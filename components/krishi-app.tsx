@@ -72,6 +72,7 @@ export function KrishiApp(){
     <button className={category==="machinery"?"side-link active":"side-link"} onClick={()=>switchModule("machinery")}><span>⚙</span> KrishiShare</button>
     <button className={category==="byproduct"?"side-link active":"side-link"} onClick={()=>switchModule("byproduct")}><span>⟳</span> FarmLoop</button>
     <button className={category==="transport"?"side-link active":"side-link"} onClick={()=>switchModule("transport")}><span>⇄</span> Transport services</button>
+    <a className="side-link" href="/workspace/storage-guardian"><span>◉</span> Storage Guardian</a>
     <a className="side-link" href="#market-prices"><span>▤</span> Mandi prices</a>
     <button className={activity?"side-link active":"side-link"} onClick={()=>{setActivity(true);setImpact(false);document.getElementById("marketplace")?.scrollIntoView({behavior:"smooth"});}}><span>◷</span> My activity</button>
     <button className={impact?"side-link active":"side-link"} onClick={()=>{setImpact(true);setActivity(false);document.getElementById("marketplace")?.scrollIntoView({behavior:"smooth"});}}><span>▥</span> Impact ledger</button>
@@ -103,12 +104,13 @@ export function KrishiApp(){
      <article className="metric-card"><div className="metric-icon sage">✓</div><small>COMPLETED OFFERS</small><strong>{user?completed.length:"—"}</strong><span>{user?"Seller-marked complete":"No account activity shown"}</span></article>
     </section>
     <section className="module-section" id="modules">
-     <div className="section-title"><div><span className="kicker">FOUR CONNECTED SERVICES</span><h2>What do you need today?</h2></div><span className="section-note">Choose a workspace to get started</span></div>
+     <div className="section-title"><div><span className="kicker">FOUR CONNECTED SERVICES + SMART STORAGE</span><h2>What do you need today?</h2></div><span className="section-note">Choose a workspace to get started</span></div>
      <div className="module-grid">
       <button className={category==="produce"?"module-card module-market selected":"module-card module-market"} onClick={()=>switchModule("produce")}><span className="module-number">01 / TRADE PRODUCE</span><span className="module-symbol">↗</span><strong>KrishiMarket <em>360</em></strong><p>Find buyers, compare offers and calculate what remains after selling costs.</p><span className="module-link">Explore produce <b>→</b></span></button>
       <button className={category==="machinery"?"module-card module-share selected":"module-card module-share"} onClick={()=>switchModule("machinery")}><span className="module-number">02 / SHARE EQUIPMENT</span><span className="module-symbol">⚙</span><strong>KrishiShare</strong><p>Find machinery and services by operation, location, availability and terms.</p><span className="module-link">Find equipment <b>→</b></span></button>
       <button className={category==="byproduct"?"module-card module-loop selected":"module-card module-loop"} onClick={()=>switchModule("byproduct")}><span className="module-number">03 / CIRCULAR VALUE</span><span className="module-symbol">⟳</span><strong>FarmLoop</strong><p>Connect usable residues with processors using clear material specifications.</p><span className="module-link">Exchange materials <b>→</b></span></button>
       <button className={category==="transport"?"module-card module-share selected":"module-card module-share"} onClick={()=>switchModule("transport")}><span className="module-number">04 / MOVE GOODS</span><span className="module-symbol">⇄</span><strong>KrishiTransit</strong><p>Publish vehicle capacity, pickup and destination, service radius and availability for farm goods.</p><span className="module-link">Find transport <b>→</b></span></button>
+      <a className="module-card module-guardian" href="/workspace/storage-guardian"><span className="module-number">05 / PROTECT STORED CROPS</span><span className="module-symbol">◉</span><strong>Krishi <em>Guard</em></strong><p>Monitor grain-storage conditions with a low-cost connected sensor and receive early warning alerts.</p><span className="module-link">Monitor storage <b>→</b></span></a>
      </div>
     </section>
     <section className="market-section-wrap"><MarketPrices /></section>

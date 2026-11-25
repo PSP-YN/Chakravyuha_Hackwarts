@@ -525,3 +525,91 @@ html[lang="kn"] body{font-family:'Noto Sans Kannada','DM Sans',sans-serif}
 .role-dashboard-stat small{font-size:9px;line-height:1.45;color:#718073}
 .role-dashboard-actions{flex:1 1 100%;justify-content:flex-start}
 @media(max-width:600px){.role-dashboard-stats{grid-template-columns:1fr 1fr;width:100%}.role-dashboard-stat:last-child{grid-column:1/-1}}
+
+/* KRISHI GUARD hardware add-on */
+.storage-page{width:min(1440px,100%);margin:0 auto;padding:28px clamp(16px,4vw,54px) 72px;color:var(--ink,#243a2b)}
+.storage-topline{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
+.storage-back{color:var(--forest,#214a36);font-size:12px;font-weight:700;text-decoration:none}
+.storage-live-pill{display:inline-flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid #dce6d6;border-radius:30px;background:#f6f9f2;color:#56704f;font:9px 'DM Mono',monospace;letter-spacing:.08em}
+.storage-live-pill i{width:7px;height:7px;border-radius:50%;background:#6b9c55;box-shadow:0 0 0 4px #6b9c5520}
+.storage-hero{display:grid;grid-template-columns:1.2fr .8fr;align-items:center;gap:28px;padding:30px;border:1px solid #e0e8dc;border-radius:20px;background:linear-gradient(125deg,#f5f8ef,#eef4e8 62%,#f7f0df);overflow:hidden}
+.storage-hero h1{margin:10px 0;font-size:clamp(38px,5vw,66px);line-height:1;letter-spacing:-.07em;color:#1c3928}
+.storage-hero h1 em{font-style:normal;color:#78934e}
+.storage-hero p{max-width:680px;color:#637264;font-size:14px;line-height:1.8}
+.storage-hero-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.storage-hero-tags span{padding:7px 10px;border:1px solid #dce5d4;border-radius:30px;background:#ffffffa8;color:#50654d;font-size:10px;font-weight:700}
+.storage-hero-art{min-height:210px;position:relative;display:grid;place-items:center;overflow:hidden;border-radius:16px;background:radial-gradient(circle at 50% 48%,#fefef9 0 18%,#dce9ce 19% 36%,#c4d7b3 37% 38%,transparent 39%),linear-gradient(145deg,#e2ecd6,#f5e9d1)}
+.storage-art-ring{position:absolute;width:190px;height:190px;border:1px solid #78966a88;border-radius:50%;box-shadow:0 0 0 17px #ffffff44,0 0 0 36px #ffffff22}
+.storage-art-grain{z-index:1;width:86px;height:86px;display:grid;place-items:center;border-radius:24px;background:#214a36;color:#d7ed76;font-size:30px;font-weight:900;letter-spacing:-.08em;box-shadow:0 15px 35px #203b2a30}
+.storage-art-label{position:absolute;bottom:17px;color:#536c4d;font:8px 'DM Mono',monospace;letter-spacing:.13em}
+.storage-alert{margin:14px 0;padding:12px 15px;border-radius:10px;font-size:12px}
+.storage-alert.error{background:#fff0eb;border:1px solid #f0cfc3;color:#8d3e2e}
+.storage-alert.success{background:#edf6e8;border:1px solid #d4e5c9;color:#315d37}
+.storage-overview{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:16px 0}
+.storage-panel{min-width:0;padding:20px;border:1px solid #e1e8dd;border-radius:15px;background:#fff;box-shadow:0 8px 24px #1d302008}
+.storage-stat{min-height:124px}
+.storage-stat>span{display:block;color:#71806f;font:9px 'DM Mono',monospace;letter-spacing:.08em}
+.storage-stat>strong{display:block;margin:13px 0 6px;color:#233c2c;font-size:27px;letter-spacing:-.05em}
+.storage-stat>small{color:#7a8879;font-size:10px}
+.storage-level-text.normal{color:#3f7b45}.storage-level-text.watch{color:#a47724}.storage-level-text.action{color:#bd682e}.storage-level-text.urgent{color:#b63f35}
+.storage-layout{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(300px,.8fr);gap:14px;align-items:start}
+.storage-main-column,.storage-side-column{display:grid;gap:14px;min-width:0}
+.storage-section-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px}
+.storage-section-heading h2,.storage-panel h2{margin:7px 0 0;color:#263d2e;font-size:20px;letter-spacing:-.04em}
+.storage-device-list{display:grid;gap:8px}
+.storage-device-row{width:100%;display:flex;align-items:center;gap:12px;padding:12px;text-align:left;border:1px solid #e5ebe1;border-radius:11px;background:#fbfcf9;color:inherit;cursor:pointer}
+.storage-device-row.selected{border-color:#8ca77c;background:#f3f7ee;box-shadow:inset 0 0 0 1px #8ca77c}
+.storage-device-icon{width:40px;height:40px;flex:0 0 auto;display:grid;place-items:center;border-radius:12px;background:#e7f0df;color:#355c3d;font-size:12px;font-weight:900}
+.storage-device-copy{flex:1;min-width:0;display:grid;gap:4px}
+.storage-device-copy strong{color:#2a4231;font-size:12px}
+.storage-device-copy small{color:#788678;font-size:10px;line-height:1.4;overflow-wrap:anywhere}
+.storage-level-chip{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;padding:5px 8px;border-radius:20px;font:8px 'DM Mono',monospace;letter-spacing:.03em}
+.storage-level-chip.normal{background:#e8f3e5;color:#376d3d}.storage-level-chip.watch{background:#fff4d9;color:#8b671d}.storage-level-chip.action{background:#ffeadb;color:#a65326}.storage-level-chip.urgent{background:#fbe5e1;color:#a23e34}.storage-level-chip.empty{background:#edf0eb;color:#6e7b6d}
+.storage-device-code{padding:6px 9px;border-radius:7px;background:#f1f4ed;color:#647560;font:9px 'DM Mono',monospace}
+.storage-empty{padding:18px;border:1px dashed #d5dfd1;border-radius:10px;background:#fafcf8;color:#405640}
+.storage-empty strong{font-size:12px}.storage-empty p{margin:7px 0 0;color:#718071;font-size:11px;line-height:1.65}
+.storage-risk-banner{padding:14px;border:1px solid;border-radius:11px}
+.storage-risk-banner.normal{background:#f0f7ed;border-color:#d7e8d0;color:#315f38}
+.storage-risk-banner.watch{background:#fff8e8;border-color:#efdfb8;color:#7d5d20}
+.storage-risk-banner.action{background:#fff1e8;border-color:#f0d0b9;color:#96502b}
+.storage-risk-banner.urgent{background:#fff0ed;border-color:#efc9c1;color:#983d32}
+.storage-risk-banner span{display:block;font:8px 'DM Mono',monospace;letter-spacing:.1em}
+.storage-risk-banner strong{display:block;margin-top:5px;font-size:18px}
+.storage-risk-banner p{margin:9px 0 0;font-size:10px;line-height:1.65}
+.storage-reasons{display:grid;gap:6px;margin:13px 0;padding-left:18px;color:#657363;font-size:11px;line-height:1.5}
+.storage-reading-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:14px 0}
+.storage-reading-grid>div{padding:12px;border-radius:9px;background:#f4f7f1}
+.storage-reading-grid small{display:block;color:#7a8878;font-size:9px}
+.storage-reading-grid strong{display:block;margin-top:7px;color:#294331;font-size:17px}
+.storage-table-wrap{width:100%;overflow:auto;margin-top:14px;border:1px solid #e5ebe2;border-radius:9px}
+.storage-table{width:100%;min-width:520px;border-collapse:collapse;text-align:left;font-size:10px}
+.storage-table th{padding:10px;background:#f1f5ed;color:#62735f;font:8px 'DM Mono',monospace;letter-spacing:.06em}
+.storage-table td{padding:10px;border-top:1px solid #edf0ea;color:#5d6d5d;white-space:nowrap}
+.storage-table td:first-child{white-space:normal}
+.storage-muted{margin:8px 0 15px;color:#718071;font-size:11px;line-height:1.65}
+.storage-form{display:grid;gap:11px}
+.storage-form label{display:grid;gap:6px;color:#5d6c5c;font-size:10px;font-weight:700}
+.storage-form input,.storage-form select{width:100%;min-width:0;min-height:42px;padding:9px 10px;border:1px solid #dfe7dc;border-radius:8px;background:#fbfcf9;color:#2b4030;font:inherit;font-size:12px}
+.storage-key-box{display:grid;gap:9px;margin-top:14px;padding:13px;border:1px solid #e8d9b7;border-radius:10px;background:#fff9eb}
+.storage-key-box strong{color:#765a23;font-size:11px}
+.storage-key-box code{display:block;padding:10px;border-radius:7px;background:#fff;color:#4b4a3d;font-size:10px;overflow-wrap:anywhere}
+.storage-key-box small{color:#7d755f;font-size:9px;line-height:1.5}
+.storage-scenarios{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}
+.storage-scenarios button{padding:7px 10px;border:1px solid #dce6d8;border-radius:20px;background:#f7faf4;color:#4c6849;font-size:10px;font-weight:700}
+.storage-slider{display:grid;grid-template-columns:1fr auto;gap:7px;margin:14px 0;color:#5c6e5c;font-size:10px}
+.storage-slider strong{color:#294631;font-size:12px}
+.storage-slider input{grid-column:1/-1;width:100%;accent-color:#5b8148}
+.storage-sim-note{display:block;margin-top:9px;text-align:center;color:#a06d28;font:8px 'DM Mono',monospace;letter-spacing:.08em}
+.storage-signin{margin:20px 0}
+.storage-signin p{color:#718071;font-size:12px}
+.storage-howto{margin-top:16px}
+.storage-howto h2{margin:7px 0 16px}
+.storage-howto-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.storage-howto-grid>div{padding:13px;border-radius:10px;background:#f4f7f1}
+.storage-howto-grid strong{color:#34563a;font-size:11px}
+.storage-howto-grid p{margin:7px 0 0;color:#718071;font-size:10px;line-height:1.6}
+.storage-disclaimer{margin:16px 0 0;padding-top:12px;border-top:1px solid #e9eee6;color:#788477;font-size:10px;line-height:1.7}
+@media(max-width:1050px){.storage-overview{grid-template-columns:repeat(2,minmax(0,1fr))}.storage-layout{grid-template-columns:1fr}.storage-side-column{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.storage-page{padding:18px 14px 40px}.storage-hero{grid-template-columns:1fr;padding:21px}.storage-hero-art{min-height:155px}.storage-hero p{font-size:12px}.storage-overview{gap:8px}.storage-stat{min-height:110px;padding:13px}.storage-stat>strong{font-size:21px}.storage-panel{padding:15px}.storage-side-column{grid-template-columns:1fr}.storage-reading-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.storage-howto-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.storage-device-row{align-items:flex-start}.storage-level-chip{font-size:7px}}
+@media(max-width:420px){.storage-topline{align-items:flex-start;flex-direction:column}.storage-overview{grid-template-columns:repeat(2,minmax(0,1fr))}.storage-howto-grid{grid-template-columns:1fr}.storage-device-row{flex-wrap:wrap}.storage-device-copy{min-width:calc(100% - 60px)}}
+.module-guardian{background:linear-gradient(135deg,#edf4e8,#e4efe0);text-decoration:none;color:inherit}.module-guardian:hover{border-color:#91aa83}.module-guardian .module-symbol{background:#fff;color:#315d3b}

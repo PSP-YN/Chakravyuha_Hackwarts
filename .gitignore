@@ -12,3 +12,6 @@ coverage
 *.tsbuildinfo
 
 supabase/.temp/
+
+hardware/krishi-guard/secrets.h
+hardware/krishi-guard/.pio/
