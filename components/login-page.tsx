@@ -78,11 +78,11 @@ export function LoginPage() {
         <span className="landing-kicker"><i/>{t.eyebrow}</span>
         <h1>{t.title}</h1>
         <p>{t.body}</p>
-        <div className="login-modules"><span>01 / KRISHIMARKET 360</span><span>02 / KRISHISHARE</span><span>03 / FARMLOOP</span></div>
+        <div className="login-modules"><span>01 / KRISHIMARKET 360</span><span>02 / KRISHISHARE</span><span>03 / FARMLOOP</span><span>04 / KRISHITRANSIT</span></div>
         <img src="/krishi-connect-logo.png" alt="Krishi Connect 360"/>
       </div>
       <div className="login-card">
-        <span className="landing-section-heading"><span>SECURE ACCOUNT ACCESS</span></span>
+        <span className="landing-section-heading"><span>{language==="kn"?"ಸುರಕ್ಷಿತ ಖಾತೆ ಪ್ರವೇಶ":"SECURE ACCOUNT ACCESS"}</span></span>
         <h2>{language==="kn"?"ಇಮೇಲ್ ಮೂಲಕ ಮುಂದುವರಿಯಿರಿ":"Continue with email"}</h2>
         <p>{language==="kn"?"ನಿಮ್ಮ ಇಮೇಲ್‌ಗೆ ಒಂದು ಬಾರಿ ಬಳಸುವ ಸೈನ್ ಇನ್ ಲಿಂಕ್ ಕಳುಹಿಸುತ್ತೇವೆ.":"We’ll send a one-time sign-in link to your email address."}</p>
         <form onSubmit={submit}>

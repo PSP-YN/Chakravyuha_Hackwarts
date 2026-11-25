@@ -4,13 +4,14 @@ import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { getSupabase } from "@/lib/supabase/client";
 import { useLanguage } from "@/components/language-provider";
 import { money } from "@/lib/domain";
+import { RoleDashboard } from "@/components/role-dashboard";
 
 type Row = Record<string, any>;
 const text = {
   en: {
     title:"Trust, service and quality", intro:"Account settings, reports, disputes, machinery bookings and processor workflows.",
     profile:"Participant profile", name:"Display name", role:"I participate as", language:"Preferred language", save:"Save profile", signOut:"Sign out",
-    farmer:"Farmer", buyer:"Buyer", provider:"Machinery provider", processor:"Processor", fpo:"FPO", other:"Other",
+    farmer:"Farmer", buyer:"Buyer / trader", provider:"Machinery / equipment owner", processor:"Waste processor", fpo:"FPO / cooperative", municipality:"Municipality contact", transporter:"Transporter", other:"Other",
     report:"Report a listing or participant", listing:"Listing", reason:"Reason", description:"Describe the issue (at least 10 characters)",
     submit:"Submit", misleading:"Misleading listing", fraud:"Suspected fraud", harassment:"Harassment", unsafe:"Unsafe practice", spam:"Spam", otherReason:"Other",
     dispute:"Open a transaction dispute", offer:"Accepted or completed offer", issue:"Issue type", qualityMismatch:"Quality mismatch", quantityMismatch:"Quantity mismatch", late:"Late or missing delivery", machinery:"Machinery service issue", payment:"Payment disagreement", safety:"Safety",
@@ -23,7 +24,7 @@ const text = {
   kn: {
     title:"ನಂಬಿಕೆ, ಸೇವೆ ಮತ್ತು ಗುಣಮಟ್ಟ", intro:"ಖಾತೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳು, ವರದಿಗಳು, ವಿವಾದಗಳು, ಯಂತ್ರೋಪಕರಣ ಬುಕಿಂಗ್ ಮತ್ತು ಸಂಸ್ಕಾರಕರ ಕಾರ್ಯವಿಧಾನಗಳು.",
     profile:"ಭಾಗವಹಿಸುವವರ ಪ್ರೊಫೈಲ್", name:"ಪ್ರದರ್ಶನ ಹೆಸರು", role:"ನಾನು ಭಾಗವಹಿಸುವುದು", language:"ಆದ್ಯತೆಯ ಭಾಷೆ", save:"ಪ್ರೊಫೈಲ್ ಉಳಿಸಿ", signOut:"ಸೈನ್ ಔಟ್",
-    farmer:"ರೈತ", buyer:"ಖರೀದಿದಾರ", provider:"ಯಂತ್ರೋಪಕರಣ ಪೂರೈಕೆದಾರ", processor:"ಸಂಸ್ಕಾರಕ", fpo:"ರೈತ ಉತ್ಪಾದಕ ಸಂಸ್ಥೆ", other:"ಇತರೆ",
+    farmer:"ರೈತ", buyer:"ಖರೀದಿದಾರ / ವ್ಯಾಪಾರಿ", provider:"ಯಂತ್ರೋಪಕರಣ / ಉಪಕರಣ ಮಾಲೀಕ", processor:"ಕೃಷಿ ತ್ಯಾಜ್ಯ ಸಂಸ್ಕಾರಕ", fpo:"ರೈತ ಉತ್ಪಾದಕ ಸಂಸ್ಥೆ / ಸಹಕಾರಿ", municipality:"ಪುರಸಭೆ / ಸ್ಥಳೀಯ ಸಂಸ್ಥೆ ಸಂಪರ್ಕಾಧಿಕಾರಿ", transporter:"ಸಾರಿಗೆದಾರ", other:"ಇತರೆ",
     report:"ಪಟ್ಟಿ ಅಥವಾ ಭಾಗವಹಿಸುವವರ ಬಗ್ಗೆ ವರದಿ", listing:"ಪಟ್ಟಿ", reason:"ಕಾರಣ", description:"ಸಮಸ್ಯೆಯನ್ನು ವಿವರಿಸಿ (ಕನಿಷ್ಠ 10 ಅಕ್ಷರಗಳು)",
     submit:"ಸಲ್ಲಿಸಿ", misleading:"ತಪ್ಪು ಮಾಹಿತಿ ಇರುವ ಪಟ್ಟಿ", fraud:"ವಂಚನೆಯ ಅನುಮಾನ", harassment:"ಕಿರುಕುಳ", unsafe:"ಅಸುರಕ್ಷಿತ ಕ್ರಮ", spam:"ಸ್ಪ್ಯಾಮ್", otherReason:"ಇತರೆ",
     dispute:"ವಹಿವಾಟಿನ ವಿವಾದ ತೆರೆಯಿರಿ", offer:"ಒಪ್ಪಿಕೊಂಡ ಅಥವಾ ಪೂರ್ಣಗೊಂಡ ಕೊಡುಗೆ", issue:"ಸಮಸ್ಯೆಯ ಪ್ರಕಾರ", qualityMismatch:"ಗುಣಮಟ್ಟ ವ್ಯತ್ಯಾಸ", quantityMismatch:"ಪ್ರಮಾಣ ವ್ಯತ್ಯಾಸ", late:"ತಡವಾದ ಅಥವಾ ಕಾಣೆಯಾದ ವಿತರಣೆ", machinery:"ಯಂತ್ರೋಪಕರಣ ಸೇವೆ ಸಮಸ್ಯೆ", payment:"ಪಾವತಿ ಭಿನ್ನಾಭಿಪ್ರಾಯ", safety:"ಸುರಕ್ಷತೆ",
@@ -48,7 +49,7 @@ export function OperationsCenter() {
       before_photo:t.before,after_photo:t.after,work_note:t.workNote,delivery_note:t.delivery,booking_confirmed:language==="kn"?"ಬುಕಿಂಗ್ ದೃಢಪಟ್ಟಿದೆ":"Booking confirmed",
       booking_rescheduled:language==="kn"?"ಬುಕಿಂಗ್ ಮರುನಿಗದಿಯಾಗಿದೆ":"Booking rescheduled",booking_cancelled:language==="kn"?"ಬುಕಿಂಗ್ ರದ್ದಾಗಿದೆ":"Booking cancelled",
       job_started:language==="kn"?"ಕೆಲಸ ಪ್ರಾರಂಭವಾಗಿದೆ":"Job started",job_completed:language==="kn"?"ಕೆಲಸ ಪೂರ್ಣಗೊಂಡಿದೆ":"Job completed",booking_updated:language==="kn"?"ಬುಕಿಂಗ್ ನವೀಕರಿಸಲಾಗಿದೆ":"Booking updated",
-      farmer:t.farmer,buyer:t.buyer,provider:t.provider,processor:t.processor,fpo:t.fpo
+      farmer:t.farmer,buyer:t.buyer,buyer_trader:t.buyer,provider:t.provider,machinery_owner:t.provider,processor:t.processor,waste_processor:t.processor,fpo:t.fpo,fpo_cooperative:t.fpo,municipality:t.municipality,transporter:t.transporter
     };
     return labels[value] ?? value.replaceAll("_"," ");
   };
@@ -64,6 +65,7 @@ export function OperationsCenter() {
   const [quality,setQuality] = useState<Row[]>([]);
   const [participants,setParticipants] = useState<Row[]>([]);
   const [bookingEvents,setBookingEvents] = useState<Row[]>([]);
+  const [auditEvents,setAuditEvents] = useState<Row[]>([]);
   const [bookingEvidence,setBookingEvidence] = useState<Row[]>([]);
   const [moderationActions,setModerationActions] = useState<Row[]>([]);
   const [busy,setBusy] = useState(false);
@@ -88,14 +90,15 @@ export function OperationsCenter() {
     setListings(results[0].data??[]);setOffers(results[1].data??[]);setBookings(results[2].data??[]);
     setReports(results[3].data??[]);setDisputes(results[4].data??[]);setAcceptances(results[5].data??[]);setQuality(results[6].data??[]);
     setProfile(results[7].data??null);
-    const [eventRows,evidenceRows,participantRows,moderationRows] = await Promise.all([
+    const [eventRows,evidenceRows,participantRows,moderationRows,auditRows] = await Promise.all([
       db.from("machinery_booking_events").select("*").order("created_at",{ascending:false}).limit(200),
       db.from("machinery_booking_evidence").select("*").order("created_at",{ascending:false}).limit(200),
       admin ? db.from("user_profiles").select("*").order("created_at",{ascending:false}).limit(200) : Promise.resolve({data:[],error:null}),
-      admin ? db.from("listing_moderation_actions").select("*").order("created_at",{ascending:false}).limit(200) : Promise.resolve({data:[],error:null})
+      admin ? db.from("listing_moderation_actions").select("*").order("created_at",{ascending:false}).limit(200) : Promise.resolve({data:[],error:null}),
+      db.from("platform_audit_events").select("id,table_name,record_id,action,changed_fields,occurred_at,actor_id").order("occurred_at",{ascending:false}).limit(100)
     ]);
-    if(eventRows.error||evidenceRows.error||participantRows.error||moderationRows.error) setError((eventRows.error||evidenceRows.error||participantRows.error||moderationRows.error)?.message??t.failed);
-    setBookingEvents(eventRows.data??[]);setBookingEvidence(evidenceRows.data??[]);setParticipants(participantRows.data??[]);setModerationActions(moderationRows.data??[]);
+    if(eventRows.error||evidenceRows.error||participantRows.error||moderationRows.error||auditRows.error) setError((eventRows.error||evidenceRows.error||participantRows.error||moderationRows.error||auditRows.error)?.message??t.failed);
+    setBookingEvents(eventRows.data??[]);setBookingEvidence(evidenceRows.data??[]);setParticipants(participantRows.data??[]);setModerationActions(moderationRows.data??[]);setAuditEvents(auditRows.data??[]);
     setBusy(false);
   },[db,user,t.failed,admin]);
 
@@ -243,6 +246,7 @@ export function OperationsCenter() {
 
   return <section className="operations-panel" id="operations">
     <div className="operations-heading"><div><span>{language==="kn"?"ನಂಬಿಕೆ / ಸೇವೆ / ಗುಣಮಟ್ಟ":"TRUST / SERVICE / QUALITY"}</span><h2>{t.title}</h2><p>{t.intro}</p></div><button className="button button-quiet" onClick={()=>void refresh()} disabled={busy}>↻ {t.refresh}</button></div>
+    <RoleDashboard role={profile?.participant_type ?? "farmer"} />
     {error&&<div className="inline-alert error" role="alert">{error}<button onClick={()=>setError("")}>×</button></div>}
     {notice&&<div className="inline-alert success" role="status">{notice}<button onClick={()=>setNotice("")}>×</button></div>}
 
@@ -251,7 +255,7 @@ export function OperationsCenter() {
         <h3>{t.profile}</h3>
         <form key={profile?.user_id??"profile-loading"} onSubmit={saveProfile} className="operations-form">
           <label>{t.name}<input name="display_name" maxLength={80} defaultValue={profile?.display_name??""} placeholder={t.displayNameHint}/></label>
-          <label>{t.role}<select name="participant_type" defaultValue={profile?.participant_type??"farmer"}><option value="farmer">{t.farmer}</option><option value="buyer">{t.buyer}</option><option value="provider">{t.provider}</option><option value="processor">{t.processor}</option><option value="fpo">{t.fpo}</option><option value="other">{t.other}</option></select></label>
+          <label>{t.role}<select name="participant_type" defaultValue={profile?.participant_type??"farmer"}><option value="farmer">{t.farmer}</option><option value="buyer_trader">{t.buyer}</option><option value="machinery_owner">{t.provider}</option><option value="waste_processor">{t.processor}</option><option value="municipality">{t.municipality}</option><option value="transporter">{t.transporter}</option><option value="fpo_cooperative">{t.fpo}</option><option value="other">{t.other}</option></select></label>
           <label>{t.language}<select name="preferred_language" defaultValue={profile?.preferred_language??language}><option value="en">English</option><option value="kn">ಕನ್ನಡ</option></select></label>
           <p className="operations-note">{t.status}: {profile?.verification_status??t.unverified}. {profile?.verification_note??""}</p>
           <div className="operations-actions"><button className="button button-primary" disabled={busy}>{t.save}</button>{profile&&profile.verification_status!=="pending"&&profile.verification_status!=="verified"&&<button type="button" className="button button-quiet" onClick={()=>void requestVerification()} disabled={busy}>{t.requestReview}</button>}<button type="button" className="button button-quiet" onClick={()=>{if(db)void db.auth.signOut();}} disabled={busy}>{t.signOut}</button></div>
@@ -319,6 +323,12 @@ export function OperationsCenter() {
           <div className="booking-history"><b>{t.evidence}</b>{bookingEvidence.filter(x=>x.booking_id===b.id).map(x=><button key={x.id} className="button button-quiet" onClick={()=>void openEvidence(x.object_path)}>{enumLabel(x.evidence_type)} · {new Date(x.created_at).toLocaleDateString(language==="kn"?"kn-IN":"en-IN")} ↗</button>)}{bookingEvents.filter(x=>x.booking_id===b.id).map(x=><small key={x.id}>{enumLabel(x.event_type)} · {new Date(x.created_at).toLocaleString(language==="kn"?"kn-IN":"en-IN")}</small>)}</div>
         </div>
       </article>)}
+    </div>
+
+    <div className="operations-section">
+      <h3>{language === "kn" ? "ಖಾತೆ ಮತ್ತು ಡೇಟಾ ಚಟುವಟಿಕೆ ಇತಿಹಾಸ" : "Account and data activity history"}</h3>
+      <p className="operations-note">{language === "kn" ? "ನಿಮ್ಮ ಖಾತೆಗೆ ಸಂಬಂಧಿಸಿದ ದಾಖಲಾದ ಅಪ್ಲಿಕೇಶನ್ ಬದಲಾವಣೆಗಳು. ಭದ್ರತಾ ಲಾಗಿನ್ ಸೆಷನ್ ದಾಖಲೆಗಳನ್ನು Supabase Auth ನಿರ್ವಹಿಸುತ್ತದೆ." : "Recorded application changes associated with your account. Authentication session logs are maintained separately by Supabase Auth."}</p>
+      {auditEvents.length === 0 ? <p className="operations-empty">{t.noItems}</p> : auditEvents.map(event => <article className="operations-row" key={event.id}><div><b>{event.action} · {event.table_name.replaceAll("_", " ")}</b><p>{(event.changed_fields ?? []).join(", ") || "—"}</p><small>{event.record_id ?? ""}</small></div><small>{new Date(event.occurred_at).toLocaleString(language === "kn" ? "kn-IN" : "en-IN")}</small></article>)}
     </div>
 
     <div className="operations-section">

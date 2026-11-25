@@ -32,7 +32,7 @@ const kn: Record<string, string> = {
   "Ready for the next move.":"ಮುಂದಿನ ಹೆಜ್ಜೆಗೆ ಸಿದ್ಧ.","Find a better market, access the right equipment, and put farm by-products to use — all in one place.":"ಉತ್ತಮ ಮಾರುಕಟ್ಟೆ ಹುಡುಕಿ, ಸರಿಯಾದ ಉಪಕರಣ ಪಡೆಯಿರಿ ಮತ್ತು ಕೃಷಿ ಉಪಉತ್ಪನ್ನಗಳನ್ನು ಬಳಸಿ—ಎಲ್ಲವೂ ಒಂದೇ ಸ್ಥಳದಲ್ಲಿ.",
   "Explore marketplace":"ಮಾರುಕಟ್ಟೆ ಅನ್ವೇಷಿಸಿ","＋ Add a listing":"＋ ಪಟ್ಟಿ ಸೇರಿಸಿ",
   "ACTIVE LISTINGS":"ಸಕ್ರಿಯ ಪಟ್ಟಿಗಳು","YOUR PENDING OFFERS":"ನಿಮ್ಮ ಬಾಕಿ ಕೊಡುಗೆಗಳು","YOUR LISTINGS":"ನಿಮ್ಮ ಪಟ್ಟಿಗಳು","COMPLETED OFFERS":"ಪೂರ್ಣಗೊಂಡ ಕೊಡುಗೆಗಳು",
-  "Participant-published offers":"ಭಾಗವಹಿಸುವವರು ಪ್ರಕಟಿಸಿದ ಪಟ್ಟಿಗಳು","Awaiting a response":"ಪ್ರತಿಕ್ರಿಯೆಗೆ ಕಾಯುತ್ತಿದೆ","Across all three modules":"ಮೂರು ವಿಭಾಗಗಳಲ್ಲೂ",
+  "Participant-published offers":"ಭಾಗವಹಿಸುವವರು ಪ್ರಕಟಿಸಿದ ಪಟ್ಟಿಗಳು","Awaiting a response":"ಪ್ರತಿಕ್ರಿಯೆಗೆ ಕಾಯುತ್ತಿದೆ","Across all four services":"ನಾಲ್ಕು ಸೇವೆಗಳಲ್ಲೂ",
   "Sign in to view activity":"ಚಟುವಟಿಕೆ ನೋಡಲು ಸೈನ್ ಇನ್ ಮಾಡಿ","Sign in to manage listings":"ಪಟ್ಟಿ ನಿರ್ವಹಿಸಲು ಸೈನ್ ಇನ್ ಮಾಡಿ","Sign in to manage your farm ↗":"ನಿಮ್ಮ ಕೃಷಿ ನಿರ್ವಹಿಸಲು ಸೈನ್ ಇನ್ ಮಾಡಿ ↗",
   "THREE CONNECTED MARKETS":"ಮೂರು ಸಂಪರ್ಕಿತ ಮಾರುಕಟ್ಟೆಗಳು","What do you need today?":"ಇಂದು ನಿಮಗೆ ಏನು ಬೇಕು?","Choose a workspace to get started":"ಪ್ರಾರಂಭಿಸಲು ವಿಭಾಗ ಆಯ್ಕೆಮಾಡಿ",
   "01 / TRADE PRODUCE":"01 / ಬೆಳೆ ವ್ಯಾಪಾರ","02 / SHARE EQUIPMENT":"02 / ಉಪಕರಣ ಹಂಚಿಕೆ","03 / CIRCULAR VALUE":"03 / ಮರುಬಳಕೆ ಮೌಲ್ಯ",
@@ -122,7 +122,30 @@ const kn: Record<string, string> = {
   "Marketplace filters":"ಮಾರುಕಟ್ಟೆ ಫಿಲ್ಟರ್‌ಗಳು",
   "Trust & operations":"ನಂಬಿಕೆ ಮತ್ತು ಕಾರ್ಯಾಚರಣೆ","Live data connection":"ನೈಜ ಡೇಟಾ ಸಂಪರ್ಕ","Supabase workspace":"Supabase ಕಾರ್ಯಸ್ಥಳ","Configuration needed":"ಸಂರಚನೆ ಅಗತ್ಯವಿದೆ","Add Supabase environment":"Supabase ಪರಿಸರ ಸಂರಚನೆ ಸೇರಿಸಿ","Signed in":"ಸೈನ್ ಇನ್ ಆಗಿದ್ದೀರಿ","No account activity shown":"ಖಾತೆ ಚಟುವಟಿಕೆ ತೋರಿಸಲಾಗಿಲ್ಲ",
   "Search variety…":"ತಳಿ ಹುಡುಕಿ…","Filter market price varieties":"ಮಾರುಕಟ್ಟೆ ಬೆಲೆ ತಳಿಗಳನ್ನು ಫಿಲ್ಟರ್ ಮಾಡಿ","Market price request failed.":"ಮಾರುಕಟ್ಟೆ ಬೆಲೆ ವಿನಂತಿ ವಿಫಲವಾಗಿದೆ.",
-  "pending":"ಬಾಕಿ","accepted":"ಒಪ್ಪಲಾಗಿದೆ","rejected":"ತಿರಸ್ಕರಿಸಲಾಗಿದೆ","withdrawn":"ಹಿಂಪಡೆಯಲಾಗಿದೆ","completed":"ಪೂರ್ಣಗೊಂಡಿದೆ","cancelled":"ರದ್ದಾಗಿದೆ","paused":"ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ","active":"ಸಕ್ರಿಯ","closed":"ಮುಚ್ಚಲಾಗಿದೆ"
+  "pending":"ಬಾಕಿ","accepted":"ಒಪ್ಪಲಾಗಿದೆ","rejected":"ತಿರಸ್ಕರಿಸಲಾಗಿದೆ","withdrawn":"ಹಿಂಪಡೆಯಲಾಗಿದೆ","completed":"ಪೂರ್ಣಗೊಂಡಿದೆ","cancelled":"ರದ್ದಾಗಿದೆ","paused":"ವಿರಾಮಗೊಳಿಸಲಾಗಿದೆ","active":"ಸಕ್ರಿಯ","closed":"ಮುಚ್ಚಲಾಗಿದೆ",
+  "AGRICULTURE NETWORK":"ಕೃಷಿ ಜಾಲ","CONTRIBUTE TO THE NETWORK":"ಜಾಲಕ್ಕೆ ಕೊಡುಗೆ ನೀಡಿ","Checking your session…":"ನಿಮ್ಮ ಸೆಷನ್ ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ…",
+  "ESTIMATED FARMER NET":"ಅಂದಾಜು ರೈತರ ನಿವ್ವಳ ಆದಾಯ","Economic activity":"ಆರ್ಥಿಕ ಚಟುವಟಿಕೆ","KRISHI CONNECT":"ಕೃಷಿ ಕನೆಕ್ಟ್","KrishiMarket":"ಕೃಷಿಮಾರುಕಟ್ಟೆ",
+  "LOCAL FARM":"ಸ್ಥಳೀಯ ಕೃಷಿ","Loading participant listings…":"ಭಾಗವಹಿಸುವವರ ಪಟ್ಟಿಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ…","Marketplace module":"ಮಾರುಕಟ್ಟೆ ವಿಭಾಗ","NETWORK":"ಜಾಲ",
+  "P · offer price　 Q · accepted quantity　 C · farmer-borne costs":"P · ಕೊಡುಗೆ ಬೆಲೆ　 Q · ಒಪ್ಪಿಕೊಂಡ ಪ್ರಮಾಣ　 C · ರೈತ ಭರಿಸುವ ವೆಚ್ಚಗಳು",
+  "PARTICIPANT-REPORTED OUTCOMES / SELLER VIEW":"ಭಾಗವಹಿಸುವವರು ವರದಿ ಮಾಡಿದ ಫಲಿತಾಂಶಗಳು / ಮಾರಾಟಗಾರರ ನೋಟ",
+  "Please wait while we reconnect.":"ಮರುಸಂಪರ್ಕಿಸುವವರೆಗೆ ಕಾಯಿರಿ.","Privacy":"ಗೌಪ್ಯತೆ",
+  "Requested duration (hours)":"ವಿನಂತಿಸಿದ ಅವಧಿ (ಗಂಟೆಗಳು)","Requested service start":"ವಿನಂತಿಸಿದ ಸೇವೆ ಆರಂಭ",
+  "SELLER-MARKED COMPLETE":"ಮಾರಾಟಗಾರರು ಪೂರ್ಣಗೊಂಡಿದೆ ಎಂದು ಗುರುತಿಸಿದ್ದಾರೆ","Submit offer ↗":"ಕೊಡುಗೆ ಸಲ್ಲಿಸಿ ↗","Terms":"ನಿಯಮಗಳು",
+  "◎ Capture provider location":"◎ ಪೂರೈಕೆದಾರರ ಸ್ಥಳ ದಾಖಲಿಸಿ",
+  "Loading states, commodities and market yards from AGMARKNET…":"AGMARKNET ನಿಂದ ರಾಜ್ಯಗಳು, ಉತ್ಪನ್ನಗಳು ಮತ್ತು ಮಾರುಕಟ್ಟೆಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ…",
+  "No markets were listed for this state in the current AGMARKNET filters.":"ಪ್ರಸ್ತುತ AGMARKNET ಫಿಲ್ಟರ್‌ಗಳಲ್ಲಿ ಈ ರಾಜ್ಯಕ್ಕೆ ಮಾರುಕಟ್ಟೆಗಳು ಪಟ್ಟಿ ಮಾಡಲಾಗಿಲ್ಲ.",
+  "Refresh":"ಮರುಲೋಡ್ ಮಾಡಿ","FOUR CONNECTED SERVICES":"ನಾಲ್ಕು ಸಂಪರ್ಕಿತ ಸೇವೆಗಳು",
+  "Transport services":"ಸಾರಿಗೆ ಸೇವೆಗಳು","KrishiTransit":"ಕೃಷಿಟ್ರಾನ್ಸಿಟ್","MOVE GOODS":"ಸರಕು ಸಾಗಣೆ","04 / MOVE GOODS":"04 / ಸರಕು ಸಾಗಣೆ","Transport":"ಸಾರಿಗೆ",
+  "Find transport":"ಸಾರಿಗೆ ಹುಡುಕಿ","Publish vehicle capacity, pickup and destination, service radius and availability for farm goods.":"ಕೃಷಿ ಸರಕುಗಳಿಗಾಗಿ ವಾಹನ ಸಾಮರ್ಥ್ಯ, ಪಿಕಪ್, ಗಮ್ಯಸ್ಥಾನ, ಸೇವಾ ವ್ಯಾಪ್ತಿ ಮತ್ತು ಲಭ್ಯತೆ ಪ್ರಕಟಿಸಿ.",
+  "Completed offers marked by sellers. These are participant-reported outcomes, not independently verified settlements.":"ಮಾರಾಟಗಾರರು ಪೂರ್ಣಗೊಂಡಿದೆ ಎಂದು ಗುರುತಿಸಿದ ಕೊಡುಗೆಗಳು. ಇವು ಭಾಗವಹಿಸುವವರು ವರದಿ ಮಾಡಿದ ಫಲಿತಾಂಶಗಳು; ಸ್ವತಂತ್ರವಾಗಿ ಪರಿಶೀಲಿಸಿದ ಪಾವತಿಗಳಲ್ಲ.",
+  "Expected farmer net = offer price × accepted quantity − transport, handling, commission and other entered costs. No settlement is inferred.":"ನಿರೀಕ್ಷಿತ ರೈತ ನಿವ್ವಳ ಆದಾಯ = ಕೊಡುಗೆ ಬೆಲೆ × ಒಪ್ಪಿಕೊಂಡ ಪ್ರಮಾಣ − ಸಾರಿಗೆ, ನಿರ್ವಹಣೆ, ಕಮಿಷನ್ ಮತ್ತು ನಮೂದಿಸಿದ ಇತರ ವೆಚ್ಚಗಳು. ಪಾವತಿ ನಡೆದಿದೆ ಎಂದು ಊಹಿಸಲಾಗುವುದಿಲ್ಲ.",
+  "Supabase is not configured in this deployment. Add the project URL and publishable key to activate listings and account workflows.":"ಈ ನಿಯೋಜನೆಯಲ್ಲಿ Supabase ಸಂರಚಿಸಲಾಗಿಲ್ಲ. ಪಟ್ಟಿಗಳು ಮತ್ತು ಖಾತೆ ಕಾರ್ಯಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಲು ಪ್ರಾಜೆಕ್ಟ್ URL ಮತ್ತು ಪ್ರಕಟಿಸಬಹುದಾದ ಕೀಲಿಯನ್ನು ಸೇರಿಸಿ.",
+  "Vehicle type":"ವಾಹನದ ಪ್ರಕಾರ","Load capacity (tonnes)":"ಸಾಗಣೆ ಸಾಮರ್ಥ್ಯ (ಟನ್)","Pickup / origin":"ಪಿಕಪ್ / ಆರಂಭಿಕ ಸ್ಥಳ",
+  "Destination / service area":"ಗಮ್ಯಸ್ಥಾನ / ಸೇವಾ ಪ್ರದೇಶ",
+  "KRISHITRANSIT / VEHICLE & ROUTE DETAILS":"ಕೃಷಿಟ್ರಾನ್ಸಿಟ್ / ವಾಹನ ಮತ್ತು ಮಾರ್ಗದ ವಿವರಗಳು",
+  "Mini truck, tractor trailer, lorry…":"ಮಿನಿ ಟ್ರಕ್, ಟ್ರ್ಯಾಕ್ಟರ್ ಟ್ರೇಲರ್, ಲಾರಿ…",
+  "Confirm load limits, route permits, loading responsibility, insurance and delivery conditions before accepting any job.":"ಯಾವುದೇ ಕೆಲಸ ಒಪ್ಪುವ ಮೊದಲು ಸರಕು ಮಿತಿ, ಮಾರ್ಗ ಪರವಾನಗಿ, ಲೋಡ್ ಮಾಡುವ ಜವಾಬ್ದಾರಿ, ವಿಮೆ ಮತ್ತು ವಿತರಣಾ ಷರತ್ತುಗಳನ್ನು ದೃಢಪಡಿಸಿ.",
+  "Choose a future transport pickup time within the listed availability.":"ಪಟ್ಟಿಯಲ್ಲಿ ನೀಡಿರುವ ಲಭ್ಯತಾ ಅವಧಿಯೊಳಗಿನ ಭವಿಷ್ಯದ ಪಿಕಪ್ ಸಮಯವನ್ನು ಆಯ್ಕೆಮಾಡಿ."
 };
 
 function translateText(value: string, language: Language) {
@@ -157,7 +180,43 @@ export function Localize({ children }: { children: ReactNode }) {
   return <>{translateNode(children, language)}</>;
 }
 
+let activeGuideAudio: HTMLAudioElement | null = null;
+let activeGuideAudioId: string | null = null;
+
+export function AudioGuideButton({ guide, compact = false }: { guide: string; compact?: boolean }) {
+  const { language } = useLanguage();
+  const [playing, setPlaying] = useState(false);
+  const [error, setError] = useState("");
+  const play = () => {
+    const guideId = guide + "-" + language;
+    if (activeGuideAudio && activeGuideAudioId === guideId && !activeGuideAudio.paused) {
+      activeGuideAudio.pause();
+      activeGuideAudio.currentTime = 0;
+      activeGuideAudio = null;
+      activeGuideAudioId = null;
+      setPlaying(false);
+      return;
+    }
+    activeGuideAudio?.pause();
+    const audio = new Audio("/audio/guides/" + guideId + ".mp3");
+    activeGuideAudio = audio;
+    activeGuideAudioId = guideId;
+    audio.onplay = () => { setPlaying(true); setError(""); };
+    audio.onpause = () => setPlaying(false);
+    audio.onended = () => { setPlaying(false); if (activeGuideAudio === audio) { activeGuideAudio = null; activeGuideAudioId = null; } };
+    audio.onerror = () => { setPlaying(false); setError(language === "kn" ? "ಆಡಿಯೊ ಲೋಡ್ ಆಗಲಿಲ್ಲ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ." : "Audio could not be loaded. Try again."); };
+    void audio.play().catch(() => { setPlaying(false); setError(language === "kn" ? "ಆಡಿಯೊ ಪ್ಲೇ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ." : "Audio playback could not start."); });
+  };
+  return <span className="audio-guide-control">
+    <button type="button" className={"language-switch voice-switch" + (compact ? " compact" : "")} onClick={play} aria-label={playing ? "Stop audio guide" : "Listen to instructions"}>{playing ? "■ Stop" : "▶ " + (language === "kn" ? "ಸೂಚನೆಗಳನ್ನು ಕೇಳಿ" : "Listen")}</button>
+    {error && <span className="voice-status" role="status">{error}</span>}
+  </span>;
+}
+
 export function LanguageSwitch() {
   const { language, setLanguage } = useLanguage();
-  return <button type="button" className="language-switch" onClick={() => setLanguage(language === "en" ? "kn" : "en")} aria-label="Change language">{language === "en" ? "ಕನ್ನಡ" : "English"}</button>;
+  return <span className="language-controls">
+    <button type="button" className="language-switch" onClick={() => { activeGuideAudio?.pause(); activeGuideAudio = null; activeGuideAudioId = null; setLanguage(language === "en" ? "kn" : "en"); }} aria-label="Change language">{language === "en" ? "ಕನ್ನಡ" : "English"}</button>
+    <AudioGuideButton guide="portal" />
+  </span>;
 }
