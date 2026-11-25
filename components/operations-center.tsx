@@ -251,9 +251,47 @@ export function OperationsCenter() {
 
   if(!user)return <section className="operations-panel" id="operations"><div className="operations-heading"><span>{language==="kn"?"ನಂಬಿಕೆ ಮತ್ತು ಕಾರ್ಯಾಚರಣೆ":"TRUST & OPERATIONS"}</span><h2>{t.title}</h2><p>{t.noAccount}</p></div></section>;
 
+  const ownListings = listings.filter(row => row.owner_id === user.id);
+  const ownOffers = offers.filter(row => row.buyer_id === user.id || row.owner_id === user.id);
+  const incomingOffers = offers.filter(row => row.owner_id === user.id && row.status === "pending");
+  const outgoingOffers = offers.filter(row => row.buyer_id === user.id);
+  const acceptedBuyerOffers = offers.filter(row => row.buyer_id === user.id && ["accepted","completed"].includes(row.status));
+  const ownAcceptances = acceptances.filter(row => row.processor_id === user.id || row.listing_owner_id === user.id);
+  const ownBookings = bookings.filter(row => row.provider_id === user.id);
+  const role = profile?.participant_type ?? "farmer";
+  const roleStats = role === "farmer" ? [
+    { label:{en:"Your produce listings",kn:"ನಿಮ್ಮ ಬೆಳೆ ಪಟ್ಟಿಗಳು"}, value:ownListings.filter(row=>row.category==="produce").length },
+    { label:{en:"Offers to review",kn:"ಪರಿಶೀಲಿಸಬೇಕಾದ ಕೊಡುಗೆಗಳು"}, value:incomingOffers.length },
+    { label:{en:"Your FarmLoop listings",kn:"ನಿಮ್ಮ ಫಾರ್ಮ್‌ಲೂಪ್ ಪಟ್ಟಿಗಳು"}, value:ownListings.filter(row=>row.category==="byproduct").length },
+  ] : role === "buyer_trader" || role === "buyer" ? [
+    { label:{en:"Active produce listings",kn:"ಸಕ್ರಿಯ ಬೆಳೆ ಪಟ್ಟಿಗಳು"}, value:listings.filter(row=>row.category==="produce"&&row.status==="active").length },
+    { label:{en:"Offers sent",kn:"ಕಳುಹಿಸಿದ ಕೊಡುಗೆಗಳು"}, value:outgoingOffers.length },
+    { label:{en:"Accepted offers",kn:"ಒಪ್ಪಿಕೊಂಡ ಕೊಡುಗೆಗಳು"}, value:acceptedBuyerOffers.length },
+  ] : role === "machinery_owner" || role === "provider" ? [
+    { label:{en:"Your machinery listings",kn:"ನಿಮ್ಮ ಯಂತ್ರೋಪಕರಣ ಪಟ್ಟಿಗಳು"}, value:ownListings.filter(row=>row.category==="machinery").length },
+    { label:{en:"Bookings to manage",kn:"ನಿರ್ವಹಿಸಬೇಕಾದ ಬುಕಿಂಗ್‌ಗಳು"}, value:ownBookings.length },
+    { label:{en:"Requests to review",kn:"ಪರಿಶೀಲಿಸಬೇಕಾದ ವಿನಂತಿಗಳು"}, value:incomingOffers.filter(row=>listings.find(item=>item.id===row.listing_id)?.category==="machinery").length },
+  ] : role === "waste_processor" || role === "processor" ? [
+    { label:{en:"Available by-product listings",kn:"ಲಭ್ಯವಿರುವ ಉಪಉತ್ಪನ್ನ ಪಟ್ಟಿಗಳು"}, value:listings.filter(row=>row.category==="byproduct"&&row.status==="active").length },
+    { label:{en:"Your processor requests",kn:"ನಿಮ್ಮ ಸಂಸ್ಕಾರಕ ವಿನಂತಿಗಳು"}, value:ownAcceptances.filter(row=>row.processor_id===user.id).length },
+    { label:{en:"Visible quality records",kn:"ಕಾಣುವ ಗುಣಮಟ್ಟ ದಾಖಲೆಗಳು"}, value:quality.length },
+  ] : role === "transporter" ? [
+    { label:{en:"Your transport listings",kn:"ನಿಮ್ಮ ಸಾರಿಗೆ ಪಟ್ಟಿಗಳು"}, value:ownListings.filter(row=>row.category==="transport").length },
+    { label:{en:"Transport requests",kn:"ಸಾರಿಗೆ ವಿನಂತಿಗಳು"}, value:ownOffers.filter(row=>listings.find(item=>item.id===row.listing_id)?.category==="transport").length },
+    { label:{en:"Pending requests",kn:"ಬಾಕಿ ವಿನಂತಿಗಳು"}, value:incomingOffers.filter(row=>listings.find(item=>item.id===row.listing_id)?.category==="transport").length },
+  ] : role === "municipality" ? [
+    { label:{en:"Active local listings",kn:"ಸಕ್ರಿಯ ಸ್ಥಳೀಯ ಪಟ್ಟಿಗಳು"}, value:listings.filter(row=>row.status==="active").length },
+    { label:{en:"Reports you submitted",kn:"ನೀವು ಸಲ್ಲಿಸಿದ ವರದಿಗಳು"}, value:reports.length },
+    { label:{en:"Open disputes visible",kn:"ಕಾಣುವ ತೆರೆದ ವಿವಾದಗಳು"}, value:disputes.filter(row=>["open","in_review"].includes(row.status)).length },
+  ] : [
+    { label:{en:"Your organisation listings",kn:"ನಿಮ್ಮ ಸಂಸ್ಥೆಯ ಪಟ್ಟಿಗಳು"}, value:ownListings.length },
+    { label:{en:"Offers involving your lots",kn:"ನಿಮ್ಮ ಪಟ್ಟಿಗಳಿಗೆ ಸಂಬಂಧಿಸಿದ ಕೊಡುಗೆಗಳು"}, value:ownOffers.length },
+    { label:{en:"Accepted offers",kn:"ಒಪ್ಪಿಕೊಂಡ ಕೊಡುಗೆಗಳು"}, value:ownOffers.filter(row=>["accepted","completed"].includes(row.status)).length },
+  ];
+
   return <section className="operations-panel" id="operations">
     <div className="operations-heading"><div><span>{language==="kn"?"ನಂಬಿಕೆ / ಸೇವೆ / ಗುಣಮಟ್ಟ":"TRUST / SERVICE / QUALITY"}</span><h2>{t.title}</h2><p>{t.intro}</p></div><button className="button button-quiet" onClick={()=>void refresh()} disabled={busy}>↻ {t.refresh}</button></div>
-    <RoleDashboard role={profile?.participant_type ?? "farmer"} />
+    <RoleDashboard role={role} stats={roleStats} />
     {error&&<div className="inline-alert error" role="alert">{error}<button onClick={()=>setError("")}>×</button></div>}
     {notice&&<div className="inline-alert success" role="status">{notice}<button onClick={()=>setNotice("")}>×</button></div>}
 

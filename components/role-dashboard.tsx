@@ -53,7 +53,7 @@ const roleContent = {
   }
 } as const;
 
-export function RoleDashboard({ role }: { role: string }) {
+export function RoleDashboard({ role, stats = [] }: { role: string; stats?: { label: { en: string; kn: string }; value: number }[] }) {
   const { language } = useLanguage();
   const selected = roleContent[role as keyof typeof roleContent] ?? roleContent.other;
   const [title, description, actions] = selected[language];
@@ -65,7 +65,8 @@ export function RoleDashboard({ role }: { role: string }) {
     : role === "fpo" || role === "fpo_cooperative" ? ["#create-listing", "#marketplace", "#operations"]
     : ["#marketplace", "#operations", "#operations"];
   return <section className="role-dashboard" aria-label={title}>
-    <div><span className="kicker">{language === "kn" ? "ನಿಮ್ಮ ಪಾತ್ರಕ್ಕೆ ಅನುಗುಣವಾಗಿ" : "YOUR ROLE WORKSPACE"}</span><h3>{title}</h3><p>{description}</p></div>
+    <div className="role-dashboard-intro"><span className="kicker">{language === "kn" ? "ನಿಮ್ಮ ಪಾತ್ರಕ್ಕೆ ಅನುಗುಣವಾಗಿ" : "YOUR ROLE WORKSPACE"}</span><h3>{title}</h3><p>{description}</p></div>
+    {stats.length > 0 && <div className="role-dashboard-stats">{stats.map((stat) => <div className="role-dashboard-stat" key={stat.label.en}><strong>{stat.value}</strong><small>{language === "kn" ? stat.label.kn : stat.label.en}</small></div>)}</div>}
     <div className="role-dashboard-actions">{actions.map((action, index) => <a key={action} href={hrefs[index]}>{action} ↗</a>)}<AudioGuideButton guide={roleAudio} compact /></div>
   </section>;
 }

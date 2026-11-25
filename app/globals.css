@@ -517,3 +517,11 @@ html[lang="kn"] body{font-family:'Noto Sans Kannada','DM Sans',sans-serif}
 @media(max-width:600px){.module-grid{grid-template-columns:1fr}}
 .landing-market-grid{grid-template-columns:repeat(4,minmax(0,1fr))}@media(max-width:1100px){.landing-market-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:850px){.landing-market-grid{grid-template-columns:1fr}}
+.role-dashboard{align-items:flex-start;flex-wrap:wrap}
+.role-dashboard-intro{flex:1 1 360px;min-width:250px}
+.role-dashboard-stats{display:grid;grid-template-columns:repeat(3,minmax(90px,1fr));gap:8px;flex:1 1 300px}
+.role-dashboard-stat{display:flex;flex-direction:column;gap:5px;padding:12px;border:1px solid #e0e8db;border-radius:9px;background:#fff}
+.role-dashboard-stat strong{font-size:23px;line-height:1;color:#244630;font-variant-numeric:tabular-nums}
+.role-dashboard-stat small{font-size:9px;line-height:1.45;color:#718073}
+.role-dashboard-actions{flex:1 1 100%;justify-content:flex-start}
+@media(max-width:600px){.role-dashboard-stats{grid-template-columns:1fr 1fr;width:100%}.role-dashboard-stat:last-child{grid-column:1/-1}}
