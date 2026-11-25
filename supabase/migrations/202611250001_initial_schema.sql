@@ -61,6 +61,21 @@ create policy "buyer offers on active listings" on public.market_offers for inse
 );
 drop policy if exists "seller updates offer status" on public.market_offers;
 create policy "seller updates offer status" on public.market_offers for update to authenticated using(owner_id=(select auth.uid())) with check(owner_id=(select auth.uid()));
+
+-- Enforce the offer state machine at the database boundary, not only in the UI.
+create or replace function public.guard_offer_status_transition()
+returns trigger language plpgsql set search_path=''
+as $
+begin
+ if new.status = old.status then return new; end if;
+ if old.status = 'pending' and new.status in ('accepted','rejected') then return new; end if;
+ if old.status = 'accepted' and new.status = 'completed' then return new; end if;
+ raise exception 'Invalid offer status transition';
+end;
+$;
+drop trigger if exists guard_market_offer_status on public.market_offers;
+create trigger guard_market_offer_status before update of status on public.market_offers
+for each row execute function public.guard_offer_status_transition();
 -- Explicit Data API grants are paired with RLS; offers can only be updated at the status column.
 grant usage on schema public to anon,authenticated;
 grant select on public.market_listings to anon,authenticated;
