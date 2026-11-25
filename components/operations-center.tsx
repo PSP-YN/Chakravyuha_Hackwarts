@@ -9,7 +9,7 @@ import { RoleDashboard } from "@/components/role-dashboard";
 type Row = Record<string, any>;
 const text = {
   en: {
-    title:"Trust, service and quality", intro:"Account settings, reports, disputes, machinery bookings and processor workflows.",
+    title:"Trust, service and quality", intro:"Account settings, reports, disputes, machinery bookings and processor workflows.", notifications:"Notifications", unread:"unread", markRead:"Mark as read", noNotifications:"No notifications yet. Offers, bookings and reports will appear here.",
     profile:"Participant profile", name:"Display name", role:"Registered participant type", language:"Preferred language", phone:"Mobile number", district:"District", taluk:"Taluk", village:"Village / Town", organisation:"Organisation name", profileComplete:"Profile completion", profileIncomplete:"Complete the required contact and location fields.", save:"Save profile", signOut:"Sign out",
     farmer:"Farmer", buyer:"Buyer / trader", provider:"Machinery / equipment owner", processor:"Waste processor", fpo:"FPO / cooperative", municipality:"Municipality contact", transporter:"Transporter", other:"Other",
     report:"Report a listing or participant", listing:"Listing", reason:"Reason", description:"Describe the issue (at least 10 characters)",
@@ -22,7 +22,7 @@ const text = {
     admin:"Administration", adminOnly:"Administrative tools appear only for accounts granted the admin role in Supabase app metadata.", moderation:"Listing moderation", moderationReason:"Reason for this moderation action (at least 10 characters)", applyModeration:"Apply moderation", restore:"Restore listing", pauseListing:"Pause listing", closeListing:"Close listing", moderationHistory:"Last moderation action", reports:"Participant reports", disputes:"Open disputes", qualityQueue:"Quality verification queue", verification:"Participant verification", status:"Status", resolution:"Resolution note", review:"Save review", verify:"Verify report", reject:"Reject", verified:"Verified", pending:"Pending", open:"Open", inReview:"In review", resolved:"Resolved", dismissed:"Dismissed", noItems:"Nothing to review.", noAccount:"Sign in to use trust and service workflows.", refresh:"Refresh", saved:"Saved.", failed:"The action could not be completed.", accepted:"Accepted", rejected:"Rejected", withdrawn:"Withdrawn", confirmed:"Confirmed", rescheduled:"Rescheduled", inProgress:"In progress", completed:"Completed", cancelled:"Cancelled", verifiedStatus:"Verified", rejectedStatus:"Rejected", unverified:"Unverified", requestReview:"Request verification review", reportedParticipant:"Reported participant", displayNameHint:"Name shown to participants", processorDisclosure:"Processor type is self-declared in the profile; it is not an independent accreditation.", pendingQuality:"Records remain pending until an administrator reviews the attached report and data.", verificationDisclosure:"Participant verification is an administrative review, not government identity or land verification.", reportFileLimit:"Report file must be 10 MB or smaller.", evidenceLimit:"Evidence must be 10 MB or smaller.", openReport:"Open report ↗"
   },
   kn: {
-    title:"ನಂಬಿಕೆ, ಸೇವೆ ಮತ್ತು ಗುಣಮಟ್ಟ", intro:"ಖಾತೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳು, ವರದಿಗಳು, ವಿವಾದಗಳು, ಯಂತ್ರೋಪಕರಣ ಬುಕಿಂಗ್ ಮತ್ತು ಸಂಸ್ಕಾರಕರ ಕಾರ್ಯವಿಧಾನಗಳು.",
+    title:"ನಂಬಿಕೆ, ಸೇವೆ ಮತ್ತು ಗುಣಮಟ್ಟ", intro:"ಖಾತೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳು, ವರದಿಗಳು, ವಿವಾದಗಳು, ಯಂತ್ರೋಪಕರಣ ಬುಕಿಂಗ್ ಮತ್ತು ಸಂಸ್ಕಾರಕರ ಕಾರ್ಯವಿಧಾನಗಳು.", notifications:"ಅಧಿಸೂಚನೆಗಳು", unread:"ಓದದವು", markRead:"ಓದಲಾಗಿದೆ ಎಂದು ಗುರುತಿಸಿ", noNotifications:"ಇನ್ನೂ ಅಧಿಸೂಚನೆಗಳಿಲ್ಲ. ಕೊಡುಗೆಗಳು, ಬುಕಿಂಗ್‌ಗಳು ಮತ್ತು ವರದಿಗಳು ಇಲ್ಲಿ ಕಾಣಿಸುತ್ತವೆ.",
     profile:"ಭಾಗವಹಿಸುವವರ ಪ್ರೊಫೈಲ್", name:"ಪ್ರದರ್ಶನ ಹೆಸರು", role:"ನೋಂದಾಯಿತ ಭಾಗವಹಿಸುವವರ ಪಾತ್ರ", language:"ಆದ್ಯತೆಯ ಭಾಷೆ", phone:"ಮೊಬೈಲ್ ಸಂಖ್ಯೆ", district:"ಜಿಲ್ಲೆ", taluk:"ತಾಲೂಕು", village:"ಗ್ರಾಮ / ಪಟ್ಟಣ", organisation:"ಸಂಸ್ಥೆಯ ಹೆಸರು", profileComplete:"ಪ್ರೊಫೈಲ್ ಪೂರ್ಣತೆ", profileIncomplete:"ಅಗತ್ಯ ಸಂಪರ್ಕ ಮತ್ತು ಸ್ಥಳದ ವಿವರಗಳನ್ನು ಭರ್ತಿ ಮಾಡಿ.", save:"ಪ್ರೊಫೈಲ್ ಉಳಿಸಿ", signOut:"ಸೈನ್ ಔಟ್",
     farmer:"ರೈತ", buyer:"ಖರೀದಿದಾರ / ವ್ಯಾಪಾರಿ", provider:"ಯಂತ್ರೋಪಕರಣ / ಉಪಕರಣ ಮಾಲೀಕ", processor:"ಕೃಷಿ ತ್ಯಾಜ್ಯ ಸಂಸ್ಕಾರಕ", fpo:"ರೈತ ಉತ್ಪಾದಕ ಸಂಸ್ಥೆ / ಸಹಕಾರಿ", municipality:"ಪುರಸಭೆ / ಸ್ಥಳೀಯ ಸಂಸ್ಥೆ ಸಂಪರ್ಕಾಧಿಕಾರಿ", transporter:"ಸಾರಿಗೆದಾರ", other:"ಇತರೆ",
     report:"ಪಟ್ಟಿ ಅಥವಾ ಭಾಗವಹಿಸುವವರ ಬಗ್ಗೆ ವರದಿ", listing:"ಪಟ್ಟಿ", reason:"ಕಾರಣ", description:"ಸಮಸ್ಯೆಯನ್ನು ವಿವರಿಸಿ (ಕನಿಷ್ಠ 10 ಅಕ್ಷರಗಳು)",
@@ -66,6 +66,7 @@ export function OperationsCenter() {
   const [participants,setParticipants] = useState<Row[]>([]);
   const [bookingEvents,setBookingEvents] = useState<Row[]>([]);
   const [auditEvents,setAuditEvents] = useState<Row[]>([]);
+  const [notifications,setNotifications] = useState<Row[]>([]);
   const [bookingEvidence,setBookingEvidence] = useState<Row[]>([]);
   const [moderationActions,setModerationActions] = useState<Row[]>([]);
   const [busy,setBusy] = useState(false);
@@ -83,13 +84,14 @@ export function OperationsCenter() {
       db.from("market_disputes").select("*").order("created_at",{ascending:false}).limit(100),
       db.from("farmloop_processor_acceptances").select("*").order("created_at",{ascending:false}).limit(100),
       db.from("material_quality_checks").select("*").order("created_at",{ascending:false}).limit(100),
-      db.from("user_profiles").select("*").eq("user_id",user.id).maybeSingle()
+      db.from("user_profiles").select("*").eq("user_id",user.id).maybeSingle(),
+      db.from("participant_notifications").select("*").order("created_at",{ascending:false}).limit(30)
     ]);
     const failures=results.filter(r=>r.error);
     if(failures.length) setError(failures[0].error?.message ?? t.failed);
     setListings(results[0].data??[]);setOffers(results[1].data??[]);setBookings(results[2].data??[]);
     setReports(results[3].data??[]);setDisputes(results[4].data??[]);setAcceptances(results[5].data??[]);setQuality(results[6].data??[]);
-    setProfile(results[7].data??null);
+    setProfile(results[7].data??null);setNotifications(results[8].data??[]);
     const [eventRows,evidenceRows,participantRows,moderationRows,auditRows] = await Promise.all([
       db.from("machinery_booking_events").select("*").order("created_at",{ascending:false}).limit(200),
       db.from("machinery_booking_evidence").select("*").order("created_at",{ascending:false}).limit(200),
@@ -125,6 +127,14 @@ export function OperationsCenter() {
     const {error}=await db.from("user_profiles").update({verification_status:"pending"}).eq("user_id",user.id);
     if(error)setError(error.message);else{setNotice(t.saved);await refresh();}
     setBusy(false);
+  }
+
+  async function markNotificationRead(id:string){
+    if(!db||!user)return;
+    const readAt=new Date().toISOString();
+    const {error}=await db.from("participant_notifications").update({read_at:readAt}).eq("id",id).is("read_at",null);
+    if(error){setError(error.message);return;}
+    setNotifications(rows=>rows.map(row=>row.id===id?{...row,read_at:readAt}:row));
   }
 
   async function saveProfile(e:FormEvent<HTMLFormElement>){
@@ -358,6 +368,14 @@ export function OperationsCenter() {
           <small>{t.pendingQuality}</small>
         </form>
       </article>
+    </div>
+
+    <div className="operations-section">
+      <div className="operations-heading"><div><h3>{t.notifications}</h3><p className="operations-note">{notifications.filter(row=>!row.read_at).length} {t.unread}</p></div><button className="button button-quiet" onClick={()=>void refresh()} disabled={busy}>{t.refresh}</button></div>
+      {notifications.length===0?<p className="operations-empty">{t.noNotifications}</p>:notifications.map(notification=><article className="operations-row" key={notification.id}>
+        <div><b>{language==="kn"?notification.title_kn:notification.title_en}</b><p>{language==="kn"?notification.body_kn:notification.body_en}</p><small>{enumLabel(notification.event_type)} · {new Date(notification.created_at).toLocaleString(language==="kn"?"kn-IN":"en-IN")}</small></div>
+        {!notification.read_at&&<button className="button button-quiet" onClick={()=>void markNotificationRead(notification.id)} disabled={busy}>{t.markRead}</button>}
+      </article>)}
     </div>
 
     <div className="operations-section">
