@@ -5,12 +5,12 @@
 #include <DHTesp.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
-#if __has_include("secrets.h")
-#include "secrets.h"
+#if __has_include("../secrets.h")
+#include "../secrets.h"
 #else
-#include "secrets.example.h"
+#include "../secrets.example.h"
 #endif
-#include "certs.h"
+#include "../certs.h"
 
 #define DHT_PIN 15
 #define DS18B20_PIN 4
