@@ -65,14 +65,14 @@ create policy "seller updates offer status" on public.market_offers for update t
 -- Enforce the offer state machine at the database boundary, not only in the UI.
 create or replace function public.guard_offer_status_transition()
 returns trigger language plpgsql set search_path=''
-as $
+as $$
 begin
  if new.status = old.status then return new; end if;
  if old.status = 'pending' and new.status in ('accepted','rejected') then return new; end if;
  if old.status = 'accepted' and new.status = 'completed' then return new; end if;
  raise exception 'Invalid offer status transition';
 end;
-$;
+$$;
 drop trigger if exists guard_market_offer_status on public.market_offers;
 create trigger guard_market_offer_status before update of status on public.market_offers
 for each row execute function public.guard_offer_status_transition();
