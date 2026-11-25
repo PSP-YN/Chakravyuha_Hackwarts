@@ -10,7 +10,7 @@ type Row = Record<string, any>;
 const text = {
   en: {
     title:"Trust, service and quality", intro:"Account settings, reports, disputes, machinery bookings and processor workflows.",
-    profile:"Participant profile", name:"Display name", role:"I participate as", language:"Preferred language", save:"Save profile", signOut:"Sign out",
+    profile:"Participant profile", name:"Display name", role:"Registered participant type", language:"Preferred language", phone:"Mobile number", district:"District", taluk:"Taluk", village:"Village / Town", organisation:"Organisation name", profileComplete:"Profile completion", profileIncomplete:"Complete the required contact and location fields.", save:"Save profile", signOut:"Sign out",
     farmer:"Farmer", buyer:"Buyer / trader", provider:"Machinery / equipment owner", processor:"Waste processor", fpo:"FPO / cooperative", municipality:"Municipality contact", transporter:"Transporter", other:"Other",
     report:"Report a listing or participant", listing:"Listing", reason:"Reason", description:"Describe the issue (at least 10 characters)",
     submit:"Submit", misleading:"Misleading listing", fraud:"Suspected fraud", harassment:"Harassment", unsafe:"Unsafe practice", spam:"Spam", otherReason:"Other",
@@ -23,7 +23,7 @@ const text = {
   },
   kn: {
     title:"ನಂಬಿಕೆ, ಸೇವೆ ಮತ್ತು ಗುಣಮಟ್ಟ", intro:"ಖಾತೆ ಸೆಟ್ಟಿಂಗ್‌ಗಳು, ವರದಿಗಳು, ವಿವಾದಗಳು, ಯಂತ್ರೋಪಕರಣ ಬುಕಿಂಗ್ ಮತ್ತು ಸಂಸ್ಕಾರಕರ ಕಾರ್ಯವಿಧಾನಗಳು.",
-    profile:"ಭಾಗವಹಿಸುವವರ ಪ್ರೊಫೈಲ್", name:"ಪ್ರದರ್ಶನ ಹೆಸರು", role:"ನಾನು ಭಾಗವಹಿಸುವುದು", language:"ಆದ್ಯತೆಯ ಭಾಷೆ", save:"ಪ್ರೊಫೈಲ್ ಉಳಿಸಿ", signOut:"ಸೈನ್ ಔಟ್",
+    profile:"ಭಾಗವಹಿಸುವವರ ಪ್ರೊಫೈಲ್", name:"ಪ್ರದರ್ಶನ ಹೆಸರು", role:"ನೋಂದಾಯಿತ ಭಾಗವಹಿಸುವವರ ಪಾತ್ರ", language:"ಆದ್ಯತೆಯ ಭಾಷೆ", phone:"ಮೊಬೈಲ್ ಸಂಖ್ಯೆ", district:"ಜಿಲ್ಲೆ", taluk:"ತಾಲೂಕು", village:"ಗ್ರಾಮ / ಪಟ್ಟಣ", organisation:"ಸಂಸ್ಥೆಯ ಹೆಸರು", profileComplete:"ಪ್ರೊಫೈಲ್ ಪೂರ್ಣತೆ", profileIncomplete:"ಅಗತ್ಯ ಸಂಪರ್ಕ ಮತ್ತು ಸ್ಥಳದ ವಿವರಗಳನ್ನು ಭರ್ತಿ ಮಾಡಿ.", save:"ಪ್ರೊಫೈಲ್ ಉಳಿಸಿ", signOut:"ಸೈನ್ ಔಟ್",
     farmer:"ರೈತ", buyer:"ಖರೀದಿದಾರ / ವ್ಯಾಪಾರಿ", provider:"ಯಂತ್ರೋಪಕರಣ / ಉಪಕರಣ ಮಾಲೀಕ", processor:"ಕೃಷಿ ತ್ಯಾಜ್ಯ ಸಂಸ್ಕಾರಕ", fpo:"ರೈತ ಉತ್ಪಾದಕ ಸಂಸ್ಥೆ / ಸಹಕಾರಿ", municipality:"ಪುರಸಭೆ / ಸ್ಥಳೀಯ ಸಂಸ್ಥೆ ಸಂಪರ್ಕಾಧಿಕಾರಿ", transporter:"ಸಾರಿಗೆದಾರ", other:"ಇತರೆ",
     report:"ಪಟ್ಟಿ ಅಥವಾ ಭಾಗವಹಿಸುವವರ ಬಗ್ಗೆ ವರದಿ", listing:"ಪಟ್ಟಿ", reason:"ಕಾರಣ", description:"ಸಮಸ್ಯೆಯನ್ನು ವಿವರಿಸಿ (ಕನಿಷ್ಠ 10 ಅಕ್ಷರಗಳು)",
     submit:"ಸಲ್ಲಿಸಿ", misleading:"ತಪ್ಪು ಮಾಹಿತಿ ಇರುವ ಪಟ್ಟಿ", fraud:"ವಂಚನೆಯ ಅನುಮಾನ", harassment:"ಕಿರುಕುಳ", unsafe:"ಅಸುರಕ್ಷಿತ ಕ್ರಮ", spam:"ಸ್ಪ್ಯಾಮ್", otherReason:"ಇತರೆ",
@@ -130,8 +130,15 @@ export function OperationsCenter() {
   async function saveProfile(e:FormEvent<HTMLFormElement>){
     e.preventDefault();if(!db||!user)return;const form=e.currentTarget;const f=new FormData(form);
     setBusy(true);
-    const payload={user_id:user.id,display_name:String(f.get("display_name")??"").trim()||null,participant_type:String(f.get("participant_type")),preferred_language:String(f.get("preferred_language"))};
-    const {error}=await db.from("user_profiles").upsert(payload,{onConflict:"user_id"});
+    const displayName=String(f.get("display_name")??"").trim();
+    const phone=String(f.get("phone")??"").trim();
+    const district=String(f.get("district")??"").trim();
+    const taluk=String(f.get("taluk")??"").trim();
+    const village=String(f.get("village")??"").trim();
+    const preferredLanguage=String(f.get("preferred_language"));
+    if(displayName.length<2||phone.length<7||district.length<2||taluk.length<2||village.length<2){setError(language==="kn"?"ಹೆಸರು, ಮೊಬೈಲ್ ಮತ್ತು ಸ್ಥಳದ ವಿವರಗಳನ್ನು ಸರಿಯಾಗಿ ಭರ್ತಿ ಮಾಡಿ.":"Enter a valid name, mobile number and complete location.");setBusy(false);return;}
+    const payload={display_name:displayName,phone,district,taluk,village,organization_name:String(f.get("organization_name")??"").trim()||null,preferred_language:preferredLanguage,profile_completed:true};
+    const {error}=await db.from("user_profiles").update(payload).eq("user_id",user.id);
     if(error)setError(error.message);else{setNotice(t.saved);setLanguage(payload.preferred_language as "en"|"kn");await refresh();}
     setBusy(false);
   }
@@ -254,9 +261,13 @@ export function OperationsCenter() {
       <article className="operations-card">
         <h3>{t.profile}</h3>
         <form key={profile?.user_id??"profile-loading"} onSubmit={saveProfile} className="operations-form">
-          <label>{t.name}<input name="display_name" maxLength={80} defaultValue={profile?.display_name??""} placeholder={t.displayNameHint}/></label>
-          <label>{t.role}<select name="participant_type" defaultValue={profile?.participant_type??"farmer"}><option value="farmer">{t.farmer}</option><option value="buyer_trader">{t.buyer}</option><option value="machinery_owner">{t.provider}</option><option value="waste_processor">{t.processor}</option><option value="municipality">{t.municipality}</option><option value="transporter">{t.transporter}</option><option value="fpo_cooperative">{t.fpo}</option><option value="other">{t.other}</option></select></label>
-          <label>{t.language}<select name="preferred_language" defaultValue={profile?.preferred_language??language}><option value="en">English</option><option value="kn">ಕನ್ನಡ</option></select></label>
+          <label>{t.name}<input name="display_name" maxLength={80} minLength={2} required defaultValue={profile?.display_name??""} placeholder={t.displayNameHint}/></label>
+          <label>{t.role}<input value={enumLabel(profile?.participant_type??"farmer")} readOnly aria-readonly="true"/></label>
+          <div className="operations-two"><label>{t.phone}<input name="phone" type="tel" minLength={7} maxLength={20} required defaultValue={profile?.phone??""}/></label><label>{t.language}<select name="preferred_language" defaultValue={profile?.preferred_language??language}><option value="en">English</option><option value="kn">ಕನ್ನಡ</option></select></label></div>
+          <div className="operations-two"><label>{t.district}<input name="district" required maxLength={80} defaultValue={profile?.district??""}/></label><label>{t.taluk}<input name="taluk" required maxLength={80} defaultValue={profile?.taluk??""}/></label></div>
+          <label>{t.village}<input name="village" required maxLength={100} defaultValue={profile?.village??""}/></label>
+          <label>{t.organisation}<input name="organization_name" maxLength={160} defaultValue={profile?.organization_name??""}/></label>
+          <p className="operations-note">{t.profileComplete}: {profile?.profile_completed ? (language==="kn"?"ಪೂರ್ಣಗೊಂಡಿದೆ":"Complete") : t.profileIncomplete}</p>
           <p className="operations-note">{t.status}: {profile?.verification_status??t.unverified}. {profile?.verification_note??""}</p>
           <div className="operations-actions"><button className="button button-primary" disabled={busy}>{t.save}</button>{profile&&profile.verification_status!=="pending"&&profile.verification_status!=="verified"&&<button type="button" className="button button-quiet" onClick={()=>void requestVerification()} disabled={busy}>{t.requestReview}</button>}<button type="button" className="button button-quiet" onClick={()=>{if(db)void db.auth.signOut();}} disabled={busy}>{t.signOut}</button></div>
         </form>

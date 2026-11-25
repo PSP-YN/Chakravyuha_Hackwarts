@@ -88,6 +88,7 @@ export function LandingPage() {
           <a href="#how">{language === "en" ? "How it works" : "ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ"}</a>
           <LanguageSwitch />
           <a className="landing-login" href="/login">{language === "en" ? "Sign in" : "ಸೈನ್ ಇನ್"}</a>
+          <a className="landing-login" href="/signup">{language === "en" ? "Create account" : "ಖಾತೆ ರಚಿಸಿ"}</a>
         </nav>
       </header>
 
@@ -98,7 +99,7 @@ export function LandingPage() {
           <h1>{t.title}</h1>
           <p className="landing-lead">{t.subtitle}</p>
           <div className="landing-cta">
-            <a className="landing-primary" href="/login">{t.primary} <span>↗</span></a>
+            <a className="landing-primary" href="/signup">{t.primary} <span>↗</span></a>
             <a className="landing-secondary" href="#how">{t.secondary} ↓</a>
           </div>
           <div className="landing-trust"><span>●</span> {t.login} <span className="landing-separator">·</span> {language==="kn"?"Supabase ಸುರಕ್ಷಿತ":"Supabase secured"} <span className="landing-separator">·</span> English / ಕನ್ನಡ</div>
@@ -136,7 +137,7 @@ export function LandingPage() {
       <section className="landing-bottom-cta">
         <img src="/krishi-connect-logo.png" alt="" />
         <div><span>KRISHI CONNECT 360</span><h2>{language === "en" ? "Make your next farm decision with better information." : "ಉತ್ತಮ ಮಾಹಿತಿಯೊಂದಿಗೆ ನಿಮ್ಮ ಮುಂದಿನ ಕೃಷಿ ನಿರ್ಧಾರ ಕೈಗೊಳ್ಳಿ."}</h2></div>
-        <a href="/login">{t.primary} ↗</a>
+        <a href="/signup">{t.primary} ↗</a>
       </section>
 
       <footer className="landing-footer"><span>© 2026 KRISHI CONNECT 360</span><span>{t.footer}</span><span>{language==="kn"?"AGMARKNET ಉಲ್ಲೇಖ ಮಾಹಿತಿ · ಭಾಗವಹಿಸುವವರ ಸಂಯೋಜನೆ":"AGMARKNET reference data · Participant-led coordination"}</span><div><a href="/privacy">{language==="kn"?"ಗೌಪ್ಯತೆ":"Privacy"}</a><a href="/terms">{language==="kn"?"ನಿಯಮಗಳು":"Terms"}</a></div></footer>
