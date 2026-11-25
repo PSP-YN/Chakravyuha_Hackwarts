@@ -36,7 +36,7 @@ const text = {
   }
 } as const;
 
-export function OperationsCenter() {
+export function OperationsCenter({ onProfileUpdated }: { onProfileUpdated?: () => void } = {}) {
   const db = getSupabase();
   const { language, setLanguage } = useLanguage();
   const t = text[language];
@@ -149,7 +149,7 @@ export function OperationsCenter() {
     if(displayName.length<2||phone.length<7||district.length<2||taluk.length<2||village.length<2){setError(language==="kn"?"ಹೆಸರು, ಮೊಬೈಲ್ ಮತ್ತು ಸ್ಥಳದ ವಿವರಗಳನ್ನು ಸರಿಯಾಗಿ ಭರ್ತಿ ಮಾಡಿ.":"Enter a valid name, mobile number and complete location.");setBusy(false);return;}
     const payload={display_name:displayName,phone,district,taluk,village,organization_name:String(f.get("organization_name")??"").trim()||null,preferred_language:preferredLanguage,profile_completed:true};
     const {error}=await db.from("user_profiles").update(payload).eq("user_id",user.id);
-    if(error)setError(error.message);else{setNotice(t.saved);setLanguage(payload.preferred_language as "en"|"kn");await refresh();}
+    if(error)setError(error.message);else{setNotice(t.saved);setLanguage(payload.preferred_language as "en"|"kn");await refresh();onProfileUpdated?.();}
     setBusy(false);
   }
 
