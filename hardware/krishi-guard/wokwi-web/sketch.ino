@@ -48,6 +48,8 @@ void loop() {
   Serial.printf("AIR %.1f C | RH %.1f %% | GRAIN %.1f C | DELTA %.1f C | STATUS %s\n",
     air.temperature, air.humidity, grain, delta,
     urgent ? "URGENT" : watch ? "WATCH" : "NORMAL");
+  Serial.printf("APP_PAYLOAD {\"ambient_temperature_c\":%.1f,\"relative_humidity_pct\":%.1f,\"grain_temperature_c\":%.1f}\n",
+    air.temperature, air.humidity, grain);
 
   delay(2500);
 }
