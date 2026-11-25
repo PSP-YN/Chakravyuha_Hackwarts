@@ -31,3 +31,10 @@ Demo records, when enabled, must be visibly identified as simulated. Market refe
 ## License
 
 MIT
+
+
+## Prototype scope
+
+The current prototype includes three participant-led workflows: produce listings/offers, machinery service listings with requested booking windows, and agricultural by-product listings with typed quality/collection attributes. Owners can manage listing status; buyers can withdraw pending offers; sellers can accept/reject and mark accepted offers completed. Database triggers enforce offer transitions, accepted quantity limits and non-overlapping accepted machinery bookings.
+
+**Explicitly not included:** payments, AI, government integrations, verified market prices, verified settlement, Kannada-reviewed copy, dispute resolution, live machinery calendar, logistics or external partner integrations. See [the roadmap](docs/12-roadmap.md) and [QA/release gates](docs/07-qa-release.md).
