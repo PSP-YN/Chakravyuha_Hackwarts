@@ -150,8 +150,10 @@ export function OperationsCenter({ onProfileUpdated }: { onProfileUpdated?: () =
     const taluk=String(f.get("taluk")??"").trim();
     const village=String(f.get("village")??"").trim();
     const preferredLanguage=String(f.get("preferred_language"));
-    if(displayName.length<2||phone.length<7||district.length<2||taluk.length<2||village.length<2){setError(language==="kn"?"ಹೆಸರು, ಮೊಬೈಲ್ ಮತ್ತು ಸ್ಥಳದ ವಿವರಗಳನ್ನು ಸರಿಯಾಗಿ ಭರ್ತಿ ಮಾಡಿ.":"Enter a valid name, mobile number and complete location.");setBusy(false);return;}
-    const payload={display_name:displayName,phone,district,taluk,village,organization_name:String(f.get("organization_name")??"").trim()||null,preferred_language:preferredLanguage,profile_completed:true};
+    const organisationName=String(f.get("organization_name")??"").trim();
+    const requiresOrganisation=["municipality","fpo_cooperative"].includes(profile?.participant_type??"");
+    if(displayName.length<2||phone.length<7||district.length<2||taluk.length<2||village.length<2||(requiresOrganisation&&organisationName.length<2)){setError(language==="kn"?"ಹೆಸರು, ಮೊಬೈಲ್ ಮತ್ತು ಸ್ಥಳದ ವಿವರಗಳನ್ನು ಸರಿಯಾಗಿ ಭರ್ತಿ ಮಾಡಿ.":"Enter a valid name, mobile number and complete location.");setBusy(false);return;}
+    const payload={display_name:displayName,phone,district,taluk,village,organization_name:organisationName||null,preferred_language:preferredLanguage,profile_completed:true};
     const {error}=await db.from("user_profiles").update(payload).eq("user_id",user.id);
     if(error)setError(error.message);else{setNotice(t.saved);setLanguage(payload.preferred_language as "en"|"kn");await refresh();onProfileUpdated?.();}
     setBusy(false);
@@ -318,7 +320,7 @@ export function OperationsCenter({ onProfileUpdated }: { onProfileUpdated?: () =
           <div className="operations-two"><label>{t.phone}<input name="phone" type="tel" minLength={7} maxLength={20} required defaultValue={profile?.phone??""}/></label><label>{t.language}<select name="preferred_language" defaultValue={profile?.preferred_language??language}><option value="en">English</option><option value="kn">ಕನ್ನಡ</option></select></label></div>
           <div className="operations-two"><label>{t.district}<input name="district" required maxLength={80} defaultValue={profile?.district??""}/></label><label>{t.taluk}<input name="taluk" required maxLength={80} defaultValue={profile?.taluk??""}/></label></div>
           <label>{t.village}<input name="village" required maxLength={100} defaultValue={profile?.village??""}/></label>
-          <label>{t.organisation}<input name="organization_name" maxLength={160} defaultValue={profile?.organization_name??""}/></label>
+          <label>{t.organisation}<input name="organization_name" maxLength={160} required={["municipality","fpo_cooperative"].includes(profile?.participant_type??"")} defaultValue={profile?.organization_name??""}/></label>
           <p className="operations-note">{t.profileComplete}: {profile?.profile_completed ? (language==="kn"?"ಪೂರ್ಣಗೊಂಡಿದೆ":"Complete") : t.profileIncomplete}</p>
           <p className="operations-note">{t.status}: {profile?.verification_status??t.unverified}. {profile?.verification_note??""}</p>
           <div className="operations-actions"><button className="button button-primary" disabled={busy}>{t.save}</button>{profile&&profile.verification_status!=="pending"&&profile.verification_status!=="verified"&&<button type="button" className="button button-quiet" onClick={()=>void requestVerification()} disabled={busy}>{t.requestReview}</button>}<button type="button" className="button button-quiet" onClick={()=>{if(db)void db.auth.signOut();}} disabled={busy}>{t.signOut}</button></div>

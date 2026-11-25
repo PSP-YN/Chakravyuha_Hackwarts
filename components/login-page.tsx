@@ -73,7 +73,7 @@ export function LoginPage({ mode = "login" }: { mode?: "login" | "signup" }) {
   async function submit(event:FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!db) return;
-    if (mode === "signup" && (!fullName.trim() || !phone.trim() || !district.trim() || !taluk.trim() || !village.trim())) { setError(t.required); return; }
+    if (mode === "signup" && (!fullName.trim() || !phone.trim() || !district.trim() || !taluk.trim() || !village.trim() || ((role === "municipality" || role === "fpo_cooperative") && !organisation.trim()))) { setError(t.required); return; }
     setBusy(true);setError("");setSent(false);
     try {
       const options = mode === "signup" ? {
@@ -115,7 +115,7 @@ export function LoginPage({ mode = "login" }: { mode?: "login" | "signup" }) {
             <label>{t.role}<select value={role} onChange={e=>setRole(e.target.value as ParticipantRole)}>{roles.map(item=><option key={item.value} value={item.value}>{language === "kn" ? item.kn : item.en}</option>)}</select></label>
             <div className="form-grid"><label>{t.district}<input value={district} onChange={e=>setDistrict(e.target.value)} required maxLength={80}/></label><label>{t.taluk}<input value={taluk} onChange={e=>setTaluk(e.target.value)} required maxLength={80}/></label></div>
             <label>{t.village}<input value={village} onChange={e=>setVillage(e.target.value)} required maxLength={100}/></label>
-            {(role === "municipality" || role === "fpo_cooperative") && <label>{t.organisation}<input value={organisation} onChange={e=>setOrganisation(e.target.value)} maxLength={160}/></label>}
+            {(role === "municipality" || role === "fpo_cooperative") && <label>{t.organisation}<input value={organisation} onChange={e=>setOrganisation(e.target.value)} maxLength={160} required/></label>}
           </>}
           <label htmlFor="login-email">{t.email}</label>
           <input id="login-email" type="email" autoComplete="email" inputMode="email" required maxLength={254} value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com"/>
