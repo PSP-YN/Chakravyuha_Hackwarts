@@ -140,12 +140,16 @@ const kn: Record<string, string> = {
   "Completed offers marked by sellers. These are participant-reported outcomes, not independently verified settlements.":"ಮಾರಾಟಗಾರರು ಪೂರ್ಣಗೊಂಡಿದೆ ಎಂದು ಗುರುತಿಸಿದ ಕೊಡುಗೆಗಳು. ಇವು ಭಾಗವಹಿಸುವವರು ವರದಿ ಮಾಡಿದ ಫಲಿತಾಂಶಗಳು; ಸ್ವತಂತ್ರವಾಗಿ ಪರಿಶೀಲಿಸಿದ ಪಾವತಿಗಳಲ್ಲ.",
   "Expected farmer net = offer price × accepted quantity − transport, handling, commission and other entered costs. No settlement is inferred.":"ನಿರೀಕ್ಷಿತ ರೈತ ನಿವ್ವಳ ಆದಾಯ = ಕೊಡುಗೆ ಬೆಲೆ × ಒಪ್ಪಿಕೊಂಡ ಪ್ರಮಾಣ − ಸಾರಿಗೆ, ನಿರ್ವಹಣೆ, ಕಮಿಷನ್ ಮತ್ತು ನಮೂದಿಸಿದ ಇತರ ವೆಚ್ಚಗಳು. ಪಾವತಿ ನಡೆದಿದೆ ಎಂದು ಊಹಿಸಲಾಗುವುದಿಲ್ಲ.",
   "Supabase is not configured in this deployment. Add the project URL and publishable key to activate listings and account workflows.":"ಈ ನಿಯೋಜನೆಯಲ್ಲಿ Supabase ಸಂರಚಿಸಲಾಗಿಲ್ಲ. ಪಟ್ಟಿಗಳು ಮತ್ತು ಖಾತೆ ಕಾರ್ಯಗಳನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಲು ಪ್ರಾಜೆಕ್ಟ್ URL ಮತ್ತು ಪ್ರಕಟಿಸಬಹುದಾದ ಕೀಲಿಯನ್ನು ಸೇರಿಸಿ.",
+
+  "Choose a future transport pickup time within the listed availability.":"ಪಟ್ಟಿಯ ಲಭ್ಯತಾ ಅವಧಿಯೊಳಗಿನ ಭವಿಷ್ಯದ ಸಾರಿಗೆ ಪಿಕಪ್ ಸಮಯ ಆಯ್ಕೆಮಾಡಿ.",
+  "Listing active.":"ಪಟ್ಟಿ ಸಕ್ರಿಯವಾಗಿದೆ.","Listing paused.":"ಪಟ್ಟಿಗೆ ವಿರಾಮ ನೀಡಲಾಗಿದೆ.","Listing closed.":"ಪಟ್ಟಿ ಮುಚ್ಚಲಾಗಿದೆ.",
+  "Supabase secured":"Supabase ಸುರಕ್ಷಿತ",
+  "FARM ECONOMY NETWORK":"ಕೃಷಿ ಆರ್ಥಿಕ ಜಾಲ",
   "Vehicle type":"ವಾಹನದ ಪ್ರಕಾರ","Load capacity (tonnes)":"ಸಾಗಣೆ ಸಾಮರ್ಥ್ಯ (ಟನ್)","Pickup / origin":"ಪಿಕಪ್ / ಆರಂಭಿಕ ಸ್ಥಳ",
   "Destination / service area":"ಗಮ್ಯಸ್ಥಾನ / ಸೇವಾ ಪ್ರದೇಶ",
   "KRISHITRANSIT / VEHICLE & ROUTE DETAILS":"ಕೃಷಿಟ್ರಾನ್ಸಿಟ್ / ವಾಹನ ಮತ್ತು ಮಾರ್ಗದ ವಿವರಗಳು",
   "Mini truck, tractor trailer, lorry…":"ಮಿನಿ ಟ್ರಕ್, ಟ್ರ್ಯಾಕ್ಟರ್ ಟ್ರೇಲರ್, ಲಾರಿ…",
-  "Confirm load limits, route permits, loading responsibility, insurance and delivery conditions before accepting any job.":"ಯಾವುದೇ ಕೆಲಸ ಒಪ್ಪುವ ಮೊದಲು ಸರಕು ಮಿತಿ, ಮಾರ್ಗ ಪರವಾನಗಿ, ಲೋಡ್ ಮಾಡುವ ಜವಾಬ್ದಾರಿ, ವಿಮೆ ಮತ್ತು ವಿತರಣಾ ಷರತ್ತುಗಳನ್ನು ದೃಢಪಡಿಸಿ.",
-  "Choose a future transport pickup time within the listed availability.":"ಪಟ್ಟಿಯಲ್ಲಿ ನೀಡಿರುವ ಲಭ್ಯತಾ ಅವಧಿಯೊಳಗಿನ ಭವಿಷ್ಯದ ಪಿಕಪ್ ಸಮಯವನ್ನು ಆಯ್ಕೆಮಾಡಿ."
+  "Confirm load limits, route permits, loading responsibility, insurance and delivery conditions before accepting any job.":"ಯಾವುದೇ ಕೆಲಸ ಒಪ್ಪುವ ಮೊದಲು ಸರಕು ಮಿತಿ, ಮಾರ್ಗ ಪರವಾನಗಿ, ಲೋಡ್ ಮಾಡುವ ಜವಾಬ್ದಾರಿ, ವಿಮೆ ಮತ್ತು ವಿತರಣಾ ಷರತ್ತುಗಳನ್ನು ದೃಢಪಡಿಸಿ."
 };
 
 function translateText(value: string, language: Language) {

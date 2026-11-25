@@ -70,7 +70,7 @@ export function LoginPage() {
 
   return <main className="login-page">
     <header className="login-nav">
-      <a className="landing-brand" href="/"><img src="/krishi-connect-logo.png" alt="Krishi Connect 360"/><span><b>KRISHI CONNECT 360</b><small>FARM ECONOMY NETWORK</small></span></a>
+      <a className="landing-brand" href="/"><img src="/krishi-connect-logo.png" alt="Krishi Connect 360"/><span><b>KRISHI CONNECT 360</b><small>{language==="kn"?"ಕೃಷಿ ಆರ್ಥಿಕ ಜಾಲ":"FARM ECONOMY NETWORK"}</small></span></a>
       <LanguageSwitch/>
     </header>
     <section className="login-layout">

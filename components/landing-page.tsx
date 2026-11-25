@@ -81,7 +81,7 @@ export function LandingPage() {
       <header className="landing-nav">
         <a href="/" className="landing-brand" aria-label="Krishi Connect home">
           <img src="/krishi-connect-logo.png" alt="Krishi Connect 360" />
-          <span><b>KRISHI CONNECT 360</b><small>FARM ECONOMY NETWORK</small></span>
+          <span><b>KRISHI CONNECT 360</b><small>{language==="kn"?"ಕೃಷಿ ಆರ್ಥಿಕ ಜಾಲ":"FARM ECONOMY NETWORK"}</small></span>
         </a>
         <nav>
           <a href="#markets">{language === "en" ? "Markets" : "ಮಾರುಕಟ್ಟೆಗಳು"}</a>
@@ -101,31 +101,31 @@ export function LandingPage() {
             <a className="landing-primary" href="/login">{t.primary} <span>↗</span></a>
             <a className="landing-secondary" href="#how">{t.secondary} ↓</a>
           </div>
-          <div className="landing-trust"><span>●</span> {t.login} <span className="landing-separator">·</span> Supabase secured <span className="landing-separator">·</span> English / ಕನ್ನಡ</div>
+          <div className="landing-trust"><span>●</span> {t.login} <span className="landing-separator">·</span> {language==="kn"?"Supabase ಸುರಕ್ಷಿತ":"Supabase secured"} <span className="landing-separator">·</span> English / ಕನ್ನಡ</div>
         </div>
         <div className="landing-visual">
           <img src="/krishi-connect-logo.png" alt="Krishi Connect 360 agricultural brand mark" />
-          <div className="landing-visual-caption"><b>360°</b><span>LOCAL FARM<br/>NETWORK</span></div>
+          <div className="landing-visual-caption"><b>360°</b><span>{language==="kn"?"ಸ್ಥಳೀಯ ಕೃಷಿ ಜಾಲ":<>LOCAL FARM<br/>NETWORK</>}</span></div>
         </div>
       </section>
 
       <section className="landing-markets" id="markets">
-        <div className="landing-section-heading"><span>01 — 04 / CONNECTED SERVICES</span><h2>{language === "en" ? "One network. Four ways to create value." : "ಒಂದೇ ಜಾಲ. ಮೌಲ್ಯ ಸೃಷ್ಟಿಸಲು ನಾಲ್ಕು ಮಾರ್ಗಗಳು."}</h2></div>
+        <div className="landing-section-heading"><span>{language==="kn"?"01 — 04 / ಸಂಪರ್ಕಿತ ಸೇವೆಗಳು":"01 — 04 / CONNECTED SERVICES"}</span><h2>{language === "en" ? "One network. Four ways to create value." : "ಒಂದೇ ಜಾಲ. ಮೌಲ್ಯ ಸೃಷ್ಟಿಸಲು ನಾಲ್ಕು ಮಾರ್ಗಗಳು."}</h2></div>
         <div className="landing-market-grid">
-          <article className="landing-market market-produce"><span>01 / TRADE PRODUCE</span><div className="landing-market-icon">↗</div><h3>KrishiMarket 360</h3><p>{t.marketText}</p><a href="/workspace?module=produce">{t.market} ↗</a></article>
-          <article className="landing-market market-machinery"><span>02 / SHARE EQUIPMENT</span><div className="landing-market-icon">⚙</div><h3>KrishiShare</h3><p>{t.shareText}</p><a href="/workspace?module=machinery">{t.share} ↗</a></article>
-          <article className="landing-market market-byproduct"><span>03 / CIRCULAR VALUE</span><div className="landing-market-icon">⟳</div><h3>FarmLoop</h3><p>{t.loopText}</p><a href="/workspace?module=byproduct">{t.loop} ↗</a></article>
-          <article className="landing-market market-machinery"><span>04 / MOVE GOODS</span><div className="landing-market-icon">⇄</div><h3>KrishiTransit</h3><p>{t.transportText}</p><a href="/workspace?module=transport">{t.transport} ↗</a></article>
+          <article className="landing-market market-produce"><span>{language==="kn"?"01 / ಬೆಳೆ ವ್ಯಾಪಾರ":"01 / TRADE PRODUCE"}</span><div className="landing-market-icon">↗</div><h3>KrishiMarket 360</h3><p>{t.marketText}</p><a href="/workspace?module=produce">{t.market} ↗</a></article>
+          <article className="landing-market market-machinery"><span>{language==="kn"?"02 / ಯಂತ್ರೋಪಕರಣ ಹಂಚಿಕೆ":"02 / SHARE EQUIPMENT"}</span><div className="landing-market-icon">⚙</div><h3>KrishiShare</h3><p>{t.shareText}</p><a href="/workspace?module=machinery">{t.share} ↗</a></article>
+          <article className="landing-market market-byproduct"><span>{language==="kn"?"03 / ವೃತ್ತಾಕಾರದ ಮೌಲ್ಯ":"03 / CIRCULAR VALUE"}</span><div className="landing-market-icon">⟳</div><h3>FarmLoop</h3><p>{t.loopText}</p><a href="/workspace?module=byproduct">{t.loop} ↗</a></article>
+          <article className="landing-market market-machinery"><span>{language==="kn"?"04 / ಸರಕು ಸಾಗಣೆ":"04 / MOVE GOODS"}</span><div className="landing-market-icon">⇄</div><h3>KrishiTransit</h3><p>{t.transportText}</p><a href="/workspace?module=transport">{t.transport} ↗</a></article>
         </div>
       </section>
 
       <section className="landing-transparency">
         <div className="landing-transparency-mark">✓</div>
-        <div><span>BUILT AROUND TRUST</span><h2>{t.transparent}</h2><p>{t.transparentText}</p></div>
+        <div><span>{language==="kn"?"ನಂಬಿಕೆಯನ್ನು ಆಧರಿಸಿ ನಿರ್ಮಿಸಲಾಗಿದೆ":"BUILT AROUND TRUST"}</span><h2>{t.transparent}</h2><p>{t.transparentText}</p></div>
       </section>
 
       <section className="landing-how" id="how">
-        <div className="landing-section-heading"><span>THE WORKFLOW</span><h2>{t.steps}</h2></div>
+        <div className="landing-section-heading"><span>{language==="kn"?"ಕಾರ್ಯವಿಧಾನ":"THE WORKFLOW"}</span><h2>{t.steps}</h2></div>
         <div className="landing-steps">
           <article><b>01</b><h3>{t.step1}</h3><p>{t.step1Text}</p></article>
           <article><b>02</b><h3>{t.step2}</h3><p>{t.step2Text}</p></article>
@@ -139,7 +139,7 @@ export function LandingPage() {
         <a href="/login">{t.primary} ↗</a>
       </section>
 
-      <footer className="landing-footer"><span>© 2026 KRISHI CONNECT 360</span><span>{t.footer}</span><span>AGMARKNET reference data · Participant-led coordination</span><div><a href="/privacy">{language==="kn"?"ಗೌಪ್ಯತೆ":"Privacy"}</a><a href="/terms">{language==="kn"?"ನಿಯಮಗಳು":"Terms"}</a></div></footer>
+      <footer className="landing-footer"><span>© 2026 KRISHI CONNECT 360</span><span>{t.footer}</span><span>{language==="kn"?"AGMARKNET ಉಲ್ಲೇಖ ಮಾಹಿತಿ · ಭಾಗವಹಿಸುವವರ ಸಂಯೋಜನೆ":"AGMARKNET reference data · Participant-led coordination"}</span><div><a href="/privacy">{language==="kn"?"ಗೌಪ್ಯತೆ":"Privacy"}</a><a href="/terms">{language==="kn"?"ನಿಯಮಗಳು":"Terms"}</a></div></footer>
     </main>
   );
 }
