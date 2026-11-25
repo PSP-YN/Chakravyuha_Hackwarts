@@ -11,6 +11,26 @@ type Contact = {
   source_url: string; verified_at: string | null; verified_by: string | null;
 };
 
+const civicKannada: Record<string,string> = {
+  "Bengaluru Urban":"ಬೆಂಗಳೂರು ನಗರ ಜಿಲ್ಲೆ", "Mysuru":"ಮೈಸೂರು", "Tumakuru":"ತುಮಕೂರು",
+  "Special Commissioner (SWM)":"ವಿಶೇಷ ಆಯುಕ್ತರು (ಘನ ತ್ಯಾಜ್ಯ ನಿರ್ವಹಣೆ)",
+  "Joint Commissioner (Health and SWM)":"ಜಂಟಿ ಆಯುಕ್ತರು (ಆರೋಗ್ಯ ಮತ್ತು ಘನ ತ್ಯಾಜ್ಯ ನಿರ್ವಹಣೆ)",
+  "Chief Engineer (SWM)":"ಮುಖ್ಯ ಇಂಜಿನಿಯರ್ (ಘನ ತ್ಯಾಜ್ಯ ನಿರ್ವಹಣೆ)",
+  "Solid waste management":"ಘನ ತ್ಯಾಜ್ಯ ನಿರ್ವಹಣೆ",
+  "Waste collection service enquiries":"ತ್ಯಾಜ್ಯ ಸಂಗ್ರಹ ಸೇವೆಗಳ ವಿಚಾರಣೆ",
+  "Illegal dumping and burning complaint routing":"ಅಕ್ರಮ ತ್ಯಾಜ್ಯ ಸುರಿಯುವಿಕೆ ಮತ್ತು ಸುಡುವಿಕೆ ದೂರುಗಳು",
+  "Health and SWM department enquiries":"ಆರೋಗ್ಯ ಮತ್ತು ಘನ ತ್ಯಾಜ್ಯ ನಿರ್ವಹಣಾ ಇಲಾಖೆಯ ವಿಚಾರಣೆ",
+  "Solid waste management engineering enquiries":"ಘನ ತ್ಯಾಜ್ಯ ನಿರ್ವಹಣಾ ತಾಂತ್ರಿಕ ವಿಚಾರಣೆ",
+  "Non-collection complaints":"ತ್ಯಾಜ್ಯ ಸಂಗ್ರಹಿಸದಿರುವ ಕುರಿತು ದೂರುಗಳು",
+  "Illegal dumping complaints":"ಅಕ್ರಮ ತ್ಯಾಜ್ಯ ಸುರಿಯುವಿಕೆ ಕುರಿತು ದೂರುಗಳು",
+  "Illegal waste burning complaints":"ಅಕ್ರಮ ತ್ಯಾಜ್ಯ ಸುಡುವಿಕೆ ಕುರಿತು ದೂರುಗಳು",
+  "Municipal civic services":"ಪುರಸಭೆಯ ನಾಗರಿಕ ಸೇವೆಗಳು",
+  "Solid waste management enquiries":"ಘನ ತ್ಯಾಜ್ಯ ನಿರ್ವಹಣೆ ಕುರಿತು ವಿಚಾರಣೆ",
+  "Municipal civic office contact":"ಪುರಸಭೆ ಕಚೇರಿ ಸಂಪರ್ಕ",
+  "Ask about local waste collection and residue disposal services":"ಸ್ಥಳೀಯ ತ್ಯಾಜ್ಯ ಸಂಗ್ರಹಣೆ ಮತ್ತು ಕೃಷಿ ಅವಶೇಷ ವಿಲೇವಾರಿ ಸೇವೆಗಳ ಬಗ್ಗೆ ವಿಚಾರಿಸಿ",
+  "Official address and website published by Tumakuru District Administration":"ತುಮಕೂರು ಜಿಲ್ಲಾಡಳಿತ ಪ್ರಕಟಿಸಿದ ಅಧಿಕೃತ ವಿಳಾಸ ಮತ್ತು ವೆಬ್‌ಸೈಟ್",
+};
+
 export function MunicipalityDirectory() {
   const { language } = useLanguage();
   const [contacts, setContacts] = useState<Contact[]>([]);
@@ -57,10 +77,10 @@ export function MunicipalityDirectory() {
       : error ? <p className="inline-alert warning">{error}</p>
       : contacts.length === 0 ? <div className="civic-empty"><b>{kn ? "ಇನ್ನೂ ಮೂಲ ಪರಿಶೀಲಿತ ಸಂಪರ್ಕ ದಾಖಲೆಗಳಿಲ್ಲ." : "No source-checked municipal contacts have been published yet."}</b><p>{kn ? "ತಪ್ಪಾದ ಸಂಖ್ಯೆಯನ್ನು ತೋರಿಸುವುದಕ್ಕಿಂತ, ನಿಮ್ಮ ಗ್ರಾಮ ಪಂಚಾಯಿತಿ ಅಥವಾ ಪುರಸಭೆಯ ಅಧಿಕೃತ ಕಚೇರಿಯಲ್ಲಿ ಸಂಪರ್ಕ ವಿವರಗಳನ್ನು ದೃಢಪಡಿಸಿ. ನಿರ್ವಾಹಕರು ಮೂಲ ಮತ್ತು ಪರಿಶೀಲನೆ ದಿನಾಂಕದೊಂದಿಗೆ ಸಂಪರ್ಕವನ್ನು ಸೇರಿಸಬಹುದು." : "Rather than display an unverified number, confirm the contact with your Gram Panchayat or municipal office. An administrator can publish a contact with its source and verification date."}</p></div>
       : <div className="civic-grid">{contacts.map(c => <article className="civic-card" key={c.id}>
-        <span className="civic-location">{[c.taluk,c.district].filter(Boolean).join(" · ")}</span><h3>{c.office_name}</h3><p>{c.jurisdiction}</p>
-        {c.contact_person && <p>{kn ? "ಸಂಪರ್ಕ ವ್ಯಕ್ತಿ" : "Contact"}: {c.contact_person}</p>}
+        <span className="civic-location">{[c.taluk,c.district].filter((v):v is string=>Boolean(v)).map(v=>kn?(civicKannada[v]??v):v).join(" · ")}</span><h3>{c.office_name}</h3><p>{c.jurisdiction}</p>
+        {c.contact_person && <p>{kn ? "ಸಂಪರ್ಕ ವ್ಯಕ್ತಿ" : "Contact"}: {kn?(civicKannada[c.contact_person]??c.contact_person):c.contact_person}</p>}
         {c.address && <p>{c.address}</p>}
-        {c.services?.length > 0 && <p>{c.services.join(" · ")}</p>}
+        {c.services?.length > 0 && <p>{c.services.map(service=>kn?(civicKannada[service]??service):service).join(" · ")}</p>}
         <div className="civic-actions">{c.phone && <a href={`tel:${c.phone}`}>{kn ? "ಕರೆ ಮಾಡಿ" : "Call"} {c.phone}</a>}{c.email && <a href={`mailto:${c.email}`}>{kn ? "ಇಮೇಲ್" : "Email"}</a>}</div>
         <small>{kn ? "ಮೂಲ" : "Source"}: <a href={c.source_url} target="_blank" rel="noreferrer">{kn ? "ಪರಿಶೀಲಿಸಿ" : "Verify source"} ↗</a> · {c.verified_at ? (c.verified_by ? (kn ? "ನಿರ್ವಾಹಕರು ಪರಿಶೀಲಿಸಿದ್ದಾರೆ" : "Admin verified") : (kn ? "ಅಧಿಕೃತ ಮೂಲ ಪರಿಶೀಲಿಸಲಾಗಿದೆ" : "Official source checked")) + ": " + c.verified_at : (kn ? "ಪರಿಶೀಲನೆ ದಿನಾಂಕ ದಾಖಲಾಗಿಲ್ಲ" : "Verification date not recorded")}</small>
       </article>)}</div>}

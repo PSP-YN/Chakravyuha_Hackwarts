@@ -342,6 +342,7 @@ export function OperationsCenter({ onProfileUpdated }: { onProfileUpdated?: () =
         </form>
       </article>
 
+      {["waste_processor","processor"].includes(profile?.participant_type??"")&&<>
       <article className="operations-card">
         <h3>{t.request}</h3>
         <form onSubmit={submitAcceptance} className="operations-form">
@@ -353,7 +354,9 @@ export function OperationsCenter({ onProfileUpdated }: { onProfileUpdated?: () =
           <small>{t.processorDisclosure}</small>
         </form>
       </article>
+      </>}
 
+      {["farmer","fpo_cooperative","waste_processor","processor"].includes(profile?.participant_type??"")&&<>
       <article className="operations-card">
         <h3>{t.quality}</h3>
         <form onSubmit={submitQuality} className="operations-form">
@@ -368,6 +371,7 @@ export function OperationsCenter({ onProfileUpdated }: { onProfileUpdated?: () =
           <small>{t.pendingQuality}</small>
         </form>
       </article>
+      </>}
     </div>
 
     <div className="operations-section">
