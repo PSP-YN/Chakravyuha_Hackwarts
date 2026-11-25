@@ -11,7 +11,7 @@
 - Anonymous offer insert returned HTTP 401 / permission denied (expected; anon has no INSERT grant).
 - New machinery and by-product columns are present in the live database.
 - Supabase security advisor returned no findings after the pilot migrations.
-- Previous Chrome viewport checks at 360, 390, 580, 768, 1024, 1440 and 1920 px showed no horizontal overflow. A new production browser smoke test confirmed the page title and all three modules render. No browser runtime errors were captured during that smoke test. Firefox is not installed in the current laptop environment, so no fresh Firefox run was performed.
+- Previous Chrome viewport checks at 360, 390, 580, 768, 1024, 1440 and 1920 px showed no horizontal overflow. A new production browser smoke test confirmed the page title, all three modules, refresh control, active-listing empty state, and Supabase listing API HTTP 200. Responsive checks at 360, 390, 580, 768, 1024 and 1440 px showed no horizontal overflow. The auth form becomes available after local session restoration. Firefox is not installed in the current laptop environment, so no fresh Firefox run was performed.
 
 ## Integration tests still required with two real accounts
 - User A publishes produce listing → User B sees it → User B submits offer → User A accepts → User B cannot access unrelated offer or update listing → User A marks completed.
@@ -45,7 +45,7 @@ Typecheck and build pass; migration applies to clean project; RLS tests pass; co
 
 ## Known limitations
 - Auth email delivery, production redirect allowlist and two-user RLS workflows are not yet verified with real user accounts.
-- Vercel GitHub integration is connected and production deployment is READY at https://krishi-connect-360.vercel.app. The latest UI/auth polish changes in this working tree still need to be committed and deployed.
+- Vercel GitHub integration is connected and production deployment is READY at https://krishi-connect-360.vercel.app. Latest UI/auth polish is deployed at commit 070bb66.
 - Machinery scheduling is a requested time window with overlap protection after seller acceptance; it is not a live calendar or automatic booking confirmation.
 - By-product compatibility is represented by typed listing attributes and participant search; no laboratory verification or automated processor certification exists.
 - No Kannada-reviewed copy, dispute resolution, moderation, external price feed, logistics integration, payments or AI.
