@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { Localize } from "@/components/language-provider";
 
 type StateOption = string;
 type CommodityOption = { id: number; name: string };
@@ -107,7 +108,7 @@ export function MarketPrices() {
   }, [payload, query]);
 
   return (
-    <section className="market-prices" id="market-prices">
+    <Localize><section className="market-prices" id="market-prices">
       <div className="market-prices-head">
         <div>
           <small>PUBLIC MARKET INTELLIGENCE / AGMARKNET 2.0</small>
@@ -169,6 +170,6 @@ export function MarketPrices() {
             <div className="market-table-foot">Showing {Math.min(rows.length, 250)} of {rows.length} reported variety-day observations · latest seven calendar days · no interpolation of missing reports</div>
           </div>}
       <p className="market-disclaimer">Prices are reproduced from AGMARKNET market reports and can be delayed or missing for closed/non-reporting markets. Verify the grade, variety, quality, weighment, transport and fees with the market before selling. Source data is published under the Government Open Data License - India. <a href="https://www.data.gov.in/godl" target="_blank" rel="noreferrer">Licence ↗</a>.</p>
-    </section>
+    </section></Localize>
   );
 }

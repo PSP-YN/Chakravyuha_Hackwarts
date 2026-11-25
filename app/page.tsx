@@ -1,2 +1,2 @@
-import { KrishiApp } from "@/components/krishi-app";
-export default function Home() { return <KrishiApp />; }
+import { LandingPage } from "@/components/landing-page";
+export default function Home() { return <LandingPage />; }
