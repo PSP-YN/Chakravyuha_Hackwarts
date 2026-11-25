@@ -43,3 +43,8 @@ button:disabled{opacity:.55;cursor:not-allowed}.session-check,.loading-state{fon
 .geo-message{display:block;margin:6px 0 0}
 .geo-distance{display:block;padding:8px 0;color:var(--moss)!important}
 .geo-distance a{text-decoration:underline;font-weight:700}
+
+.farmloop-filters{display:flex;gap:10px;flex-wrap:wrap;width:100%;padding:12px 0}
+.farmloop-filters label{display:grid;gap:5px;min-width:150px;font-size:10px;color:var(--muted)}
+.farmloop-filters input,.search-tools select{border:1px solid var(--line);background:white;border-radius:7px;padding:10px;font:inherit;color:var(--ink)}
+@media(max-width:650px){.farmloop-filters{display:grid;grid-template-columns:1fr 1fr}.farmloop-filters label{min-width:0}}
