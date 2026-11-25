@@ -1,6 +1,8 @@
 "use client";
 
 import { Fragment, createContext, useContext, useEffect, useMemo, useState, isValidElement, cloneElement, type ReactNode, type ReactElement } from "react";
+import { krishiExtraKannada } from "@/components/krishi-extra-translations";
+import { getSupabase } from "@/lib/supabase/client";
 
 type Language = "en" | "kn";
 type LanguageContextValue = { language: Language; setLanguage: (language: Language) => void };
@@ -11,6 +13,27 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const saved = window.localStorage.getItem("krishi-language");
     if (saved === "kn" || saved === "en") { setLanguageState(saved); document.documentElement.lang = saved; }
+    const db = getSupabase();
+    if (!db) return;
+    let alive = true;
+    const loadProfileLanguage = async (userId: string) => {
+      const { data, error } = await db.from("user_profiles").select("preferred_language").eq("user_id", userId).maybeSingle();
+      if (!alive || error) return;
+      const preferred = data?.preferred_language;
+      if (preferred === "kn" || preferred === "en") {
+        setLanguageState(preferred);
+        window.localStorage.setItem("krishi-language", preferred);
+        document.documentElement.lang = preferred;
+      }
+    };
+    db.auth.getSession().then(({ data }) => {
+      if (alive && data.session?.user.id) void loadProfileLanguage(data.session.user.id);
+    });
+    const { data } = db.auth.onAuthStateChange((_event, session) => {
+      const userId = session?.user.id;
+      if (userId) window.setTimeout(() => { if (alive) void loadProfileLanguage(userId); }, 0);
+    });
+    return () => { alive = false; data.subscription.unsubscribe(); };
   }, []);
   const setLanguage = (next: Language) => {
     setLanguageState(next);
@@ -159,9 +182,9 @@ function translateText(value: string, language: Language) {
   const core = value.trim();
   const latest = core.match(/^Latest reported date: (.+)$/);
   if (latest) return leading + "ಇತ್ತೀಚಿನ ವರದಿ ದಿನಾಂಕ: " + latest[1] + trailing;
-  const count = core.match(/^Showing (\\d+) of (\\d+) reported variety-day observations · latest seven calendar days · no interpolation of missing reports$/);
+  const count = core.match(/^Showing (\d+) of (\d+) reported variety-day observations · latest seven calendar days · no interpolation of missing reports$/);
   if (count) return leading + `ವರದಿಯಾದ ತಳಿ-ದಿನದ ದಾಖಲೆಗಳಲ್ಲಿ ${count[1]} / ${count[2]} · ಕಳೆದ ಏಳು ಕ್ಯಾಲೆಂಡರ್ ದಿನಗಳು · ಕಾಣೆಯಾದ ವರದಿಗಳಿಗೆ ಅಂದಾಜು ಇಲ್ಲ` + trailing;
-  return leading + (kn[core] ?? core) + trailing;
+  return leading + (kn[core] ?? krishiExtraKannada[core] ?? core) + trailing;
 }
 
 function translateNode(node: ReactNode, language: Language): ReactNode {
@@ -212,7 +235,7 @@ export function AudioGuideButton({ guide, compact = false }: { guide: string; co
     void audio.play().catch(() => { setPlaying(false); setError(language === "kn" ? "ಆಡಿಯೊ ಪ್ಲೇ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ." : "Audio playback could not start."); });
   };
   return <span className="audio-guide-control">
-    <button type="button" className={"language-switch voice-switch" + (compact ? " compact" : "")} onClick={play} aria-label={playing ? "Stop audio guide" : "Listen to instructions"}>{playing ? "■ Stop" : "▶ " + (language === "kn" ? "ಸೂಚನೆಗಳನ್ನು ಕೇಳಿ" : "Listen")}</button>
+    <button type="button" className={"language-switch voice-switch" + (compact ? " compact" : "")} onClick={play} aria-label={playing ? (language === "kn" ? "ಆಡಿಯೊ ನಿಲ್ಲಿಸಿ" : "Stop audio guide") : (language === "kn" ? "ಸೂಚನೆಗಳನ್ನು ಕೇಳಿ" : "Listen to instructions")}>{playing ? (language === "kn" ? "■ ನಿಲ್ಲಿಸಿ" : "■ Stop") : "▶ " + (language === "kn" ? "ಸೂಚನೆಗಳನ್ನು ಕೇಳಿ" : "Listen")}</button>
     {error && <span className="voice-status" role="status">{error}</span>}
   </span>;
 }
@@ -220,7 +243,7 @@ export function AudioGuideButton({ guide, compact = false }: { guide: string; co
 export function LanguageSwitch() {
   const { language, setLanguage } = useLanguage();
   return <span className="language-controls">
-    <button type="button" className="language-switch" onClick={() => { activeGuideAudio?.pause(); activeGuideAudio = null; activeGuideAudioId = null; setLanguage(language === "en" ? "kn" : "en"); }} aria-label="Change language">{language === "en" ? "ಕನ್ನಡ" : "English"}</button>
+    <button type="button" className="language-switch" onClick={() => { activeGuideAudio?.pause(); activeGuideAudio = null; activeGuideAudioId = null; setLanguage(language === "en" ? "kn" : "en"); }} aria-label={language === "kn" ? "ಭಾಷೆ ಬದಲಾಯಿಸಿ" : "Change language"}>{language === "en" ? "ಕನ್ನಡ" : "English"}</button>
     <AudioGuideButton guide="portal" />
   </span>;
 }
