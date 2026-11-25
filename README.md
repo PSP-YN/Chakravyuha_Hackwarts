@@ -11,7 +11,7 @@ A Karnataka-first agricultural coordination platform connecting farmers, produce
 
 ## Status
 
-Greenfield implementation. The repository is being built from an empty state. Product and engineering decisions, system boundaries, security requirements, data model, operations and release criteria are documented in [docs/](./docs/).
+Deployed pilot prototype. Production: https://krishi-connect-360.vercel.app. The application uses the dedicated Supabase project and Vercel Git deployment. Product and engineering decisions, system boundaries, security requirements, data model, operations and release criteria are documented in [docs/](./docs/).
 
 ## Technology
 

@@ -7,11 +7,11 @@
 - `npm run build`: optimized Next.js production build.
 
 ## Live checks performed
-- Supabase public listing Data API read returned HTTP 200.
+- Supabase public listing Data API read returned HTTP 200; current production database contains zero participant listings (no demo records were seeded).
 - Anonymous offer insert returned HTTP 401 / permission denied (expected; anon has no INSERT grant).
 - New machinery and by-product columns are present in the live database.
 - Supabase security advisor returned no findings after the pilot migrations.
-- Chrome headless viewport checks at 360, 390, 580, 768, 1024, 1440 and 1920 px showed no horizontal overflow; all three module names rendered and no JavaScript exceptions were captured. Firefox is not installed in the current laptop environment, so this iteration did not include a fresh Firefox run.
+- Previous Chrome viewport checks at 360, 390, 580, 768, 1024, 1440 and 1920 px showed no horizontal overflow. A new production browser smoke test confirmed the page title and all three modules render. No browser runtime errors were captured during that smoke test. Firefox is not installed in the current laptop environment, so no fresh Firefox run was performed.
 
 ## Integration tests still required with two real accounts
 - User A publishes produce listing → User B sees it → User B submits offer → User A accepts → User B cannot access unrelated offer or update listing → User A marks completed.
@@ -44,8 +44,8 @@ Offer ₹2,400/quintal × 8 quintals = ₹19,200 gross. Farmer costs ₹1,250. E
 Typecheck and build pass; migration applies to clean project; RLS tests pass; core browser journey passes; mobile and keyboard access reviewed; env correctly scoped; production smoke test complete; no critical/high security issue.
 
 ## Known limitations
-- Auth email delivery and two-user RLS workflows are not yet verified with real user accounts.
-- Vercel GitHub integration and production deployment are pending secure Vercel authentication.
+- Auth email delivery, production redirect allowlist and two-user RLS workflows are not yet verified with real user accounts.
+- Vercel GitHub integration is connected and production deployment is READY at https://krishi-connect-360.vercel.app. The latest UI/auth polish changes in this working tree still need to be committed and deployed.
 - Machinery scheduling is a requested time window with overlap protection after seller acceptance; it is not a live calendar or automatic booking confirmation.
 - By-product compatibility is represented by typed listing attributes and participant search; no laboratory verification or automated processor certification exists.
 - No Kannada-reviewed copy, dispute resolution, moderation, external price feed, logistics integration, payments or AI.
