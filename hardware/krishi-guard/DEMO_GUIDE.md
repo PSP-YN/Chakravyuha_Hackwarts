@@ -38,10 +38,10 @@ The Wokwi circuit is in `hardware/krishi-guard/wokwi-web/`. The production firmw
 
 ### A. Hardware simulation in Wokwi
 
-1. Open https://wokwi.com/projects/new/esp32.
-2. Copy `wokwi-web/sketch.ino` into `sketch.ino`.
-3. Copy `wokwi-web/diagram.json` into `diagram.json`.
-4. In Library Manager add:
+1. Open the saved circuit: https://wokwi.com/projects/481686932424365057.
+2. The project already contains the ESP32, DHT22, DS18B20, pull-up resistor, LED, buzzer and required libraries.
+3. Start the simulation and open the serial monitor. To recreate it from source instead, use `wokwi-web/sketch.ino`, `wokwi-web/diagram.json` and `wokwi-web/libraries.txt`.
+4. In Library Manager add (only when recreating from source):
    - DHT sensor library for ESPx
    - OneWire
    - DallasTemperature
@@ -57,7 +57,7 @@ The Wokwi circuit is in `hardware/krishi-guard/wokwi-web/`. The production firmw
 4. Show the resulting condition index, reasons, history table and SIM source label.
 5. Explain that the Wokwi board demonstrates sensor acquisition and local alarm logic, while the app's simulator sends explicitly labelled test data through the same backend used by physical ESP32 devices.
 
-The Wokwi project is deliberately configured without a real device key. The browser's public gateway may monitor outbound traffic; do not send private credentials through it.
+The Wokwi project is deliberately configured without a real device key. Its serial monitor prints an `APP_PAYLOAD` JSON line so you can mirror the exact sensor values in the Krishi Connect 360 Sensor Simulator. This keeps the public Wokwi project free of credentials. The physical ESP32 uses the single authenticated HTTPS connection described above. The browser's public gateway may monitor outbound traffic; do not send private credentials through it.
 
 ## Reproducible scenarios
 
