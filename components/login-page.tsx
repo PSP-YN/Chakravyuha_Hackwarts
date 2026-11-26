@@ -82,13 +82,24 @@ export function LoginPage({ mode = "login" }: { mode?: "login" | "signup" }) {
       const options = mode === "signup" ? {
         emailRedirectTo: `${window.location.origin}/workspace`,
         shouldCreateUser: true,
-        data: { full_name: fullName.trim(), phone: phone.trim(), participant_type: role, preferred_language: language, district: district.trim(), taluk: taluk.trim(), village: village.trim(), organization_name: organisation.trim() || null, accepted_terms: acceptedTerms, terms_version: POLICY_VERSION, privacy_notice_version: POLICY_VERSION }
+        data: { full_name: fullName.trim(), phone: phone.trim(), participant_type: role, preferred_language: language, district: district.trim(), taluk: taluk.trim(), village: village.trim(), organization_name: organisation.trim() || null, accepted_terms: true, terms_version: POLICY_VERSION, privacy_notice_version: POLICY_VERSION }
       } : { emailRedirectTo: `${window.location.origin}/workspace`, shouldCreateUser: false };
       const {error} = await db.auth.signInWithOtp({ email:email.trim().toLowerCase(), options });
       if(error) throw error;
       setSent(true);
-    } catch {
-      setError(t.failed);
+    } catch (err) {
+      const message = err instanceof Error ? err.message.toLowerCase() : "";
+      if (/database error saving new user|unexpected_failure|terms of use.*must be accepted|policy acceptance/.test(message)) {
+        setError(language === "kn"
+          ? "ನೋಂದಣಿ ಪರಿಶೀಲನೆ ಪೂರ್ಣಗೊಳ್ಳಲಿಲ್ಲ. ಬಳಕೆಯ ನಿಯಮಗಳು ಮತ್ತು ಗೌಪ್ಯತಾ ಸೂಚನೆಗೆ ಒಪ್ಪಿಗೆ ನೀಡಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."
+          : "The registration checks rejected the request. Confirm the Terms of Use and Privacy Notice checkbox, then submit again.");
+      } else if (/smtp|error sending confirmation email|email.*(send|deliver)/.test(message)) {
+        setError(language === "kn"
+          ? "ನೋಂದಣಿ ಸ್ವೀಕರಿಸಲಾಗಿದೆ, ಆದರೆ ದೃಢೀಕರಣ ಇಮೇಲ್ ತಲುಪಲಿಲ್ಲ. Supabase Auth SMTP ಸಂರಚನೆಯನ್ನು ಪರಿಶೀಲಿಸಬೇಕು."
+          : "The registration request was accepted, but the confirmation email could not be delivered. Check the Supabase Auth SMTP configuration.");
+      } else {
+        setError(friendlyErrorMessage(err, language, t.failed));
+      }
     } finally {
       setBusy(false);
     }
