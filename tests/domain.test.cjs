@@ -12,7 +12,13 @@ domain.filename = filename;
 domain.paths = Module._nodeModulePaths(path.dirname(filename));
 domain._compile(compiled, filename);
 const { money, netPaise, toPaise, validateFpoAllocations, canTransitionTransportJob, canMakeOffer } = domain.exports;
-const { assessStorageCondition } = require("../supabase/functions/storage-guardian/risk.ts");
+const riskFilename = path.resolve(__dirname, "../supabase/functions/storage-guardian/risk.ts");
+const riskCompiled = ts.transpile(fs.readFileSync(riskFilename, "utf8"), { module: ts.ModuleKind.CommonJS });
+const riskModule = new Module(riskFilename, module);
+riskModule.filename = riskFilename;
+riskModule.paths = Module._nodeModulePaths(path.dirname(riskFilename));
+riskModule._compile(riskCompiled, riskFilename);
+const { assessStorageCondition } = riskModule.exports;
 
 const simulationFilename = path.resolve(__dirname, "../lib/krishi-simulation.ts");
 const simulationCompiled = ts.transpile(fs.readFileSync(simulationFilename, "utf8"), { module: ts.ModuleKind.CommonJS });
