@@ -56,7 +56,8 @@ export const krishiExtraKannada: Record<string, string> = {
   "Create an account ↗": "ಖಾತೆ ರಚಿಸಿ ↗",
   "Complete profile ↗": "ಪ್ರೊಫೈಲ್ ಪೂರ್ಣಗೊಳಿಸಿ ↗",
   "Sign in to manage your farm ↗": "ನಿಮ್ಮ ಕೃಷಿಯನ್ನು ನಿರ್ವಹಿಸಲು ಸೈನ್ ಇನ್ ಮಾಡಿ ↗",
-  "No password required. Email delivery depends on Supabase Auth configuration.": "ಪಾಸ್‌ವರ್ಡ್ ಅಗತ್ಯವಿಲ್ಲ. ಇಮೇಲ್ ವಿತರಣೆ Supabase Auth ಸಂರಚನೆಗೆ ಅವಲಂಬಿತವಾಗಿದೆ.",
+  "Account sign-in is only needed for personal workspace and cloud actions. Explore the interactive demo without an account.": "ವೈಯಕ್ತಿಕ ಕಾರ್ಯಸ್ಥಳ ಮತ್ತು ಕ್ಲೌಡ್ ಕಾರ್ಯಗಳಿಗೆ ಮಾತ್ರ ಖಾತೆ ಪ್ರವೇಶ ಅಗತ್ಯ. ಖಾತೆ ಇಲ್ಲದೆ ಸಂವಾದಾತ್ಮಕ ಪ್ರದರ್ಶನವನ್ನು ವೀಕ್ಷಿಸಿ.",
+  "Launch interactive demo — no account required ↗": "ಸಂವಾದಾತ್ಮಕ ಪ್ರದರ್ಶನ ಪ್ರಾರಂಭಿಸಿ — ಖಾತೆ ಅಗತ್ಯವಿಲ್ಲ ↗",
   "Send secure sign-in link": "ಸುರಕ್ಷಿತ ಸೈನ್ ಇನ್ ಲಿಂಕ್ ಕಳುಹಿಸಿ",
 
   // Event-driven KRISHI GUARD field-lab UI.
