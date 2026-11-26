@@ -14,10 +14,15 @@ export function friendlyErrorMessage(
   fallback = "The action could not be completed.",
 ): string {
   const raw = extractMessage(error);
+  const message = raw.toLowerCase();
+  if (/email rate limit exceeded|rate limit.*email|email.*rate limit/.test(message)) {
+    return language === "kn"
+      ? "ಇಮೇಲ್ ಕಳುಹಿಸುವ ಮಿತಿಯನ್ನು ತಲುಪಲಾಗಿದೆ. ಈಗಲೇ ಪ್ರದರ್ಶನ ನೋಡಲು ಸೈನ್ ಇನ್ ಅಗತ್ಯವಿಲ್ಲದ ಕೃಷಿ ಗಾರ್ಡ್ ಸಿಮ್ಯುಲೇಟರ್ ತೆರೆಯಿರಿ."
+      : "Email sending is temporarily rate-limited. Launch the interactive demo without email or an account.";
+  }
   if (language === "en") return raw || fallback;
   if (/[\u0C80-\u0CFF]/.test(raw)) return raw;
 
-  const message = raw.toLowerCase();
   if (/row-level security|permission denied|not allowed|unauthorized|forbidden/.test(message)) {
     return "ಈ ಖಾತೆಗೆ ಈ ಕಾರ್ಯಕ್ಕೆ ಅನುಮತಿ ಇಲ್ಲ. ಖಾತೆಯ ಪಾತ್ರ ಮತ್ತು ಪರಿಶೀಲನಾ ಸ್ಥಿತಿಯನ್ನು ಪರಿಶೀಲಿಸಿ.";
   }
@@ -32,9 +37,6 @@ export function friendlyErrorMessage(
   }
   if (/email not confirmed|email address.*confirm/.test(message)) {
     return "ಮುಂದುವರಿಯುವ ಮೊದಲು ನಿಮ್ಮ ಇಮೇಲ್ ವಿಳಾಸವನ್ನು ದೃಢೀಕರಿಸಿ.";
-  }
-  if (/email rate limit exceeded|rate limit.*email|email.*rate limit/.test(message)) {
-    return "ಇಮೇಲ್ ಕಳುಹಿಸುವ ಮಿತಿ ತಲುಪಿದೆ. ಈಗಲೇ ಪ್ರದರ್ಶನ ನೋಡಲು ಸೈನ್ ಇನ್ ಅಗತ್ಯವಿಲ್ಲದ ಕೃಷಿ ಗಾರ್ಡ್ ಸಿಮ್ಯುಲೇಟರ್ ತೆರೆಯಿರಿ. ಖಾತೆ ಪ್ರವೇಶಕ್ಕಾಗಿ ಮಿತಿ ಮರುಹೊಂದಿದ ನಂತರ ಪ್ರಯತ್ನಿಸಿ.";
   }
   if (/rate limit|too many requests/.test(message)) {
     return "ಹಲವಾರು ವಿನಂತಿಗಳು ಕಳುಹಿಸಲಾಗಿದೆ. ಸ್ವಲ್ಪ ಸಮಯದ ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.";
