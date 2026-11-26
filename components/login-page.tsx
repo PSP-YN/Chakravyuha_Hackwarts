@@ -26,9 +26,9 @@ const copy = {
     email: "Email address", send: "Send secure sign-in link", register: "Create account and send link", sending: "Sending link…",
     sentLogin: "Sign-in link sent. Open the newest email on this device. The link expires; request a new one if needed.",
     sentSignup: "Registration link sent. Open the newest email to verify your address and activate your account.",
-    failed: "We could not send the email link. Check the details and try again.", noConfig: "Account access is not configured in this deployment. Contact the pilot operator.",
+    failed: "We could not send the email link. Check the details and try again.", rateLimited: "Email sending is temporarily rate-limited. You can launch the interactive demo now without email or an account.", noConfig: "Account access is not configured in this deployment. Contact the pilot operator.",
     back: "Back to home", privacy: "Privacy notice", terms: "Terms of use", secure: "Supabase Auth · Passwordless email · English / ಕನ್ನಡ",
-    tip: "Email delivery requires a production SMTP provider configured in Supabase Auth.", fullName: "Full name", phone: "Mobile number", role: "I am registering as", district: "District", taluk: "Taluk", village: "Village / Town", organisation: "Organisation name",
+    demo: "Try the interactive KRISHI GUARD demo without signing in", fullName: "Full name", phone: "Mobile number", role: "I am registering as", district: "District", taluk: "Taluk", village: "Village / Town", organisation: "Organisation name",
     login: "Already have an account? Sign in", signup: "New to Krishi Connect? Create an account", required: "Complete all required fields and accept the Terms of Use and Privacy Notice.", consent: "I have read and accept the",
   },
   kn: {
@@ -38,9 +38,9 @@ const copy = {
     email: "ಇಮೇಲ್ ವಿಳಾಸ", send: "ಸುರಕ್ಷಿತ ಸೈನ್ ಇನ್ ಲಿಂಕ್ ಕಳುಹಿಸಿ", register: "ಖಾತೆ ರಚಿಸಿ ಮತ್ತು ಲಿಂಕ್ ಕಳುಹಿಸಿ", sending: "ಲಿಂಕ್ ಕಳುಹಿಸಲಾಗುತ್ತಿದೆ…",
     sentLogin: "ಸೈನ್ ಇನ್ ಲಿಂಕ್ ಕಳುಹಿಸಲಾಗಿದೆ. ಈ ಸಾಧನದಲ್ಲಿನ ಹೊಸ ಇಮೇಲ್ ತೆರೆಯಿರಿ. ಲಿಂಕ್ ಅವಧಿ ಮುಗಿದರೆ ಹೊಸದನ್ನು ಕೇಳಿ.",
     sentSignup: "ನೋಂದಣಿ ಲಿಂಕ್ ಕಳುಹಿಸಲಾಗಿದೆ. ಇಮೇಲ್ ಪರಿಶೀಲಿಸಿ ಖಾತೆ ಸಕ್ರಿಯಗೊಳಿಸಲು ಹೊಸ ಸಂದೇಶ ತೆರೆಯಿರಿ.",
-    failed: "ಇಮೇಲ್ ಲಿಂಕ್ ಕಳುಹಿಸಲಾಗಲಿಲ್ಲ. ವಿವರಗಳನ್ನು ಪರಿಶೀಲಿಸಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.", noConfig: "ಈ ನಿಯೋಜನೆಯಲ್ಲಿ ಖಾತೆ ಪ್ರವೇಶ ಸಂರಚಿಸಲಾಗಿಲ್ಲ. ಪೈಲಟ್ ನಿರ್ವಾಹಕರನ್ನು ಸಂಪರ್ಕಿಸಿ.",
+    failed: "ಇಮೇಲ್ ಲಿಂಕ್ ಕಳುಹಿಸಲಾಗಲಿಲ್ಲ. ವಿವರಗಳನ್ನು ಪರಿಶೀಲಿಸಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.", rateLimited: "ಇಮೇಲ್ ಕಳುಹಿಸುವ ಮಿತಿಯನ್ನು ತಲುಪಲಾಗಿದೆ. ಇಮೇಲ್ ಅಥವಾ ಖಾತೆ ಇಲ್ಲದೆ ಈಗಲೇ ಸಂವಾದಾತ್ಮಕ ಪ್ರದರ್ಶನ ಪ್ರಾರಂಭಿಸಬಹುದು.", noConfig: "ಈ ನಿಯೋಜನೆಯಲ್ಲಿ ಖಾತೆ ಪ್ರವೇಶ ಸಂರಚಿಸಲಾಗಿಲ್ಲ. ಪೈಲಟ್ ನಿರ್ವಾಹಕರನ್ನು ಸಂಪರ್ಕಿಸಿ.",
     back: "ಮುಖಪುಟಕ್ಕೆ ಹಿಂತಿರುಗಿ", privacy: "ಗೌಪ್ಯತಾ ಸೂಚನೆ", terms: "ಬಳಕೆಯ ನಿಯಮಗಳು", secure: "Supabase Auth · ಪಾಸ್‌ವರ್ಡ್ ರಹಿತ ಇಮೇಲ್ · English / ಕನ್ನಡ",
-    tip: "ಇಮೇಲ್ ವಿತರಣೆಗೆ Supabase Auth ನಲ್ಲಿ ಉತ್ಪಾದನಾ SMTP ಸೇವೆ ಸಂರಚಿಸಬೇಕು.", fullName: "ಪೂರ್ಣ ಹೆಸರು", phone: "ಮೊಬೈಲ್ ಸಂಖ್ಯೆ", role: "ನಾನು ನೋಂದಾಯಿಸಿಕೊಳ್ಳುವುದು", district: "ಜಿಲ್ಲೆ", taluk: "ತಾಲೂಕು", village: "ಗ್ರಾಮ / ಪಟ್ಟಣ", organisation: "ಸಂಸ್ಥೆಯ ಹೆಸರು",
+    demo: "ಸೈನ್ ಇನ್ ಮಾಡದೆ ಸಂವಾದಾತ್ಮಕ ಕೃಷಿ ಗಾರ್ಡ್ ಪ್ರದರ್ಶನ ಪ್ರಯತ್ನಿಸಿ", fullName: "ಪೂರ್ಣ ಹೆಸರು", phone: "ಮೊಬೈಲ್ ಸಂಖ್ಯೆ", role: "ನಾನು ನೋಂದಾಯಿಸಿಕೊಳ್ಳುವುದು", district: "ಜಿಲ್ಲೆ", taluk: "ತಾಲೂಕು", village: "ಗ್ರಾಮ / ಪಟ್ಟಣ", organisation: "ಸಂಸ್ಥೆಯ ಹೆಸರು",
     login: "ಈಗಾಗಲೇ ಖಾತೆ ಇದೆಯೇ? ಸೈನ್ ಇನ್ ಮಾಡಿ", signup: "Krishi Connect ಗೆ ಹೊಸಬರೇ? ಖಾತೆ ರಚಿಸಿ", required: "ಅಗತ್ಯವಿರುವ ಎಲ್ಲಾ ವಿವರಗಳನ್ನು ಭರ್ತಿ ಮಾಡಿ ಮತ್ತು ಬಳಕೆಯ ನಿಯಮಗಳು ಹಾಗೂ ಗೌಪ್ಯತಾ ಸೂಚನೆಯನ್ನು ಒಪ್ಪಿಕೊಳ್ಳಿ.", consent: "ನಾನು ಇದನ್ನು ಓದಿ ಒಪ್ಪುತ್ತೇನೆ:",
   }
 } as const;
@@ -89,7 +89,9 @@ export function LoginPage({ mode = "login" }: { mode?: "login" | "signup" }) {
       setSent(true);
     } catch (err) {
       const message = err instanceof Error ? err.message.toLowerCase() : "";
-      if (/database error saving new user|unexpected_failure|terms of use.*must be accepted|policy acceptance/.test(message)) {
+      if (/email rate limit exceeded|rate limit.*email|email.*rate limit/.test(message)) {
+        setError(t.rateLimited);
+      } else if (/database error saving new user|unexpected_failure|terms of use.*must be accepted|policy acceptance/.test(message)) {
         setError(language === "kn"
           ? "ನೋಂದಣಿ ಪರಿಶೀಲನೆ ಪೂರ್ಣಗೊಳ್ಳಲಿಲ್ಲ. ಬಳಕೆಯ ನಿಯಮಗಳು ಮತ್ತು ಗೌಪ್ಯತಾ ಸೂಚನೆಗೆ ಒಪ್ಪಿಗೆ ನೀಡಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."
           : "The registration checks rejected the request. Confirm the Terms of Use and Privacy Notice checkbox, then submit again.");
@@ -122,6 +124,7 @@ export function LoginPage({ mode = "login" }: { mode?: "login" | "signup" }) {
         <span className="landing-section-heading"><span>{language==="kn"?"ಸುರಕ್ಷಿತ ಖಾತೆ ಪ್ರವೇಶ":"SECURE ACCOUNT ACCESS"}</span></span>
         <h2>{mode === "signup" ? (language === "kn" ? "ಭಾಗವಹಿಸುವವರ ನೋಂದಣಿ" : "Participant registration") : (language==="kn"?"ಇಮೇಲ್ ಮೂಲಕ ಮುಂದುವರಿಯಿರಿ":"Continue with email")}</h2>
         <p>{mode === "signup" ? t.signupBody : (language==="kn"?"ನಿಮ್ಮ ಇಮೇಲ್‌ಗೆ ಒಂದು ಬಾರಿ ಬಳಸುವ ಸೈನ್ ಇನ್ ಲಿಂಕ್ ಕಳುಹಿಸುತ್ತೇವೆ.":"We’ll send a one-time sign-in link to your email address.")}</p>
+        <a className="login-demo-primary" href="/krishi-guard-simulator">{language === "kn" ? "ಡೆಮೊ ಪ್ರಾರಂಭಿಸಿ — ಖಾತೆ ಅಗತ್ಯವಿಲ್ಲ" : "Launch interactive demo — no account required"} <span>↗</span></a>
         <form onSubmit={submit}>
           {mode === "signup" && <>
             <label>{t.fullName}<input value={fullName} onChange={e=>setFullName(e.target.value)} autoComplete="name" required minLength={2} maxLength={80}/></label>
@@ -139,7 +142,6 @@ export function LoginPage({ mode = "login" }: { mode?: "login" | "signup" }) {
         {!db&&<p className="login-error" role="alert">{t.noConfig}</p>}
         {error&&<p className="login-error" role="alert">{error}</p>}
         {sent&&<p className="login-success" role="status">{mode === "signup" ? t.sentSignup : t.sentLogin}</p>}
-        <p className="login-note">{t.tip}</p>
         <div className="login-security">{t.secure}</div>
         <a className="login-back" href={mode === "signup" ? "/login" : "/signup"}>{mode === "signup" ? t.login : t.signup}</a>
         <a className="login-back" href="/">{t.back} ←</a>

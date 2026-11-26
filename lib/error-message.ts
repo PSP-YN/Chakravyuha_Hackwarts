@@ -33,6 +33,9 @@ export function friendlyErrorMessage(
   if (/email not confirmed|email address.*confirm/.test(message)) {
     return "ಮುಂದುವರಿಯುವ ಮೊದಲು ನಿಮ್ಮ ಇಮೇಲ್ ವಿಳಾಸವನ್ನು ದೃಢೀಕರಿಸಿ.";
   }
+  if (/email rate limit exceeded|rate limit.*email|email.*rate limit/.test(message)) {
+    return "ಇಮೇಲ್ ಕಳುಹಿಸುವ ಮಿತಿ ತಲುಪಿದೆ. ಈಗಲೇ ಪ್ರದರ್ಶನ ನೋಡಲು ಸೈನ್ ಇನ್ ಅಗತ್ಯವಿಲ್ಲದ ಕೃಷಿ ಗಾರ್ಡ್ ಸಿಮ್ಯುಲೇಟರ್ ತೆರೆಯಿರಿ. ಖಾತೆ ಪ್ರವೇಶಕ್ಕಾಗಿ ಮಿತಿ ಮರುಹೊಂದಿದ ನಂತರ ಪ್ರಯತ್ನಿಸಿ.";
+  }
   if (/rate limit|too many requests/.test(message)) {
     return "ಹಲವಾರು ವಿನಂತಿಗಳು ಕಳುಹಿಸಲಾಗಿದೆ. ಸ್ವಲ್ಪ ಸಮಯದ ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.";
   }

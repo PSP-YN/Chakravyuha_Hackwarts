@@ -358,6 +358,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .login-card form button:disabled{opacity:.55;cursor:not-allowed}
 .login-note{padding:12px;border-radius:9px;background:#f7f8f2;font-size:10px!important;color:#7b887b!important}
 .login-security{padding-top:16px;border-top:1px solid #edf0e9;color:#748474;font-size:10px}
+.login-demo-primary{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 18px;padding:15px 17px;border-radius:11px;background:#214a36;color:#fff;font-size:13px;font-weight:800;box-shadow:0 8px 22px #214a3622}.login-demo-primary span{font-size:18px}.login-demo-primary:hover{background:#163626}
 .login-success,.login-error{padding:12px;border-radius:9px;font-size:12px!important;line-height:1.6}
 .login-success{background:#eaf4e6;color:#315d37!important}
 .login-error{background:#fbe9e5;color:#914d37!important}
