@@ -49,3 +49,13 @@ test("new Kannada dictionary keys are unique", () => {
   const duplicates = [...counts].filter(([, count]) => count > 1).map(([key]) => key);
   assert.deepEqual(duplicates, []);
 });
+
+test("document and Storage Guardian metadata default to Kannada", () => {
+  const layout = fs.readFileSync(path.join(__dirname, "../app/layout.tsx"), "utf8");
+  const storage = fs.readFileSync(path.join(__dirname, "../app/workspace/storage-guardian/page.tsx"), "utf8");
+  assert.match(layout, /<html lang="kn">/);
+  assert.match(layout, /locale: "kn_IN"/);
+  assert.match(layout, /description: "ಬೆಳೆ ವ್ಯಾಪಾರ/);
+  assert.match(storage, /title: "ಕೃಷಿ ಗಾರ್ಡ್ — ಸಂಗ್ರಹಣೆ ಮಾಹಿತಿ/);
+  assert.match(storage, /description: "ಕಡಿಮೆ ವೆಚ್ಚದ ಸಂಪರ್ಕಿತ ಸಂವೇದಕ/);
+});
