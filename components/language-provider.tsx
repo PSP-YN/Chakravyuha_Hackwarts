@@ -295,10 +295,12 @@ export function Localize({ children }: { children: ReactNode }) {
 let activeGuideAudio: HTMLAudioElement | null = null;
 let activeGuideAudioId: string | null = null;
 
-export function AudioGuideButton({ guide, compact = false }: { guide: string; compact?: boolean }) {
+export function AudioGuideButton({ guide, compact = false, label }: { guide: string; compact?: boolean; label?: { en: string; kn: string } }) {
   const { language } = useLanguage();
   const [playing, setPlaying] = useState(false);
   const [error, setError] = useState("");
+  const guideLabel = label ? label[language] : (language === "kn" ? "ಸೂಚನೆಗಳನ್ನು ಕೇಳಿ" : "Listen to instructions");
+  const stopLabel = language === "kn" ? "ಆಡಿಯೊ ನಿಲ್ಲಿಸಿ" : "Stop audio guide";
   const play = () => {
     const guideId = guide + "-" + language;
     if (activeGuideAudio && activeGuideAudioId === guideId && !activeGuideAudio.paused) {
@@ -320,7 +322,7 @@ export function AudioGuideButton({ guide, compact = false }: { guide: string; co
     void audio.play().catch(() => { setPlaying(false); setError(language === "kn" ? "ಆಡಿಯೊ ಪ್ಲೇ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ." : "Audio playback could not start."); });
   };
   return <span className="audio-guide-control">
-    <button type="button" className={"language-switch voice-switch" + (compact ? " compact" : "")} onClick={play} aria-label={playing ? (language === "kn" ? "ಆಡಿಯೊ ನಿಲ್ಲಿಸಿ" : "Stop audio guide") : (language === "kn" ? "ಸೂಚನೆಗಳನ್ನು ಕೇಳಿ" : "Listen to instructions")}>{playing ? (language === "kn" ? "■ ನಿಲ್ಲಿಸಿ" : "■ Stop") : "▶ " + (language === "kn" ? "ಸೂಚನೆಗಳನ್ನು ಕೇಳಿ" : "Listen")}</button>
+    <button type="button" className={"language-switch voice-switch" + (compact ? " compact" : "")} onClick={play} aria-label={playing ? stopLabel : guideLabel}>{playing ? (language === "kn" ? "■ ನಿಲ್ಲಿಸಿ" : "■ Stop") : "▶ " + guideLabel}</button>
     {error && <span className="voice-status" role="status">{error}</span>}
   </span>;
 }

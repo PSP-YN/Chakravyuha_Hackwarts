@@ -1304,3 +1304,29 @@ html[lang="kn"] p,html[lang="kn"] label,html[lang="kn"] button,html[lang="kn"] a
  .mobile-nav{padding-inline:5px}
  .mobile-nav-item small{font-size:9px}
 }
+
+
+/* Final interaction-size and compact-header refinements from preview QA. */
+.kg-toggle input[type="checkbox"],
+.kg-sync-toggle input[type="checkbox"],
+.login-consent input[type="checkbox"]{
+ width:24px!important;height:24px!important;min-width:24px!important;min-height:24px!important;
+ flex:0 0 24px!important;accent-color:var(--kc-forest)
+}
+.kg-toggle,.kg-sync-toggle,.login-consent{align-items:center}
+@media(max-width:640px){
+ .landing-nav nav .language-controls .voice-switch{display:none}
+ .landing-nav nav>a.landing-login:last-child{display:none}
+ .landing-brand{min-width:0;flex:1}
+ .landing-brand span{min-width:0}
+ .landing-brand b{white-space:nowrap;font-size:9px;letter-spacing:.06em}
+ .landing-brand small{white-space:nowrap}
+ .landing-nav nav{flex:0 0 auto}
+ .landing-nav nav .landing-login{padding-inline:12px}
+}
+@media(max-width:420px){
+ .landing-brand img{width:38px;height:38px}
+ .landing-nav{padding-inline:12px}
+ .landing-brand b{font-size:8px}
+ .landing-nav nav .landing-login{font-size:9px;padding-inline:9px}
+}
