@@ -92,14 +92,14 @@ These inputs are independent of the grain-condition score.
 | Input test | How to trigger in Wokwi | Expected serial / output |
 |---|---|---|
 | Dry baseline | Leave rain potentiometer at its default 1023 position | RAIN 0%; no rain alert |
-| Rain plate wet | Rotate rainpot to 0 (or use automation scenario 01) | RAIN near 100%; this is plate wetness, not proof of a roof leak |
+| Rain plate wet | Rotate rainpot to 0 (or use automation scenario 01) | RAIN near 100%; RAIN_ALERT ACTIVE; LED on and short low-tone chirp; this is plate wetness, not proof of a roof leak |
 | Rodent/perimeter motion | Click PIR part and choose Simulate Motion | RODENT MOTION; PEST ALERT; LED and short buzzer indication |
 | Insect trap | Press the yellow insect button (or run automation scenario 02) | INSECT_PULSES increments; PEST ALERT; LED and short buzzer indication |
 | Insect alert recovery | Release button and wait for the next sample | PEST CLEAR; LED/buzzer return to grain-condition state |
 | Water contact | Close the GPIO25 water-contact switch to GND | WATER_INGRESS ACTIVE; LED and water-contact buzzer indication |
 | Climate sensor fault + water/pest event | Disconnect DHT22 DATA or DS18B20 DQ, then trigger GPIO25, PIR or insect beam | Climate FAULT remains visible while independent water/pest event is still reported and can activate the alarm outputs |
 
-The browser digital twin at /krishi-guard-simulator separately models a roof-ingress scenario. It animates rain, a leak path and gradual indoor humidity/grain-temperature response. The physical rain plate only measures wetness where it is installed; it cannot detect a leak elsewhere in the roof.
+The browser digital twin at /krishi-guard-simulator provides live controls for rain ADC wetness, DHT22 air temperature and humidity, DS18B20 grain-core temperature, GPIO25 water contact, GPIO27 PIR motion, GPIO26 insect pulses, and climate-sensor fault injection. The pin readout and modeled LED/buzzer respond immediately. It is a digital-twin test bench; use the Wokwi link on that page for actual ESP32 instruction execution against virtual components. The browser digital twin separately models a roof-ingress scenario. It animates rain, a leak path and gradual indoor humidity/grain-temperature response. The physical rain plate only measures wetness where it is installed; it cannot detect a leak elsewhere in the roof.
 
 Automated Wokwi scenarios live in hardware/krishi-guard/scenarios. The Wokwi CI token is required to execute them from the CLI. The diagram lint and PlatformIO firmware build can be run without that token.
 
@@ -115,7 +115,7 @@ Automated Wokwi scenarios live in hardware/krishi-guard/scenarios. The Wokwi CI 
 - [ ] Urgent scenario gives URGENT, LED and stronger buzzer.
 - [ ] Disconnected sensor produces FAULT instead of a fabricated valid reading.
 - [ ] Restoring the sensor and restarting returns to valid readings.
-- [ ] Rain potentiometer changes the ADC-derived rain percentage.
+- [ ] Rain potentiometer changes the ADC-derived rain percentage and triggers the rain LED/chirp at 25% wetness.
 - [ ] PIR motion produces a distinct rodent/perimeter event.
 - [ ] Insect beam-break input increments its pulse counter and clears after the event.
 - [ ] GPIO25 water-contact switch is reported independently from the roof-ingress simulation assumption.
@@ -126,3 +126,18 @@ Automated Wokwi scenarios live in hardware/krishi-guard/scenarios. The Wokwi CI 
 ## Risk model caveat
 
 These scores and thresholds are for repeatable demonstration only. They are not validated safe-storage limits, a grain-moisture measurement, or a prediction of mould/spoilage. Before field use, calibrate against reference instruments and local agronomic guidance, test multiple sensors and storage conditions, and validate alert thresholds with grain-storage specialists.
+
+## Browser demo sequence (repeatable judge walkthrough)
+
+Open `/krishi-guard-simulator` in the deployed/local app. The page is an interactive digital-twin bench; every control updates the corresponding GPIO readout and firmware-output model immediately.
+
+1. **Clear baseline:** choose `Clear day`. Expect GPIO34 dry / ADC 4095, GPIO27 LOW, GPIO25 clear, no insect pulses, condition NORMAL, LED OFF and buzzer SILENT.
+2. **Rain input:** move `Rain plate wetness · GPIO34` to 65%. Expect ADC about 1433/4095, MODERATE RAIN, GPIO34 WET, LED ON and `RAIN DETECTED`. This is plate wetness, not a roof-leak measurement.
+3. **Climate threshold:** set DHT22 humidity to 82% and DS18B20 grain-core temperature to 38°C while air is 29°C. Expect condition score 75/100 and URGENT; LED ON and urgent buzzer output.
+4. **Water contact:** return climate values to 29°C / 54% RH / 29°C and rain to 0%; trigger GPIO25. Expect `WATER CONTACT ACTIVE`, LED ON and `WATER CONTACT` buzzer while grain condition remains NORMAL.
+5. **PIR:** clear GPIO25 and trigger the GPIO27 motion control. Expect a perimeter movement event and PEST WATCH without changing the grain-condition score.
+6. **Insect beam:** trigger GPIO26 three times. Expect three pulses and PEST ACTION; the grain-condition score remains independent.
+7. **Fault handling:** enable `Disconnect DHT22`, then `Disconnect DS18B20` in turn. Expect condition `FAULT`, score withheld, the relevant pin marked `FAULT / NO DATA`, and a sensor-fault alarm. Water and pest channels remain available during the fault.
+8. **Firmware execution:** use the embedded `Live hardware execution` panel. It boots the compiled standalone ESP32 firmware. Changing rain, air temperature, humidity, grain temperature, water contact or either climate-fault control uploads a revised circuit and restarts the MCU. Confirm the GPIO34 ADC and the actual firmware's LED/buzzer response. Inside the Wokwi circuit, click the PIR sensor and choose `Simulate Motion`; click the insect-beam button (or press `I`) to generate pulses. Open Wokwi's Serial Monitor toolbar and copy an `APP_PAYLOAD` line into `Import an ESP32 simulation reading` if automatic serial streaming is unavailable. Import it locally or send it to a registered Storage Guardian demo node. The resulting record is marked SIMULATOR, never DEVICE.
+
+The browser bench and Wokwi simulator are virtual hardware. A physical ESP32 demonstration additionally requires the assembled board and sensors wired to the pin map in this document; the web sliders cannot electrically actuate an unconnected physical board.

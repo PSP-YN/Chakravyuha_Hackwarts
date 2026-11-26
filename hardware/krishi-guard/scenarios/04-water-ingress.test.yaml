@@ -13,3 +13,9 @@ steps:
       part-id: esp
       name: 2
       value: 1
+  - set-control:
+      part-id: leak
+      name: pressed
+      value: 0
+  - delay: 3000ms
+  - wait-serial: 'WATER_INGRESS CLEAR'

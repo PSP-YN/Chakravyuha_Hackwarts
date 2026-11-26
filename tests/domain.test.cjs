@@ -20,7 +20,7 @@ const simulationModule = new Module(simulationFilename, module);
 simulationModule.filename = simulationFilename;
 simulationModule.paths = Module._nodeModulePaths(path.dirname(simulationFilename));
 simulationModule._compile(simulationCompiled, simulationFilename);
-const { advanceStorageEnvironment, assessPestChannel, assessStorageScenario, buildEnvironmentalTelemetryContext, getStorageAlertOutputs } = simulationModule.exports;
+const { advanceStorageEnvironment, assessPestChannel, assessStorageScenario, buildEnvironmentalTelemetryContext, getStorageAlertOutputs, parseWokwiSerialOutput } = simulationModule.exports;
 
 test('rupee amounts convert to integer paise without floating point drift', () => {
   assert.equal(toPaise('2400'), 240000);
@@ -135,4 +135,29 @@ test("water-contact and pest events activate local alert outputs independently o
   assert.deepEqual(getStorageAlertOutputs("NORMAL", "CLEAR", true), { led: true, buzzer: "WATER CONTACT" });
   assert.deepEqual(getStorageAlertOutputs("NORMAL", "WATCH", false), { led: true, buzzer: "PEST ALERT" });
   assert.deepEqual(getStorageAlertOutputs("ACTION", "CLEAR", false), { led: true, buzzer: "ACTION" });
+});
+
+
+test("rain wetness activates the simulated ESP32 alarm without asserting roof leakage", () => {
+  assert.deepEqual(getStorageAlertOutputs("NORMAL", "CLEAR", false, false, false), { led: false, buzzer: "SILENT" });
+  assert.deepEqual(getStorageAlertOutputs("NORMAL", "CLEAR", false, false, true), { led: true, buzzer: "RAIN DETECTED" });
+  assert.deepEqual(getStorageAlertOutputs("NORMAL", "CLEAR", false, true, false), { led: true, buzzer: "SENSOR FAULT" });
+});
+
+
+test("Wokwi APP_PAYLOAD lines parse into bounded sensor and event readings", () => {
+  const reading = parseWokwiSerialOutput('APP_PAYLOAD {"ambient_temperature_c":30,"relative_humidity_pct":82,"grain_temperature_c":36,"rain_intensity_pct":92,"water_ingress_detected":1,"rodent_motion_events":2,"insect_trap_pulses":4}');
+  assert.equal(reading.ambientTemperatureC, 30);
+  assert.equal(reading.relativeHumidityPct, 82);
+  assert.equal(reading.grainTemperatureC, 36);
+  assert.equal(reading.rainIntensityPct, 92);
+  assert.equal(reading.waterIngressDetected, true);
+  assert.equal(reading.rodentMotionEvents, 2);
+  assert.equal(reading.insectTrapPulses, 4);
+});
+
+test("Wokwi APP_PAYLOAD rejects malformed and out-of-range sensor data", () => {
+  assert.throws(() => parseWokwiSerialOutput("not-json"));
+  assert.throws(() => parseWokwiSerialOutput('APP_PAYLOAD {"ambient_temperature_c":99,"relative_humidity_pct":55,"grain_temperature_c":30}'));
+  assert.throws(() => parseWokwiSerialOutput('APP_PAYLOAD {"ambient_temperature_c":30,"relative_humidity_pct":55,"grain_temperature_c":30,"insect_trap_pulses":1.5}'));
 });

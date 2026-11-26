@@ -65,14 +65,69 @@ export function buildEnvironmentalTelemetryContext(input: {
 }
 
 
-export function getStorageAlertOutputs(conditionLevel: StorageLevel, pestStatus: string, waterContact: boolean) {
-  const led = conditionLevel !== "NORMAL" || pestStatus !== "CLEAR" || waterContact;
-  const buzzer = conditionLevel !== "NORMAL"
+export function getStorageAlertOutputs(conditionLevel: StorageLevel, pestStatus: string, waterContact: boolean, sensorFault = false, rainDetected = false) {
+  const led = conditionLevel !== "NORMAL" || pestStatus !== "CLEAR" || waterContact || sensorFault || rainDetected;
+  const buzzer = sensorFault
+    ? "SENSOR FAULT"
+    : conditionLevel !== "NORMAL"
     ? conditionLevel
     : waterContact
     ? "WATER CONTACT"
     : pestStatus !== "CLEAR"
     ? "PEST ALERT"
+    : rainDetected
+    ? "RAIN DETECTED"
     : "SILENT";
   return { led, buzzer };
+}
+
+export type WokwiSerialReading = {
+  ambientTemperatureC: number;
+  relativeHumidityPct: number;
+  grainTemperatureC: number;
+  rainIntensityPct: number;
+  waterIngressDetected: boolean;
+  rodentMotionEvents: number;
+  insectTrapPulses: number;
+};
+
+export function parseWokwiSerialOutput(raw: string): WokwiSerialReading {
+  if (raw.length > 12000) throw new Error("Wokwi serial output is too large.");
+  const match = raw.trim().match(/APP_PAYLOAD\s+(\{[\s\S]*\})/);
+  const source = match?.[1] ?? raw.trim();
+  let payload: unknown;
+  try {
+    payload = JSON.parse(source);
+  } catch {
+    throw new Error("Paste a valid APP_PAYLOAD JSON line from the Wokwi serial monitor.");
+  }
+  if (!payload || typeof payload !== "object" || Array.isArray(payload)) {
+    throw new Error("Wokwi serial payload must be a JSON object.");
+  }
+  const values = payload as Record<string, unknown>;
+  const readNumber = (key: string, min: number, max: number, fallback?: number) => {
+    const value = values[key] === undefined && fallback !== undefined ? fallback : values[key];
+    if (typeof value !== "number" || !Number.isFinite(value) || value < min || value > max) {
+      throw new Error(`Wokwi value ${key} must be between ${min} and ${max}.`);
+    }
+    return value;
+  };
+  const waterValue = values.water_ingress_detected ?? 0;
+  if (![0, 1, true, false].includes(waterValue as number | boolean)) {
+    throw new Error("Wokwi value water_ingress_detected must be 0 or 1.");
+  }
+  const rodentMotionEvents = readNumber("rodent_motion_events", 0, 10000, 0);
+  const insectTrapPulses = readNumber("insect_trap_pulses", 0, 10000, 0);
+  if (!Number.isInteger(rodentMotionEvents) || !Number.isInteger(insectTrapPulses)) {
+    throw new Error("Wokwi pest event counters must be whole numbers.");
+  }
+  return {
+    ambientTemperatureC: readNumber("ambient_temperature_c", -10, 70),
+    relativeHumidityPct: readNumber("relative_humidity_pct", 0, 100),
+    grainTemperatureC: readNumber("grain_temperature_c", -10, 80),
+    rainIntensityPct: readNumber("rain_intensity_pct", 0, 100, 0),
+    waterIngressDetected: waterValue === true || waterValue === 1,
+    rodentMotionEvents,
+    insectTrapPulses,
+  };
 }

@@ -1,0 +1,289 @@
+{
+  "version": 1,
+  "author": "KRISHI CONNECT 360",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "board-esp32-devkit-c-v4",
+      "id": "esp",
+      "top": 20,
+      "left": 20,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-dht22",
+      "id": "dht",
+      "top": -110,
+      "left": 280,
+      "attrs": {
+        "temperature": "30",
+        "humidity": "55"
+      }
+    },
+    {
+      "type": "wokwi-ds18b20",
+      "id": "grain",
+      "top": 110,
+      "left": 300,
+      "attrs": {
+        "temperature": "30",
+        "deviceID": "28A1B2C3D4E5"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "pullup",
+      "top": 10,
+      "left": 260,
+      "attrs": {
+        "value": "4700"
+      }
+    },
+    {
+      "type": "wokwi-led",
+      "id": "status",
+      "top": 250,
+      "left": 290,
+      "attrs": {
+        "color": "green",
+        "label": "Alert status"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "ledres",
+      "top": 260,
+      "left": 220,
+      "attrs": {
+        "value": "220"
+      }
+    },
+    {
+      "type": "wokwi-buzzer",
+      "id": "buzzer",
+      "top": 340,
+      "left": 280,
+      "attrs": {
+        "volume": "0.25"
+      }
+    },
+    {
+      "type": "wokwi-potentiometer",
+      "id": "rainpot",
+      "top": -110,
+      "left": 500,
+      "attrs": {
+        "value": "1023"
+      }
+    },
+    {
+      "type": "wokwi-pir-motion-sensor",
+      "id": "pir",
+      "top": 100,
+      "left": 520,
+      "attrs": {
+        "delayTime": "5",
+        "inhibitTime": "1.2"
+      }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "insect",
+      "top": 260,
+      "left": 520,
+      "attrs": {
+        "color": "yellow",
+        "label": "Insect beam-break pulse",
+        "key": "I"
+      }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "leak",
+      "top": 390,
+      "left": 520,
+      "attrs": {
+        "color": "blue",
+        "label": "Water ingress probe",
+        "key": "W"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "dhtpullup",
+      "top": -80,
+      "left": 220,
+      "attrs": {
+        "value": "10000"
+      }
+    }
+  ],
+  "connections": [
+    [
+      "esp:3V3",
+      "dht:VCC",
+      "red",
+      []
+    ],
+    [
+      "esp:GND.1",
+      "dht:GND",
+      "black",
+      []
+    ],
+    [
+      "esp:15",
+      "dht:SDA",
+      "green",
+      []
+    ],
+    [
+      "esp:3V3",
+      "grain:VCC",
+      "red",
+      []
+    ],
+    [
+      "esp:GND.1",
+      "grain:GND",
+      "black",
+      []
+    ],
+    [
+      "esp:4",
+      "grain:DQ",
+      "green",
+      []
+    ],
+    [
+      "esp:3V3",
+      "pullup:1",
+      "red",
+      []
+    ],
+    [
+      "pullup:2",
+      "grain:DQ",
+      "green",
+      []
+    ],
+    [
+      "esp:2",
+      "ledres:1",
+      "green",
+      []
+    ],
+    [
+      "ledres:2",
+      "status:A",
+      "green",
+      []
+    ],
+    [
+      "status:C",
+      "esp:GND.1",
+      "black",
+      []
+    ],
+    [
+      "buzzer:2",
+      "esp:18",
+      "green",
+      []
+    ],
+    [
+      "buzzer:1",
+      "esp:GND.1",
+      "black",
+      []
+    ],
+    [
+      "esp:3V3",
+      "rainpot:VCC",
+      "red",
+      []
+    ],
+    [
+      "esp:GND.1",
+      "rainpot:GND",
+      "black",
+      []
+    ],
+    [
+      "esp:34",
+      "rainpot:SIG",
+      "orange",
+      []
+    ],
+    [
+      "esp:3V3",
+      "pir:VCC",
+      "red",
+      []
+    ],
+    [
+      "esp:GND.1",
+      "pir:GND",
+      "black",
+      []
+    ],
+    [
+      "esp:27",
+      "pir:OUT",
+      "green",
+      []
+    ],
+    [
+      "esp:26",
+      "insect:1.l",
+      "green",
+      []
+    ],
+    [
+      "insect:2.l",
+      "esp:GND.1",
+      "black",
+      []
+    ],
+    [
+      "esp:3V3",
+      "dhtpullup:1",
+      "red",
+      []
+    ],
+    [
+      "dhtpullup:2",
+      "dht:SDA",
+      "green",
+      []
+    ],
+    [
+      "esp:TX",
+      "$serialMonitor:RX",
+      "",
+      []
+    ],
+    [
+      "esp:RX",
+      "$serialMonitor:TX",
+      "",
+      []
+    ],
+    [
+      "esp:25",
+      "leak:1.l",
+      "green",
+      []
+    ],
+    [
+      "leak:2.l",
+      "esp:GND.1",
+      "black",
+      []
+    ]
+  ],
+  "dependencies": {},
+  "serialMonitor": {
+    "display": "always"
+  }
+}

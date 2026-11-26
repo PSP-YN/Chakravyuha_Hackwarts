@@ -15,3 +15,6 @@ supabase/.temp/
 
 hardware/krishi-guard/secrets.h
 hardware/krishi-guard/.pio/
+
+# Ignore PlatformIO build/dependency artifacts in nested projects
+**/.pio/

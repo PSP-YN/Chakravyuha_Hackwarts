@@ -41,9 +41,9 @@ GPIO34 is input-only and has no internal pull-up. GPIO15 and GPIO2 are ESP32 str
 
 ## 3. Circuit and event semantics
 
-- `diagram.json` is the PlatformIO/Wokwi CLI circuit.
+- `diagram.json` is the PlatformIO/Wokwi CLI circuit. The standalone browser circuit in `wokwi-web/` runs the same independent rain/water/pest sampling and rain-alert behavior.
 - `wokwi-web/diagram.json` and `wokwi-web/sketch.ino` are the standalone browser-simulation circuit and sketch.
-- Rain plate / potentiometer reports wetness at the plate. It does **not** establish roof leakage.
+- Rain plate / potentiometer reports wetness at the plate. At 25% calibrated wetness or above, firmware turns on the alert LED and emits a short low-tone rain chirp. It does **not** establish roof leakage.
 - GPIO25 is a separate water-contact input. The browser digital twin's roof-ingress scenario is a model assumption and must not be described as a rain sensor measurement.
 - PIR reports movement in its field of view. It cannot reliably classify an animal as a rodent.
 - The insect channel counts beam interruptions. It does not identify insects or prove that every interruption is an insect.
@@ -82,7 +82,9 @@ Wokwi CLI scenario execution requires `WOKWI_CLI_TOKEN` from the Wokwi CI dashbo
 
 ## 6. Application integration
 
-The physical firmware posts `action: telemetry` with ambient temperature, relative humidity, grain temperature and environmental context. The Edge Function authenticates the one-time device key, checks the registered device, validates ranges and rate limits, calculates the condition index server-side, and stores `source = device` with `DEVICE_SENSOR` provenance. Browser digital-twin readings use the authenticated `simulate` action and are stored as `source = simulator` with `BROWSER_SCENARIO_SIMULATION` provenance.
+The current demo is simulation-first. The Wokwi sketch prints an APP_PAYLOAD JSON line in its Serial Monitor. The Krishi Guard simulator validates that line and sends it through the signed-in simulate action; the Edge Function verifies the owner and demo-node identity, validates sensor ranges and event counters, calculates the condition index server-side, and stores source = simulator with BROWSER_SCENARIO_SIMULATION provenance. The Storage Guardian dashboard displays the SIMULATOR label and event context.
+
+A future physical ESP32 uses action: telemetry with a unique device key. The Edge Function hashes and verifies that key, checks the registered device, validates ranges and rate limits, calculates the condition index server-side, and stores source = device with DEVICE_SENSOR provenance. Never place a Supabase service-role key in firmware.
 
 The migration `20261125212157_storage_guardian_environmental_events.sql` adds the JSONB context column. Apply migrations only after checking the linked Supabase project's migration history and reviewing the pending changes. A local Supabase stack is not assumed to be running.
 
@@ -99,3 +101,8 @@ The migration `20261125212157_storage_guardian_environmental_events.sql` adds th
 - Confirm browser simulations remain visibly labelled as simulated and never appear as physical device measurements.
 
 Do not claim field readiness until the physical bench tests, real-device registration, authenticated telemetry, enclosure/power safety and field calibration have passed.
+
+
+### Embedded ESP32 simulator assets
+
+The app's live Wokwi panel runs the compiled standalone sketch in `wokwi-web/`. After changing `sketch.ino`, the Wokwi diagram or sensor wiring, run `npm run sync:krishi-wokwi`. This rebuilds the ESP32 binary, creates a content-hashed firmware asset and updates `public/krishi-guard/manifest.json`; the app uploads that exact binary into the embedded simulator. The hash prevents Wokwi from reusing an older firmware file after a code change.

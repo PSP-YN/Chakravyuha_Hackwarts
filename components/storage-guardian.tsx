@@ -46,7 +46,7 @@ type Reading = {
 
 const fmt = (value: string | null, locale: string) => value
   ? new Date(value).toLocaleString(locale, { dateStyle: "medium", timeStyle: "short" })
-  : "Never connected";
+  : "No readings yet";
 
 export function StorageGuardian() {
   const db = getSupabase();
@@ -63,10 +63,8 @@ export function StorageGuardian() {
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
-  const [newDeviceKey, setNewDeviceKey] = useState("");
-  const [copied, setCopied] = useState(false);
 
-  const [deviceName, setDeviceName] = useState("Main grain store");
+  const [deviceName, setDeviceName] = useState("KRISHI GUARD · Wokwi demo");
   const [cropType, setCropType] = useState("paddy");
   const [storageType, setStorageType] = useState("bag");
   const [location, setLocation] = useState("");
@@ -153,10 +151,9 @@ export function StorageGuardian() {
     setBusy(true);
     setError("");
     setNotice("");
-    setNewDeviceKey("");
     const { data, error: invokeError } = await db.functions.invoke("storage-guardian", {
       body: {
-        action: "register",
+        action: "register_simulator",
         device_name: deviceName,
         crop_type: cropType,
         storage_type: storageType,
@@ -164,11 +161,10 @@ export function StorageGuardian() {
       },
     });
     if (invokeError || data?.error) {
-      setError(friendlyErrorMessage(data?.error ?? invokeError ?? "Device registration failed.", language, "Device registration failed."));
+      setError(friendlyErrorMessage(data?.error ?? invokeError ?? "Wokwi demo node creation failed.", language, "Wokwi demo node creation failed."));
     } else {
-      setNewDeviceKey(String(data.device_key ?? ""));
       setSelectedDevice(String(data.device?.id ?? ""));
-      setNotice("Device registered. Copy its key now; it will not be displayed again.");
+      setNotice("Wokwi demo node created. No physical ESP32 or device API key is required.");
       await refresh();
     }
     setBusy(false);
@@ -177,16 +173,15 @@ export function StorageGuardian() {
   async function revokeDevice(device: Device) {
     if (!db) return;
     const confirmed = window.confirm(language === "kn"
-      ? "ಈ ಸಾಧನವನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ ಅದರ API ಕೀಯನ್ನು ಶಾಶ್ವತವಾಗಿ ರದ್ದುಮಾಡಬೇಕೇ? ಹೊಸ ಸಾಧನವನ್ನು ನೋಂದಾಯಿಸುವವರೆಗೆ ಇದು ಡೇಟಾ ಕಳುಹಿಸುವುದಿಲ್ಲ."
-      : "Deactivate this device and permanently revoke its API key? It will stop sending data until you register a replacement.");
+      ? "ಈ Wokwi ಡೆಮೊ ನೋಡ್ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಬೇಕೇ? ಇದು ಹೊಸ ನೋಡ್ ರಚಿಸುವವರೆಗೆ ಸಿಮ್ಯುಲೇಟರ್ ಓದುಗಳನ್ನು ಸ್ವೀಕರಿಸುವುದಿಲ್ಲ."
+      : "Deactivate this demo node? It will stop accepting simulator readings until you create another node.");
     if (!confirmed) return;
     setBusy(true); setError(""); setNotice("");
     const { data, error: invokeError } = await db.functions.invoke("storage-guardian", { body: { action: "revoke", device_id: device.id } });
     if (invokeError || data?.error) setError(friendlyErrorMessage(data?.error ?? invokeError ?? "Device revocation failed.", language, "Device revocation failed."));
     else {
-      setNotice(language === "kn" ? "ಸಾಧನ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ ಮತ್ತು API ಕೀ ರದ್ದುಪಡಿಸಲಾಗಿದೆ." : "Device deactivated and API key revoked.");
+      setNotice(language === "kn" ? "ಸಾಧನ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ ಮತ್ತು API ಕೀ ರದ್ದುಪಡಿಸಲಾಗಿದೆ." : "Demo node deactivated.");
       if (selectedDevice === device.id) setSelectedDevice(devices.find((row) => row.id !== device.id && row.is_active)?.id ?? "");
-      setNewDeviceKey(""); setCopied(false);
       await refresh();
     }
     setBusy(false);
@@ -194,7 +189,7 @@ export function StorageGuardian() {
 
   async function sendSimulation(values?: { ambient: number; humidity: number; grain: number }) {
     if (!db || !selected) {
-      setError("Register a device before sending a simulated reading.");
+      setError("Create a Wokwi demo node before sending a simulated reading.");
       return;
     }
     const sample = values ?? { ambient: ambientTemp, humidity, grain: grainTemp };
@@ -219,26 +214,20 @@ export function StorageGuardian() {
     setBusy(false);
   }
 
-  async function copyDeviceKey() {
-    if (!newDeviceKey) return;
-    await navigator.clipboard.writeText(newDeviceKey);
-    setCopied(true);
-  }
-
   return (
     <Localize>
       <main className="storage-page">
         <div className="storage-topline">
           <Link href="/workspace" className="storage-back">← Back to Krishi Connect 360</Link>
-          <span className="storage-page-controls"><div className="storage-top-actions"><a href="https://wokwi.com/projects/481686932424365057" target="_blank" rel="noreferrer" className="storage-back">Launch actual ESP32 simulation in Wokwi ↗</a><span className="storage-live-pill"><i /> HARDWARE ADD-ON / PILOT</span></div><LanguageSwitch/><AudioGuideButton guide="storage_guardian" compact/></span>
+          <span className="storage-page-controls"><div className="storage-top-actions"><a href="https://wokwi.com/projects/481686932424365057" target="_blank" rel="noreferrer" className="storage-back">Open saved Wokwi baseline ↗</a><span className="storage-live-pill"><i /> WOKWI DIGITAL TWIN</span></div><LanguageSwitch/><AudioGuideButton guide="storage_guardian" compact/></span>
         </div>
 
         <header className="storage-hero">
           <div>
             <span className="kicker">KRISHI CONNECT 360 / STORAGE INTELLIGENCE</span>
             <h1>KRISHI <em>GUARD</em></h1>
-            <p>Monitor the microclimate around stored grain. Spot rising humidity and unusual grain-core temperature patterns before storage conditions deteriorate further.</p>
-            <div className="storage-hero-tags"><span>ESP32 sensor node</span><span>One API connection</span><span>Local alerts work offline</span></div>
+            <p>Explore a Wokwi-powered grain-store digital twin. Change virtual sensor inputs, inspect the ESP32 alarm response and send clearly labelled simulation readings into your Storage Guardian dashboard.</p>
+            <div className="storage-hero-tags"><span>Wokwi ESP32 simulation</span><span>Secure cloud bridge</span><span>Virtual sensor alerts</span></div>
           </div>
           <div className="storage-hero-art" aria-hidden="true">
             <div className="storage-art-ring" />
@@ -254,15 +243,15 @@ export function StorageGuardian() {
           <div className="storage-panel">Checking your Krishi Connect session…</div>
         ) : !session ? (
           <section className="storage-panel storage-signin">
-            <h2>Sign in to connect your storage device</h2>
-            <p>Device ownership and readings are private to your Krishi Connect account.</p>
+            <h2>Sign in to create your Wokwi demo node</h2>
+            <p>Your virtual demo nodes and simulated readings are private to your Krishi Connect account.</p>
             <Link className="button button-primary" href="/login">Sign in to continue ↗</Link>
           </section>
         ) : (
           <>
             <section className="storage-overview">
               <div className="storage-panel storage-stat">
-                <span>REGISTERED DEVICES</span><strong>{devices.length}</strong><small>Storage locations monitored</small>
+                <span>SIMULATOR NODES</span><strong>{devices.length}</strong><small>Virtual storage locations</small>
               </div>
               <div className="storage-panel storage-stat">
                 <span>LATEST CONDITION</span><strong className={`storage-level-text ${statusClass}`}>{latest?.condition_level ?? "NO DATA"}</strong><small>{latest ? `Condition index ${latest.condition_score}/100` : "Waiting for first reading"}</small>
@@ -279,11 +268,11 @@ export function StorageGuardian() {
               <div className="storage-main-column">
                 <section className="storage-panel">
                   <div className="storage-section-heading">
-                    <div><span className="kicker">YOUR HARDWARE</span><h2>Registered storage devices</h2></div>
+                    <div><span className="kicker">YOUR WOKWI SIMULATORS</span><h2>Demo storage nodes</h2></div>
                     <button className="button button-quiet" type="button" onClick={() => void refresh()} disabled={loading}>{loading ? "Refreshing…" : "↻ Refresh"}</button>
                   </div>
                   {devices.length === 0 ? (
-                    <div className="storage-empty"><strong>No storage device registered yet.</strong><p>Register the first KRISHI GUARD node. You can test it immediately using the built-in simulator.</p></div>
+                    <div className="storage-empty"><strong>No Wokwi demo node yet.</strong><p>Create a virtual KRISHI GUARD node below. You can run scenarios and send readings to this dashboard immediately.</p></div>
                   ) : (
                     <div className="storage-device-list">
                       {devices.map((device) => {
@@ -292,10 +281,10 @@ export function StorageGuardian() {
                           <div key={device.id} className={`storage-device-row ${selectedDevice === device.id ? "selected" : ""}`}>
                             <button type="button" className="storage-device-select" onClick={() => setSelectedDevice(device.id)}>
                               <span className="storage-device-icon">KG</span>
-                              <span className="storage-device-copy"><strong>{device.device_name}</strong><small>{device.device_code} · {cropLabel(device.crop_type)} · {storageLabel(device.storage_type)} · {device.location}</small><small>Last contact: {fmt(device.last_seen_at,locale)}</small></span>
+                              <span className="storage-device-copy"><strong>{device.device_name}</strong><small>{device.device_code} · {cropLabel(device.crop_type)} · {storageLabel(device.storage_type)} · {device.location}</small><small>Last simulator reading: {fmt(device.last_seen_at,locale)}</small></span>
                               <span className={`storage-level-chip ${deviceLatest?.condition_level.toLowerCase() ?? "empty"}`}>{device.is_active ? (deviceLatest?.condition_level ?? "NO DATA") : (language === "kn" ? "ನಿಷ್ಕ್ರಿಯ" : "INACTIVE")}</span>
                             </button>
-                            {device.is_active && <button type="button" className="button button-danger storage-revoke-button" onClick={() => void revokeDevice(device)} disabled={busy}>{language === "kn" ? "ಕೀ ರದ್ದು" : "Revoke key"}</button>}
+                            {device.is_active && <button type="button" className="button button-danger storage-revoke-button" onClick={() => void revokeDevice(device)} disabled={busy}>{language === "kn" ? "ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ" : "Deactivate node"}</button>}
                           </div>
                         );
                       })}
@@ -334,13 +323,13 @@ export function StorageGuardian() {
                       )}
                     </>
                   ) : (
-                    <div className="storage-empty"><strong>No readings for this device.</strong><p>Use the simulator below or connect the physical ESP32 node.</p></div>
+                    <div className="storage-empty"><strong>No readings for this device.</strong><p>Use the Wokwi demo node and send a scenario from the simulator below.</p></div>
                   )}
                   <div className="storage-table-wrap">
                     <table className="storage-table">
                       <thead><tr><th>Recorded</th><th>Core</th><th>Ambient RH</th><th>Index</th><th>Source</th></tr></thead>
                       <tbody>
-                        {selectedReadings.map((reading) => <tr key={reading.id}><td>{fmt(reading.recorded_at,locale)}</td><td>{Number(reading.grain_temperature_c).toFixed(1)}°C</td><td>{Number(reading.relative_humidity_pct).toFixed(0)}%</td><td><span className={`storage-level-chip ${reading.condition_level.toLowerCase()}`}>{reading.condition_level} · {reading.condition_score}</span></td><td>{reading.source === "simulator" ? "SIM" : "DEVICE"}</td></tr>)}
+                        {selectedReadings.map((reading) => <tr key={reading.id}><td>{fmt(reading.recorded_at,locale)}</td><td>{Number(reading.grain_temperature_c).toFixed(1)}°C</td><td>{Number(reading.relative_humidity_pct).toFixed(0)}%</td><td><span className={`storage-level-chip ${reading.condition_level.toLowerCase()}`}>{reading.condition_level} · {reading.condition_score}</span></td><td>{reading.source === "simulator" ? "SIMULATOR" : "DEVICE"}</td></tr>)}
                         {selectedReadings.length === 0 && <tr><td colSpan={5}>No readings recorded.</td></tr>}
                       </tbody>
                     </table>
@@ -350,23 +339,23 @@ export function StorageGuardian() {
 
               <aside className="storage-side-column">
                 <section className="storage-panel">
-                  <span className="kicker">ADD A HARDWARE NODE</span>
-                  <h2>Register a device</h2>
-                  <p className="storage-muted">Create a device identity and generate a one-time API key for its ESP32.</p>
+                  <span className="kicker">SIMULATION DEVICE</span>
+                  <h2>Create a Wokwi demo node</h2>
+                  <p className="storage-muted">Create a virtual storage monitor identity for Wokwi and the browser simulator. No physical ESP32, Wi-Fi credentials or device API key is needed. Complete your participant profile first if prompted.</p>
+                  <p className="storage-muted"><Link href="/workspace#operations">Open participant profile setup ↗</Link></p>
                   <form className="storage-form" onSubmit={registerDevice}>
                     <label>Device name<input value={deviceName} onChange={(event) => setDeviceName(event.target.value)} minLength={2} maxLength={80} required /></label>
                     <label>Stored crop<select value={cropType} onChange={(event) => setCropType(event.target.value)}><option value="paddy">Paddy / rice</option><option value="ragi">Ragi</option><option value="maize">Maize</option><option value="wheat">Wheat</option><option value="mixed">Mixed grain</option><option value="other">Other</option></select></label>
                     <label>Storage type<select value={storageType} onChange={(event) => setStorageType(event.target.value)}><option value="bag">Bag / sack</option><option value="bin">Small bin</option><option value="silo">Silo</option><option value="room">Storage room</option><option value="other">Other</option></select></label>
                     <label>Village / storage location<input value={location} onChange={(event) => setLocation(event.target.value)} minLength={2} maxLength={120} placeholder="Village, taluk, district" required /></label>
-                    <button className="button button-primary" type="submit" disabled={busy || !db}>{busy ? "Registering…" : "Register storage device ↗"}</button>
+                    <button className="button button-primary" type="submit" disabled={busy || !db}>{busy ? "Creating demo node…" : "Create Wokwi demo node ↗"}</button>
                   </form>
-                  {newDeviceKey && <div className="storage-key-box"><strong>Copy this device key now</strong><code>{newDeviceKey}</code><button className="button button-quiet" type="button" onClick={() => void copyDeviceKey()}>{copied ? "Copied" : "Copy device key"}</button><small>The database stores only its SHA-256 hash. If lost, revoke and generate a replacement.</small></div>}
                 </section>
 
                 <section className="storage-panel">
-                  <span className="kicker">SOFTWARE TEST BENCH</span>
-                  <h2>Sensor simulator</h2>
-                  <p className="storage-muted">Send clearly labelled test readings through the same backend used by the physical device.</p>
+                  <span className="kicker">WOKWI / SOFTWARE TEST BENCH</span>
+                  <h2>Send a simulated sensor reading</h2>
+                  <p className="storage-muted">Use the quick scenarios here or open the ESP32 circuit in Wokwi. Every reading is stored as SIMULATOR data.</p>
                   <div className="storage-scenarios">
                     <button type="button" onClick={() => { setAmbientTemp(29); setHumidity(52); setGrainTemp(30); }}>Normal</button>
                     <button type="button" onClick={() => { setAmbientTemp(30); setHumidity(70); setGrainTemp(33); }}>Humid</button>
@@ -378,6 +367,8 @@ export function StorageGuardian() {
                   <button className="button button-dark" type="button" onClick={() => void sendSimulation()} disabled={busy || !selected || !selected.is_active}>{busy ? "Sending…" : "Send simulated reading ↗"}</button>
                   <a className="button button-light" href="/krishi-guard-simulator">Open live rain & pest simulation ↗</a>
                   <small className="storage-sim-note">SIMULATED DATA · Not a physical sensor measurement</small>
+                  <a className="button button-light" href="https://wokwi.com/projects/481686932424365057" target="_blank" rel="noreferrer">Open saved Wokwi baseline ↗</a>
+                  <a className="button button-light" href="https://github.com/PSP-YN/Chakravyuha_Hackwarts/tree/feature/complete-platform/hardware/krishi-guard/wokwi-web" target="_blank" rel="noreferrer">View complete multi-sensor Wokwi source ↗</a>
                 </section>
               </aside>
             </section>
@@ -385,16 +376,16 @@ export function StorageGuardian() {
         )}
 
         <section className="storage-panel storage-howto">
-          <span className="kicker">LOW-COST HARDWARE</span><h2>One small device. One secure connection.</h2>
+          <span className="kicker">DEMO ARCHITECTURE</span><h2>Wokwi circuit → simulator bridge → Storage Guardian</h2>
           <div className="storage-howto-grid">
-            <div><strong>01 · ESP32</strong><p>Reads the sensors and sends one HTTPS telemetry request.</p></div>
+            <div><strong>01 · WOKWI ESP32</strong><p>Runs the ESP32 firmware against virtual DHT22, DS18B20, rain, PIR, insect-beam and water-contact inputs.</p></div>
             <div><strong>02 · DHT22</strong><p>Measures ambient temperature and relative humidity near the grain store.</p></div>
             <div><strong>03 · DS18B20</strong><p>Measures temperature inside a grain bag or storage core using a protected probe.</p></div>
             <div><strong>04 · RAIN SENSOR</strong><p>Analogue wetness input estimates rain exposure at the sensor mounting point; it does not independently prove roof leakage.</p></div>
             <div><strong>05 · RODENT PIR</strong><p>Detects movement in a monitored storage perimeter. It is not an insect detector or a species classifier.</p></div>
             <div><strong>06 · INSECT BEAM</strong><p>An infrared break-beam counter records trap interruptions. It does not identify insect species.</p></div>
             <div><strong>07 · WATER CONTACT</strong><p>A separate contact switch reports water at its probe location. It is not inferred from rain intensity or the modelled roof-leak path.</p></div>
-            <div><strong>08 · KRISHI CONNECT</strong><p>Stores source-labelled telemetry, calculates the grain-condition indicator and displays independent water-contact and pest events.</p></div>
+            <div><strong>08 · KRISHI CONNECT</strong><p>Receives the simulator reading through the authenticated Edge Function, calculates the condition indicator and displays SIMULATOR provenance, history and alerts.</p></div>
           </div>
           <p className="storage-disclaimer">Storage condition indicators are advisory. They do not certify grain quality, diagnose fungal contamination, measure grain moisture or replace inspection and laboratory testing. Thresholds require local crop and storage validation.</p>
         </section>

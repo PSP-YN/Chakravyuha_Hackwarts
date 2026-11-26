@@ -93,7 +93,8 @@
       "left": 520,
       "attrs": {
         "color": "yellow",
-        "label": "Insect beam-break pulse"
+        "label": "Insect beam-break pulse",
+        "key": "I"
       }
     },
     {
@@ -103,7 +104,17 @@
       "left": 520,
       "attrs": {
         "color": "blue",
-        "label": "Water ingress probe"
+        "label": "Water ingress probe",
+        "key": "W"
+      }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "dhtpullup",
+      "top": -80,
+      "left": 220,
+      "attrs": {
+        "value": "10000"
       }
     }
   ],
@@ -235,6 +246,30 @@
       []
     ],
     [
+      "esp:3V3",
+      "dhtpullup:1",
+      "red",
+      []
+    ],
+    [
+      "dhtpullup:2",
+      "dht:SDA",
+      "green",
+      []
+    ],
+    [
+      "esp:TX",
+      "$serialMonitor:RX",
+      "",
+      []
+    ],
+    [
+      "esp:RX",
+      "$serialMonitor:TX",
+      "",
+      []
+    ],
+    [
       "esp:25",
       "leak:1.l",
       "green",
@@ -247,5 +282,8 @@
       []
     ]
   ],
-  "dependencies": {}
+  "dependencies": {},
+  "serialMonitor": {
+    "display": "always"
+  }
 }

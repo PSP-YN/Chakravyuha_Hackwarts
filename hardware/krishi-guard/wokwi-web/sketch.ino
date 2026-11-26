@@ -76,22 +76,26 @@ bool validReadings(const TempAndHumidity &air, float grainC) {
          grainC >= -10.0f && grainC <= 80.0f;
 }
 
-void sensorFault() {
+void sensorFault(bool pestAlert, bool waterAlert, bool rainAlert) {
   digitalWrite(STATUS_LED, HIGH);
-  tone(BUZZER_PIN, 1200, 250);
-  Serial.println("FAULT | SENSOR_READ_ERROR | Check DHT22 and DS18B20 wiring");
+  if (waterAlert) tone(BUZZER_PIN, 1500, 250);
+  else if (pestAlert) tone(BUZZER_PIN, 1100, 180);
+  else if (rainAlert) tone(BUZZER_PIN, 700, 100);
+  else tone(BUZZER_PIN, 1200, 250);
+  Serial.printf("FAULT | SENSOR_READ_ERROR | RAIN %d%% | WATER_INGRESS %s | RODENT %s | INSECT_PULSES %lu | PEST %s\n", rainIntensityPct, waterAlert ? "ACTIVE" : "CLEAR", rodentMotionDetected ? "MOTION" : "CLEAR", (unsigned long)insectTrapPulses, pestAlert ? "ALERT" : "CLEAR");
 }
 
-void applyAlarm(const char *level, bool pestAlert, bool waterIngressAlert) {
+void applyAlarm(const char *level, bool pestAlert, bool waterIngressAlert, bool rainAlert) {
   const bool action = strcmp(level, "ACTION") == 0;
   const bool urgent = strcmp(level, "URGENT") == 0;
 
-  digitalWrite(STATUS_LED, (action || urgent || strcmp(level, "WATCH") == 0 || pestAlert || waterIngressAlert) ? HIGH : LOW);
+  digitalWrite(STATUS_LED, (action || urgent || strcmp(level, "WATCH") == 0 || pestAlert || waterIngressAlert || rainAlert) ? HIGH : LOW);
   if (urgent) tone(BUZZER_PIN, 1800, 500);
   else if (action) tone(BUZZER_PIN, 1200, 180);
   else if (strcmp(level, "WATCH") == 0) tone(BUZZER_PIN, 800, 90);
   else if (waterIngressAlert) tone(BUZZER_PIN, 1500, 250);
   else if (pestAlert) tone(BUZZER_PIN, 1100, 180);
+  else if (rainAlert) tone(BUZZER_PIN, 700, 100);
   else noTone(BUZZER_PIN);
 }
 
@@ -125,17 +129,7 @@ void loop() {
   }
   lastSampleMs = now;
 
-  const TempAndHumidity air = dht.getTempAndHumidity();
-  grainProbe.requestTemperatures();
-  const float grainC = grainProbe.getTempCByIndex(0);
-
-  if (!validReadings(air, grainC)) {
-    previousGrainC = NAN;  // Do not compare against stale data after a sensor fault.
-    sensorFault();
-    return;
-  }
-
-  const float deltaC = grainC - air.temperature;
+  // Read all independent GPIO/ADC channels before climate validation.
   rainIntensityPct = constrain(map(analogRead(RAIN_SENSOR_PIN), 4095, 0, 0, 100), 0, 100);
   rodentMotionDetected = digitalRead(RODENT_PIR_PIN) == HIGH;
   waterIngressDetected = digitalRead(WATER_INGRESS_PIN) == LOW;
@@ -148,19 +142,30 @@ void loop() {
   const bool pestAlert = rodentMotionDetected || pulseSnapshot > lastAlertedInsectPulses || rodentMotionEvents > lastAlertedRodentEvents;
   lastAlertedInsectPulses = pulseSnapshot;
   lastAlertedRodentEvents = rodentMotionEvents;
+
+  const TempAndHumidity air = dht.getTempAndHumidity();
+  grainProbe.requestTemperatures();
+  const float grainC = grainProbe.getTempCByIndex(0);
+  if (!validReadings(air, grainC)) {
+    previousGrainC = NAN;  // Do not compare against stale data after a sensor fault.
+    sensorFault(pestAlert, waterIngressDetected, rainIntensityPct >= 25);
+    return;
+  }
+
+  const float deltaC = grainC - air.temperature;
   const float riseC = isnan(previousGrainC) ? NAN : grainC - previousGrainC;
   const Assessment result = assessStorage(air.humidity, deltaC, riseC);
-  applyAlarm(result.level, pestAlert, waterIngressDetected);
+  applyAlarm(result.level, pestAlert, waterIngressDetected, rainIntensityPct >= 25);
 
   Serial.printf("AIR %.1f C | RH %.1f %% | GRAIN %.1f C | DELTA %.1f C | RISE ",
                 air.temperature, air.humidity, grainC, deltaC);
   if (isnan(riseC)) Serial.print("N/A");
   else Serial.printf("%.1f C", riseC);
-  Serial.printf(" | SCORE %d/100 | STATUS %s | RAIN %d%% | WATER_INGRESS %s | RODENT %s | INSECT_PULSES %lu | PEST %s\n",
+  Serial.printf(" | SCORE %d/100 | STATUS %s | RAIN %d%% | WATER_INGRESS %s | RODENT %s | INSECT_PULSES %lu | PEST %s | RAIN_ALERT %s\n",
                 result.score, result.level, rainIntensityPct,
                 waterIngressDetected ? "ACTIVE" : "CLEAR",
                 rodentMotionDetected ? "MOTION" : "CLEAR",
-                (unsigned long)pulseSnapshot, pestAlert ? "ALERT" : "CLEAR");
+                (unsigned long)pulseSnapshot, pestAlert ? "ALERT" : "CLEAR", rainIntensityPct >= 25 ? "ACTIVE" : "CLEAR");
   Serial.printf("APP_PAYLOAD {\"ambient_temperature_c\":%.1f,\"relative_humidity_pct\":%.1f,\"grain_temperature_c\":%.1f,\"temperature_delta_c\":%.1f,\"risk_score\":%d,\"risk_level\":\"%s\",\"rain_intensity_pct\":%d,\"water_ingress_detected\":%d,\"rodent_motion_events\":%d,\"insect_trap_pulses\":%lu}\n",
                 air.temperature, air.humidity, grainC, deltaC, result.score, result.level,
                 rainIntensityPct, waterIngressDetected ? 1 : 0, (int)rodentMotionEvents, (unsigned long)pulseSnapshot);

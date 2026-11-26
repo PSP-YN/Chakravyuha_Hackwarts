@@ -145,17 +145,18 @@ int assessConditionScore() {
   return min(score, 100);
 }
 
-void updateLocalAlarm(int score, bool pestAlert, bool waterIngressAlert, bool sensorFaultAlert = false) {
+void updateLocalAlarm(int score, bool pestAlert, bool waterIngressAlert, bool sensorFaultAlert = false, bool rainAlert = false) {
   const bool urgent = score >= 75;
   const bool action = score >= 50;
   const bool watch = score >= 25;
-  digitalWrite(STATUS_LED, (watch || pestAlert || waterIngressAlert || sensorFaultAlert) ? HIGH : LOW);
+  digitalWrite(STATUS_LED, (watch || pestAlert || waterIngressAlert || sensorFaultAlert || rainAlert) ? HIGH : LOW);
   if (urgent) tone(BUZZER_PIN, 1800, 350);
   else if (action) tone(BUZZER_PIN, 1300, 220);
   else if (watch) tone(BUZZER_PIN, 900, 100);
   else if (waterIngressAlert) tone(BUZZER_PIN, 1500, 250);
   else if (sensorFaultAlert) tone(BUZZER_PIN, 1200, 150);
   else if (pestAlert) tone(BUZZER_PIN, 1100, 180);
+  else if (rainAlert) tone(BUZZER_PIN, 700, 100);
   else noTone(BUZZER_PIN);
 }
 
@@ -263,9 +264,9 @@ void loop() {
     // Break the trend chain across a sensor fault; never compare against stale data.
     // Preserve independent water-ingress and pest alarms while climate data is unavailable.
     previousGrainTemperatureC = NAN;
-    updateLocalAlarm(0, pestAlert, waterIngressDetected, true);
-    Serial.printf("SENSOR FAULT - check DHT22 / DS18B20 wiring | RAIN %d%% | WATER_INGRESS %s | RODENT %s | INSECT_PULSES %lu | PEST %s\n",
-                  rainIntensityPct,
+    updateLocalAlarm(0, pestAlert, waterIngressDetected, true, rainIntensityPct >= 25);
+    Serial.printf("SENSOR FAULT - check DHT22 / DS18B20 wiring | RAIN %d%% (%s) | WATER_INGRESS %s | RODENT %s | INSECT_PULSES %lu | PEST %s\n",
+                  rainIntensityPct, rainIntensityPct >= 25 ? "WET" : "DRY",
                   waterIngressDetected ? "ACTIVE" : "CLEAR",
                   rodentMotionDetected ? "MOTION" : "CLEAR",
                   (unsigned long)pulseSnapshot,
@@ -275,19 +276,26 @@ void loop() {
 
   const float delta = grainTemperatureC - ambientTemperatureC;
   const int conditionScore = assessConditionScore();
-  updateLocalAlarm(conditionScore, pestAlert, waterIngressDetected);
+  updateLocalAlarm(conditionScore, pestAlert, waterIngressDetected, false, rainIntensityPct >= 25);
   const float trend = isnan(previousGrainTemperatureC)
       ? 0.0
       : grainTemperatureC - previousGrainTemperatureC;
   const char *conditionLevel = conditionScore >= 75 ? "URGENT"
       : conditionScore >= 50 ? "ACTION"
       : conditionScore >= 25 ? "WATCH" : "NORMAL";
-  Serial.printf("AIR %.1f C | RH %.1f %% | GRAIN %.1f C | DELTA %.1f C | TREND %.1f C | SCORE %d | %s | RAIN %d%% | WATER_INGRESS %s | RODENT %s | INSECT_PULSES %lu | PEST %s\n",
+  Serial.printf("AIR %.1f C | RH %.1f %% | GRAIN %.1f C | DELTA %.1f C | TREND %.1f C | SCORE %d | %s | RAIN %d%% (%s) | WATER_INGRESS %s | RODENT %s\n",
                 ambientTemperatureC, relativeHumidityPct, grainTemperatureC, delta, trend,
-                conditionScore, conditionLevel, rainIntensityPct,
-                waterIngressDetected ? "ACTIVE" : "CLEAR",
-                rodentMotionDetected ? "MOTION" : "CLEAR",
-                (unsigned long)pulseSnapshot, pestAlert ? "ALERT" : "CLEAR");
+                conditionScore, conditionLevel, rainIntensityPct, rainIntensityPct >= 25 ? "WET" : "DRY",
+                waterIngressDetected ? "ACTIVE" : "CLEAR", rodentMotionDetected ? "MOTION" : "CLEAR");
+  Serial.printf("INSECT_PULSES %lu | PEST %s | RAIN_ALERT %s\n",
+                (unsigned long)pulseSnapshot, pestAlert ? "ALERT" : "CLEAR", rainIntensityPct >= 25 ? "ACTIVE" : "CLEAR");
+#if defined(KRISHI_GUARD_WOKWI)
+  // Public Wokwi simulation bridge: copy this serial JSON into the website importer.
+  Serial.printf("APP_PAYLOAD {\"ambient_temperature_c\":%.1f,\"relative_humidity_pct\":%.1f,\"grain_temperature_c\":%.1f,\"temperature_delta_c\":%.1f,\"risk_score\":%d,\"risk_level\":\"%s\",\"rain_intensity_pct\":%d,\"water_ingress_detected\":%d,\"rodent_motion_events\":%lu,\"insect_trap_pulses\":%lu}\n",
+                ambientTemperatureC, relativeHumidityPct, grainTemperatureC, delta, conditionScore,
+                conditionLevel, rainIntensityPct, waterIngressDetected ? 1 : 0,
+                (unsigned long)rodentMotionEvents, (unsigned long)pulseSnapshot);
+#endif
   previousGrainTemperatureC = grainTemperatureC;
 
   if (now - lastSend >= SEND_INTERVAL_MS) {

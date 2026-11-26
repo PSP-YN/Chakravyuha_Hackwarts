@@ -153,6 +153,48 @@ async function registerDevice(
   }, 201);
 }
 
+async function registerSimulatorDevice(
+  admin: ReturnType<typeof makeAdmin>,
+  userId: string,
+  body: Record<string, unknown>,
+) {
+  if (!(await profileIsComplete(admin, userId))) {
+    return respond({ error: "Complete your participant profile before creating a Wokwi demo node." }, 403);
+  }
+  const deviceName = String(body.device_name ?? "KRISHI GUARD Wokwi demo").trim();
+  const cropType = String(body.crop_type ?? "paddy");
+  const storageType = String(body.storage_type ?? "bag");
+  const location = String(body.location ?? "").trim();
+  if (deviceName.length < 2 || deviceName.length > 80 || location.length < 2 || location.length > 120) {
+    return respond({ error: "Enter a demo node name and storage location." }, 400);
+  }
+  if (!["paddy", "ragi", "maize", "wheat", "mixed", "other"].includes(cropType)) {
+    return respond({ error: "Unsupported crop type." }, 400);
+  }
+  if (!["bag", "bin", "silo", "room", "other"].includes(storageType)) {
+    return respond({ error: "Unsupported storage type." }, 400);
+  }
+  const deviceCode = "SIM-" + crypto.randomUUID().slice(0, 8).toUpperCase();
+  const { data: device, error } = await admin
+    .from("storage_guardian_devices")
+    .insert({
+      owner_id: userId,
+      device_code: deviceCode,
+      device_name: deviceName,
+      crop_type: cropType,
+      storage_type: storageType,
+      location,
+    })
+    .select("id,device_code,device_name,crop_type,storage_type,location,is_active,created_at,last_seen_at")
+    .single();
+  if (error || !device) return respond({ error: "Wokwi demo node could not be created." }, 500);
+  return respond({
+    device,
+    mode: "simulator",
+    message: "Wokwi demo node created. It accepts signed-in simulator readings and does not require a physical ESP32 or device API key.",
+  }, 201);
+}
+
 async function revokeDevice(
   admin: ReturnType<typeof makeAdmin>,
   userId: string,
@@ -361,7 +403,7 @@ Deno.serve(async (req: Request) => {
     }
     const action = String(body.action ?? "");
 
-    if (action === "register" || action === "simulate" || action === "revoke") {
+    if (action === "register" || action === "register_simulator" || action === "simulate" || action === "revoke") {
       const user = await authenticatedUser(admin, req);
       if (!user) {
         return respond({ error: "Sign in to use Storage Guardian." }, 401);
@@ -369,6 +411,9 @@ Deno.serve(async (req: Request) => {
 
       if (action === "register") {
         return await registerDevice(admin, user.id, body);
+      }
+      if (action === "register_simulator") {
+        return await registerSimulatorDevice(admin, user.id, body);
       }
       if (action === "revoke") {
         return await revokeDevice(admin, user.id, body);

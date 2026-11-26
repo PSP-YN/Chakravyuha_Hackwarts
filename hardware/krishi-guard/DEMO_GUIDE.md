@@ -1,92 +1,136 @@
-# KRISHI GUARD — problem statement, solution and live demo
+# KRISHI GUARD — simulation-first demo guide
 
-## Problem statement
+## What the demo proves
 
-Small and medium grain stores often rely on periodic visual inspection. That can miss changing storage microclimate conditions between inspections. A low-cost, always-on warning node can make ambient humidity and grain-core temperature trends visible sooner.
+KRISHI GUARD demonstrates how a grain store can monitor storage-air temperature, relative humidity and grain-core temperature, then surface transparent advisory alerts inside KRISHI CONNECT 360.
 
-The prototype addresses a narrow, testable problem: **how can a farmer monitor two useful storage-condition signals at low cost and receive a warning through the existing Krishi Connect 360 application?**
+**This is a simulation-first prototype.** There is no physical ESP32 in this demo. The ESP32, sensors, LED and buzzer are virtual components in Wokwi. Browser-generated scenarios are also synthetic and are always stored with **source = simulator**.
 
-It does not claim to measure grain moisture, detect mould, certify grain quality or predict spoilage.
+The prototype does not measure grain moisture, identify mould, certify grain quality, identify pest species or predict spoilage. The condition index is an explainable heuristic, not a crop-independent safety threshold.
 
-## Proposed solution
+## End-to-end architecture
 
-KRISHI GUARD is an ESP32-based grain-storage condition monitor:
+~~~text
+Wokwi browser simulator
+  ├─ Virtual ESP32 DevKit
+  ├─ DHT22: ambient temperature + RH
+  ├─ DS18B20: grain-core temperature
+  ├─ Rain potentiometer: plate wetness / ADC
+  ├─ PIR: perimeter movement event
+  ├─ IR break-beam: insect-trap pulse count
+  ├─ Water-contact switch: independent contact input
+  └─ Virtual LED + buzzer: local alarm logic
+             |
+             | Serial Monitor: APP_PAYLOAD {...}
+             v
+Krishi Guard web simulator
+  ├─ Validates and parses the Wokwi JSON
+  ├─ Replays values in the digital-twin UI
+  └─ Sends the reading as a signed-in simulator action
+             |
+             | HTTPS + Supabase user session
+             v
+Supabase Edge Function: storage-guardian
+  ├─ Authenticates the signed-in owner
+  ├─ Verifies demo-node ownership and active state
+  ├─ Validates sensor ranges and event counters
+  ├─ Calculates the storage-condition index server-side
+  └─ Stores source=simulator + provenance/context
+             |
+             v
+Storage Guardian dashboard
+  ├─ Latest condition + reasons
+  ├─ Ambient / grain temperature and RH
+  ├─ Rain, roof-ingress assumption, water contact and pest events
+  ├─ Timestamped history with SIMULATOR source label
+  └─ Auto-refresh and manual refresh
+~~~
 
-- DHT22: air temperature and relative humidity in the storage space.
-- DS18B20 waterproof probe: temperature inside the grain mass.
-- ESP32: samples sensors, calculates grain-to-air temperature difference and drives a local LED/buzzer advisory.
-- Krishi Connect 360: receives readings through one HTTPS Edge Function, calculates a transparent condition index, stores history and displays condition reasons.
+The website loads the full multi-sensor circuit and compiled ESP32 firmware into an embedded Wokwi simulator using Wokwi's experimental embed API. The API is not an officially supported production integration, so the website also provides a manual APP_PAYLOAD import path. The manual path is the reliable fallback and keeps the public Wokwi project free of credentials.
 
-### Single application connection
+## 1. Open and run the Wokwi circuit
 
-`POST https://zimgkzfahqmenqlfzyqi.supabase.co/functions/v1/storage-guardian`
+1. Open the Krishi Guard simulator page. Its embedded Wokwi instance loads the full multi-sensor diagram and compiled ESP32 firmware from the repository's public assets.
+2. The complete source is in **wokwi-web/sketch.ino**, **wokwi-web/diagram.json** and **wokwi-web/libraries.txt**. It includes DHT22, DS18B20, rain-plate wetness, PIR movement, IR beam-break, water contact, LED and buzzer.
+3. Change the climate and water-contact controls above the embed. The website rebuilds the virtual circuit inputs and restarts the MCU with those values.
+4. Trigger PIR motion and insect beam interruptions directly inside the Wokwi circuit.
+5. Inspect the virtual LED and buzzer. The firmware prints an **APP_PAYLOAD** JSON line containing climate and event-context fields.
+6. The embed's serial stream is experimental. If it does not display output, use the Wokwi toolbar's Serial Monitor or open the public baseline project in a separate tab and use the website's manual APP_PAYLOAD importer. The currently published public link is an older climate-only baseline; the embedded instance uses the expanded local circuit.
+7. To update the public Wokwi project itself, sign in to Wokwi, replace its sketch and diagram with the repository files, confirm the required libraries, then save. The Wokwi account owner must perform this save; the public link is read-only when signed out.
 
-The device sends JSON containing `ambient_temperature_c`, `relative_humidity_pct` and `grain_temperature_c`, authenticated with its own one-time device key. The service stores only the SHA-256 hash of that key. Never place a Supabase service-role key in firmware.
+The full Wokwi sketch compiles as a separate PlatformIO project and its diagram passes Wokwi lint. The embedded simulator runs the compiled firmware, but serial output delivery through the experimental embed API is not guaranteed.
 
-## Circuit and software
+## 2. Create the website demo node
 
-- Board: ESP32 DevKit C V4
-- DHT22 data: GPIO 15
-- DS18B20 data: GPIO 4, with 4.7 kΩ pull-up to 3.3 V
-- Status LED: GPIO 2, with 220 Ω series resistor
-- Buzzer: GPIO 18
-- Libraries: DHT sensor library for ESPx, OneWire, DallasTemperature
+1. Open [Krishi Connect 360](https://krishi-connect-360-lby3wgxsf-pspyn.vercel.app/workspace/storage-guardian).
+2. Sign in and complete the participant profile if the app asks.
+3. Under **Create a Wokwi demo node**, enter a name and storage location, choose crop and storage type, then create it.
+4. This creates a virtual node identity with a **SIM-** code. It does not create a physical device credential and does not require Wi-Fi details or an ESP32 API key.
+5. Select the new node in the device list.
 
-The Wokwi circuit is in `hardware/krishi-guard/wokwi-web/`. The production firmware and PlatformIO project are in the parent folder.
+## 3. Send actual Wokwi serial values to the website
 
-## Demo workflow
+1. Open [KRISHI GUARD simulator](https://krishi-connect-360-lby3wgxsf-pspyn.vercel.app/krishi-guard-simulator).
+2. Scroll to **Import an ESP32 simulation reading**.
+3. Paste the full APP_PAYLOAD JSON line from the embedded or external Wokwi Serial Monitor.
+4. Select **Import Wokwi reading → dashboard**.
+5. The browser validates the JSON and sensor ranges, updates the digital-twin display, then sends the reading to the authenticated Edge Function.
+6. Return to Storage Guardian. The new row should appear with source **SIMULATOR** and the matching timestamp, values and condition reasons.
 
-### A. Hardware simulation in Wokwi
+If you do not have Wokwi open, use **Run full demo → dashboard** in the simulator. It applies the combined storm/pest scenario and sends a deterministic test reading to the selected demo node in one action.
 
-1. Open the saved circuit: https://wokwi.com/projects/481686932424365057.
-2. The project already contains the ESP32, DHT22, DS18B20, pull-up resistor, LED, buzzer and required libraries.
-3. Start the simulation and open the serial monitor. To recreate it from source instead, use `wokwi-web/sketch.ino`, `wokwi-web/diagram.json` and `wokwi-web/libraries.txt`.
-4. In Library Manager add (only when recreating from source):
-   - DHT sensor library for ESPx
-   - OneWire
-   - DallasTemperature
-5. Start the simulation and open the serial monitor.
-6. Change the DHT22 and DS18B20 attributes in `diagram.json`, then restart the simulation to replay the scenarios below.
-7. Sign in to Wokwi and save the project under your own account if you need a persistent share link. Do not add real device credentials to a public project.
+## 4. Recommended live presentation sequence
 
-### B. Krishi Connect 360 integration demo
+| Step | Presenter action | Expected result |
+|---|---|---|
+| 1 | Select **Clear day** | Normal baseline; rain plate dry; no pest events |
+| 2 | Select **Rain shower** | Rain ADC and humidity rise; no roof leak is inferred |
+| 3 | Select **Heavy rain + leak** | High RH and grain/air temperature delta; urgent advisory |
+| 4 | Trigger **Water-contact probe** | Independent water-contact alert |
+| 5 | Trigger **Rodent movement** | PIR movement event and pest-channel update |
+| 6 | Trigger **Insect trap** | IR interruption count and pest-channel update |
+| 7 | Toggle DHT22 / DS18B20 disconnect | Sensor fault shown; invalid climate readings are not uploaded |
+| 8 | Select **Run full demo → dashboard** | Combined scenario saved to Storage Guardian |
+| 9 | Paste Wokwi APP_PAYLOAD | The exact MCU simulation reading is imported and saved as SIMULATOR |
+| 10 | Return to Storage Guardian | Show latest condition, reasons, event context and history |
 
-1. Sign in to Krishi Connect 360 and open Workspace → Storage Guardian.
-2. Register a demo device (for example, `KG-WOKWI-DEMO`) and select the crop and storage location.
-3. Use the built-in Sensor Simulator on the same page to send the matching scenario to the authenticated Edge Function.
-4. Show the resulting condition index, reasons, history table and SIM source label.
-5. Explain that the Wokwi board demonstrates sensor acquisition and local alarm logic, while the app's simulator sends explicitly labelled test data through the same backend used by physical ESP32 devices.
+## 5. Sensor semantics and limitations
 
-The Wokwi project is deliberately configured without a real device key. Its serial monitor prints an `APP_PAYLOAD` JSON line so you can mirror the exact sensor values in the Krishi Connect 360 Sensor Simulator. This keeps the public Wokwi project free of credentials. The physical ESP32 uses the single authenticated HTTPS connection described above. The browser's public gateway may monitor outbound traffic; do not send private credentials through it.
+- DHT22 measures air temperature and relative humidity in the virtual storage space.
+- DS18B20 measures virtual grain-core temperature.
+- Rain potentiometer models rain-plate wetness at its mounting point. It does not prove a roof leak.
+- Roof-ingress path is a separate model assumption that can raise indoor humidity over time.
+- Water-contact switch is an independent contact input; it is not inferred from rain intensity.
+- PIR reports movement in its field of view; it does not identify rodents or other species.
+- IR beam-break counts interruptions; it does not identify insects or prove every pulse is an insect.
+- LED and buzzer outputs are local virtual MCU outputs.
+- Every website reading created through this demo is marked **SIMULATOR**; it must not be described as a physical measurement.
 
-## Reproducible scenarios
+## 6. Reproducible climate examples
 
-| Scenario | Ambient °C | RH % | Grain °C | Grain − air | Expected local state |
+| Scenario | Ambient °C | RH % | Grain °C | Grain − air | Expected condition |
 |---|---:|---:|---:|---:|---|
 | Normal | 30 | 55 | 30 | 0 | NORMAL |
 | Watch | 30 | 77 | 34 | 4 | WATCH |
 | Urgent hotspot | 29 | 82 | 38 | 9 | URGENT |
 
-These are demonstration thresholds, not crop-independent safety limits. Validate them against reference instruments and local storage conditions before field use.
+These are demonstration inputs, not field-validated thresholds. A high condition score indicates configured triggers, not confirmed spoilage.
 
-### Expected app-side examples
+## 7. Local engineering checks
 
-- Normal: low condition score and no active configured trigger.
-- Watch: humidity and/or grain-to-air temperature difference raises the indicator.
-- Urgent hotspot: high humidity plus a large temperature difference raises the indicator and displays the contributing reasons.
+From the repository root:
 
-The app labels these readings as SIM. Physical firmware readings are labelled DEVICE.
+~~~bash
+npm run typecheck
+npm test
+npm run build
+pio run -d hardware/krishi-guard -e wokwi
+pio run -d hardware/krishi-guard/wokwi-web
+wokwi-cli lint hardware/krishi-guard/wokwi-web
+~~~
 
-## Research and impact evaluation
+The Wokwi CLI's headless scenario runner requires a WOKWI_CLI_TOKEN from the Wokwi CI dashboard. Diagram lint and PlatformIO compilation do not require this token. The public Wokwi project can be run manually in the browser; saving the expanded multi-sensor source requires the project owner's Wokwi sign-in.
 
-For a credible impact claim, compare stores or storage containers with and without the monitor over the same crop and storage period. Record ambient RH, grain-core temperature, inspection findings, grain moisture measured with a reference meter, mass loss, visible spoilage observations, and farmer response time. Use replicates and do not infer reduced spoilage from sensor alerts alone.
+## 8. Future physical deployment (not part of this demo)
 
-## Physical deployment checklist
-
-- Verify DHT22 and DS18B20 readings against reference instruments.
-- Place the DHT22 in ventilated headspace, protected from direct water and dust.
-- Insert the DS18B20 probe into the grain mass without damaging bags or containers.
-- Provision a unique device key privately in an untracked `secrets.h`.
-- Enable telemetry only after registering the device.
-- Use TLS certificate validation on physical hardware; the Wokwi-only TLS bypass must never be used on the physical node.
-- Test Wi-Fi loss, sensor disconnection, power cycling and invalid readings.
+A physical deployment would require an ESP32 DevKit, DHT22, DS18B20, rain sensor, PIR, IR beam-break, water-contact switch, LED, buzzer, suitable resistors, enclosure and power supply. It also requires private device-key provisioning, TLS validation, sensor calibration and bench tests. Do not claim physical flashing, physical sensor validation or field readiness for this simulation-only demonstration.
