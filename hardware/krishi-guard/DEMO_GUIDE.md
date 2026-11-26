@@ -61,7 +61,7 @@ The full Wokwi sketch compiles as a separate PlatformIO project and its diagram 
 
 ## 2. Create the website demo node
 
-1. Open [Krishi Connect 360](https://krishi-connect-360-lby3wgxsf-pspyn.vercel.app/workspace/storage-guardian).
+1. Open [Krishi Connect 360](https://krishi-connect-360-git-feature-complete-platform-pspyn.vercel.app/workspace/storage-guardian).
 2. Sign in and complete the participant profile if the app asks.
 3. Under **Create a Wokwi demo node**, enter a name and storage location, choose crop and storage type, then create it.
 4. This creates a virtual node identity with a **SIM-** code. It does not create a physical device credential and does not require Wi-Fi details or an ESP32 API key.
@@ -69,7 +69,7 @@ The full Wokwi sketch compiles as a separate PlatformIO project and its diagram 
 
 ## 3. Send actual Wokwi serial values to the website
 
-1. Open [KRISHI GUARD simulator](https://krishi-connect-360-lby3wgxsf-pspyn.vercel.app/krishi-guard-simulator).
+1. Open [KRISHI GUARD simulator](https://krishi-connect-360-git-feature-complete-platform-pspyn.vercel.app/krishi-guard-simulator).
 2. Scroll to **Import an ESP32 simulation reading**.
 3. Paste the full APP_PAYLOAD JSON line from the embedded or external Wokwi Serial Monitor.
 4. Select **Import Wokwi reading → dashboard**.
