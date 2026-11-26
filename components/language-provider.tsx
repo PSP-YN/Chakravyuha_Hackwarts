@@ -6,17 +6,33 @@ import { getSupabase } from "@/lib/supabase/client";
 
 type Language = "en" | "kn";
 type LanguageContextValue = { language: Language; setLanguage: (language: Language) => void };
-const LanguageContext = createContext<LanguageContextValue>({ language: "en", setLanguage: () => {} });
+const LanguageContext = createContext<LanguageContextValue>({ language: "kn", setLanguage: () => {} });
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>("en");
+  const [language, setLanguageState] = useState<Language>("kn");
   useEffect(() => {
-    const saved = window.localStorage.getItem("krishi-language");
-    if (saved === "kn" || saved === "en") { setLanguageState(saved); document.documentElement.lang = saved; }
+    // One-time language migration: this release makes Kannada the app default
+    // while preserving the user's ability to switch back to English.
+    const languageVersion = "2";
+    const migrateToKannada = window.localStorage.getItem("krishi-language-version") !== languageVersion;
+    if (migrateToKannada) {
+      window.localStorage.setItem("krishi-language-version", languageVersion);
+      window.localStorage.setItem("krishi-language", "kn");
+      setLanguageState("kn");
+      document.documentElement.lang = "kn";
+    } else {
+      const saved = window.localStorage.getItem("krishi-language");
+      if (saved === "kn" || saved === "en") { setLanguageState(saved); document.documentElement.lang = saved; }
+      else { window.localStorage.setItem("krishi-language", "kn"); document.documentElement.lang = "kn"; }
+    }
     const db = getSupabase();
     if (!db) return;
     let alive = true;
     const loadProfileLanguage = async (userId: string) => {
+      if (migrateToKannada) {
+        await db.from("user_profiles").update({ preferred_language: "kn" }).eq("user_id", userId);
+        return;
+      }
       const { data, error } = await db.from("user_profiles").select("preferred_language").eq("user_id", userId).maybeSingle();
       if (!alive || error) return;
       const preferred = data?.preferred_language;
@@ -38,6 +54,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const setLanguage = (next: Language) => {
     setLanguageState(next);
     window.localStorage.setItem("krishi-language", next);
+    window.localStorage.setItem("krishi-language-version", "2");
     document.documentElement.lang = next;
     const db = getSupabase();
     if (db) void db.auth.getUser().then(({ data }) => {
@@ -241,6 +258,10 @@ function translateText(value: string, language: Language) {
   if (latest) return leading + "ಇತ್ತೀಚಿನ ವರದಿ ದಿನಾಂಕ: " + latest[1] + trailing;
   const contact = core.match(/^Last contact: (.+)$/);
   if (contact) return leading + "ಕೊನೆಯ ಸಂಪರ್ಕ: " + (kn[contact[1]] ?? contact[1]) + trailing;
+  const adcRaw = core.match(/^(GPIO\d+ · )?ADC raw (\d+\/\d+)$/);
+  if (adcRaw) return leading + (adcRaw[1] ?? "") + "ADC ಕಚ್ಚಾ ಮೌಲ್ಯ " + adcRaw[2] + trailing;
+  const waterAlert = core.match(/^(Climate fault is active\. )?Water-contact input: (ACTIVE|CLEAR)\. Pest and water alerts are independent of the grain-condition score\.$/);
+  if (waterAlert) return leading + (waterAlert[1] ? "ಹವಾಮಾನ ಸಂವೇದಕ ದೋಷ ಸಕ್ರಿಯವಾಗಿದೆ. " : "") + "ನೀರಿನ ಸಂಪರ್ಕ ಇನ್‌ಪುಟ್: " + (waterAlert[2] === "ACTIVE" ? "ಸಕ್ರಿಯ" : "ಸ್ಪಷ್ಟ") + ". ಕೀಟ ಮತ್ತು ನೀರಿನ ಎಚ್ಚರಿಕೆಗಳು ಧಾನ್ಯ ಸ್ಥಿತಿ ಅಂಕದಿಂದ ಪ್ರತ್ಯೇಕವಾಗಿವೆ." + trailing;
   const index = core.match(/^Condition index (\d+)\/100$/);
   if (index) return leading + `ಸ್ಥಿತಿ ಸೂಚ್ಯಂಕ ${index[1]}/100` + trailing;
   const samples = core.match(/^(\d+) samples saved in this browser$/);

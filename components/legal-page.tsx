@@ -77,7 +77,7 @@ export function LegalPage({ kind }: { kind: "privacy" | "terms" }) {
   const alternate = kind === "privacy" ? "/terms" : "/privacy";
   return <main className="legal-page">
     <header><a href="/" className="landing-brand"><img src="/krishi-connect-logo.png" alt="Krishi Connect 360"/><span><b>KRISHI CONNECT 360</b><small>{language==="kn"?"ಕೃಷಿ ಆರ್ಥಿಕ ಜಾಲ":"FARM ECONOMY NETWORK"}</small></span></a><div><LanguageSwitch/><a className="landing-login" href="/workspace">{language==="kn"?"ಕಾರ್ಯಸ್ಥಳ":"Workspace"}</a></div></header>
-    <article><a href="/" className="legal-back">← {language==="kn"?"ಮುಖಪುಟ":"Home"}</a><span className="landing-section-heading"><span>KRISHI CONNECT 360 / PILOT</span></span><h1>{data.title}</h1><p className="legal-intro">{data.intro}</p>
+    <article><a href="/" className="legal-back">← {language==="kn"?"ಮುಖಪುಟ":"Home"}</a><span className="landing-section-heading"><span>KRISHI CONNECT 360 / ಪೈಲಟ್</span></span><h1>{data.title}</h1><p className="legal-intro">{data.intro}</p>
       {data.sections.map(([heading,body])=><section key={heading}><h2>{heading}</h2><p>{body}</p></section>)}
       <p className="legal-caveat">{data.caveat}</p><a className="landing-secondary" href={alternate}>{data.terms} ↗</a>
     </article>
