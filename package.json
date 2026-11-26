@@ -8,7 +8,7 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "test": "node --test tests/domain.test.cjs",
-    "sync:krishi-wokwi": "node scripts/sync-krishi-wokwi.mjs"
+    "build:krishi-wokwi": "pio run -d hardware/krishi-guard/wokwi-web -e esp32dev"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.58.0",

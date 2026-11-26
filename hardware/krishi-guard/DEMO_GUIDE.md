@@ -46,19 +46,18 @@ Storage Guardian dashboard
   └─ Auto-refresh and manual refresh
 ~~~
 
-The website loads the full multi-sensor circuit and compiled ESP32 firmware into an embedded Wokwi simulator using Wokwi's experimental embed API. The API is not an officially supported production integration, so the website also provides a manual APP_PAYLOAD import path. The manual path is the reliable fallback and keeps the public Wokwi project free of credentials.
+The website embeds the saved public Wokwi project using Wokwi's standard project embed. The published project is currently a climate-sensor baseline. The repository also contains a complete multi-sensor Wokwi source project that compiles locally; the Wokwi project owner must sign in and save those files before they appear in the public embed. The website's manual APP_PAYLOAD import path connects Wokwi readings to the authenticated Storage Guardian workflow.
 
 ## 1. Open and run the Wokwi circuit
 
-1. Open the Krishi Guard simulator page. Its embedded Wokwi instance loads the full multi-sensor diagram and compiled ESP32 firmware from the repository's public assets.
+1. Open the Krishi Guard simulator page. The embedded Wokwi project runs the currently published climate-sensor baseline.
 2. The complete source is in **wokwi-web/sketch.ino**, **wokwi-web/diagram.json** and **wokwi-web/libraries.txt**. It includes DHT22, DS18B20, rain-plate wetness, PIR movement, IR beam-break, water contact, LED and buzzer.
-3. Change the climate and water-contact controls above the embed. The website rebuilds the virtual circuit inputs and restarts the MCU with those values.
-4. Trigger PIR motion and insect beam interruptions directly inside the Wokwi circuit.
-5. Inspect the virtual LED and buzzer. The firmware prints an **APP_PAYLOAD** JSON line containing climate and event-context fields.
-6. The embed's serial stream is experimental. If it does not display output, use the Wokwi toolbar's Serial Monitor or open the public baseline project in a separate tab and use the website's manual APP_PAYLOAD importer. The currently published public link is an older climate-only baseline; the embedded instance uses the expanded local circuit.
-7. To update the public Wokwi project itself, sign in to Wokwi, replace its sketch and diagram with the repository files, confirm the required libraries, then save. The Wokwi account owner must perform this save; the public link is read-only when signed out.
+3. To publish the expanded circuit, sign in to Wokwi, replace the public project's **sketch.ino** and **diagram.json** with the repository files, confirm the required libraries, then save.
+4. The website digital twin independently provides rain, roof-leak, pest, water-contact and sensor-fault scenarios. These controls are not wired into the public baseline circuit until its owner saves the expanded diagram.
+5. Inspect the virtual LED and buzzer in Wokwi. The complete firmware prints an **APP_PAYLOAD** JSON line containing climate and event-context fields.
+6. Copy the APP_PAYLOAD line from Wokwi Serial Monitor and paste it into the website's manual importer. The website validates it and sends it to Storage Guardian when a signed-in demo node is selected.
 
-The full Wokwi sketch compiles as a separate PlatformIO project and its diagram passes Wokwi lint. The embedded simulator runs the compiled firmware, but serial output delivery through the experimental embed API is not guaranteed.
+The full Wokwi sketch compiles as a separate PlatformIO project and its diagram passes Wokwi lint. The standard project embed works on the deployed website; the public circuit remains climate-only until the Wokwi project owner saves the expanded files.
 
 ## 2. Create the website demo node
 

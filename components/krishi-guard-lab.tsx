@@ -4,7 +4,7 @@ import Link from "next/link";
 import { getSupabase } from "@/lib/supabase/client";
 import { KrishiWokwiSimulator } from "@/components/krishi-wokwi-simulator";
 import { AudioGuideButton, LanguageSwitch, Localize } from "@/components/language-provider";
-import { advanceStorageEnvironment, assessPestChannel, assessStorageScenario, buildEnvironmentalTelemetryContext, getStorageAlertOutputs, parseWokwiSerialOutput, type WokwiSerialReading } from "@/lib/krishi-simulation";
+import { advanceStorageEnvironment, assessPestChannel, assessStorageScenario, buildEnvironmentalTelemetryContext, getStorageAlertOutputs, parseWokwiSerialOutput } from "@/lib/krishi-simulation";
 
 type Level = "NORMAL" | "WATCH" | "ACTION" | "URGENT";
 type Device = { id: string; device_code: string; device_name: string; is_active: boolean };
@@ -168,35 +168,6 @@ export function KrishiGuardLab() {
   const reset = () => { setRunning(false); setSeconds(0); setAir(29); setRh(54); setGrain(29); setRain(0); setLeak(false); setWaterContact(false); setRodent(false); setDhtFault(false); setGrainFault(false); setInsects(0); setRodentEvents(0); setHistory([]); setEvents([]); previousGrain.current = null; setScenarioName("Live environment"); };
   const cloudLabel = syncEnabled && deviceId ? (sensorFault ? "CLOUD SYNC PAUSED · SENSOR FAULT" : "CLOUD SYNC ON") : "LOCAL SIMULATION";
 
-  const lastWokwiSampleAt = useRef(0);
-  const handleWokwiReading = useCallback((reading: WokwiSerialReading) => {
-    const now = Date.now();
-    if (now - lastWokwiSampleAt.current < 2500) return;
-    lastWokwiSampleAt.current = now;
-    const pest = assessPestChannel(reading.rodentMotionEvents, reading.insectTrapPulses, reading.rodentMotionEvents > 0);
-    const assessment = assessStorageScenario(reading.ambientTemperatureC, reading.relativeHumidityPct, reading.grainTemperatureC, previousGrain.current);
-    const sample: Sample = {
-      at: new Date().toLocaleTimeString("en-IN"),
-      air: reading.ambientTemperatureC, rh: reading.relativeHumidityPct, grain: reading.grainTemperatureC,
-      rain: reading.rainIntensityPct, leak: false, waterContact: reading.waterIngressDetected,
-      sensorFault: false, scenario: "Live Wokwi ESP32", seconds,
-      pestStatus: pest, pest: reading.rodentMotionEvents + reading.insectTrapPulses,
-      score: assessment.score, level: assessment.level,
-      rodents: reading.rodentMotionEvents, insects: reading.insectTrapPulses,
-    };
-    previousGrain.current = reading.grainTemperatureC;
-    setHistory((old) => [sample, ...old].slice(0, 80));
-    if (!deviceId) {
-      setWokwiStatus("Live Wokwi firmware is producing sensor readings. Create a demo node to save them to Storage Guardian.");
-      return;
-    }
-    if (now - lastCloudAt.current < 6000) return;
-    lastCloudAt.current = now;
-    void sendCloud(sample).then((accepted) => {
-      setWokwiStatus(accepted ? "Live Wokwi ESP32 reading saved to Storage Guardian as SIMULATOR data." : "Live Wokwi reading received, but cloud delivery failed. Review the cloud error.");
-    });
-  }, [deviceId, seconds, sendCloud]);
-
   async function importWokwiSerialOutput() {
     setWokwiStatus("");
     setCloudError("");
@@ -264,7 +235,7 @@ export function KrishiGuardLab() {
         <div className="kg-sensor-values"><div><small>AMBIENT AIR</small><b>{air.toFixed(1)}°C</b></div><div><small>RELATIVE HUMIDITY</small><b>{rh.toFixed(1)}%</b></div><div><small>GRAIN CORE</small><b>{grain.toFixed(1)}°C</b></div></div><p className="kg-disclaimer">PIR is a movement channel, not a species classifier. The insect input models an IR break-beam trap counter. Neither channel identifies a pest species.</p>
       </article>
     </section>
-    <KrishiWokwiSimulator air={air} humidity={rh} grain={grain} rain={rain} waterContact={waterContact} dhtFault={dhtFault} grainFault={grainFault} onReading={handleWokwiReading} />
+    <KrishiWokwiSimulator />
     <section className="kg-live-grid">
       <article className="kg-panel"><div className="kg-heading"><div><p className="kg-eyebrow">FIRMWARE OUTPUT MODEL</p><h2>ESP32 response</h2></div><span className={"kg-state "+(sensorFault ? "urgent" : storageClass)}>{sensorFault ? "SENSOR FAULT" : result.level}</span></div>
         <div className="kg-hardware-board"><div className="kg-mcu"><b>ESP32</b><small>GPIO INPUT / DECISION</small></div><div className="kg-wire-list"><span>GPIO 34 · Rain ADC <b>{rain}% / {rainAdc} · {rain >= 25 ? "WET" : "DRY"}</b></span><span>GPIO 27 · PIR <b>{rodent?"HIGH":"LOW"}</b></span><span>GPIO 26 · IR beam <b>{insects} pulses</b></span><span>GPIO 25 · Water contact <b>{waterContact ? "ACTIVE" : "CLEAR"}</b></span><span>GPIO 15 · DHT22 <b>{dhtFault ? "FAULT / NO DATA" : air.toFixed(1)+"° / "+rh.toFixed(0)+"%"}</b></span><span>GPIO 4 · DS18B20 <b>{grainFault ? "FAULT / NO DATA" : grain.toFixed(1)+"°C"}</b></span></div><div className="kg-output-leds"><div><i className={alertOutputs.led?"on":"off"}/><b>ALERT LED</b><small>{alertOutputs.led?"ON":"OFF"}</small></div><div><i className={alertOutputs.buzzer!=="SILENT"?"buzzer-on":"off"}/><b>BUZZER</b><small>{alertOutputs.buzzer}</small></div></div></div>
