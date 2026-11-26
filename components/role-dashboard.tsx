@@ -8,8 +8,8 @@ const roleContent = {
     kn: ["ರೈತ ಕಾರ್ಯಸ್ಥಳ", "ಬೆಳೆ ಪಟ್ಟಿ ಪ್ರಕಟಿಸಿ, ಮಂಡಿ ಉಲ್ಲೇಖ ಬೆಲೆಗಳನ್ನು ಹೋಲಿಸಿ, ಯಂತ್ರೋಪಕರಣ ಹುಡುಕಿ ಮತ್ತು ಅವಶೇಷಗಳನ್ನು ಮರುಬಳಕೆ ಅಥವಾ ಸಂಗ್ರಹಕ್ಕೆ ಕಳುಹಿಸುವುದನ್ನು ನಿರ್ಧರಿಸಿ.", ["ಪಟ್ಟಿ ಪ್ರಕಟಿಸಿ", "ಮಂಡಿ ಬೆಲೆ ನೋಡಿ", "ತ್ಯಾಜ್ಯ ಮಾರ್ಗದರ್ಶನ"]]
   },
   buyer_trader: {
-    en: ["Buyer & trader workspace", "Discover active produce listings, submit commercial offers, review farmer net-realisation estimates and raise a dispute when a transaction has an issue.", ["Browse produce", "Review activity", "Open trust tools"]],
-    kn: ["ಖರೀದಿದಾರ ಮತ್ತು ವ್ಯಾಪಾರಿ ಕಾರ್ಯಸ್ಥಳ", "ಸಕ್ರಿಯ ಬೆಳೆ ಪಟ್ಟಿಗಳನ್ನು ಹುಡುಕಿ, ವಾಣಿಜ್ಯ ಕೊಡುಗೆ ಸಲ್ಲಿಸಿ, ರೈತರ ನಿವ್ವಳ ಆದಾಯದ ಅಂದಾಜು ನೋಡಿ ಮತ್ತು ಸಮಸ್ಯೆಯಿದ್ದರೆ ವಿವಾದ ದಾಖಲಿಸಿ.", ["ಬೆಳೆ ಹುಡುಕಿ", "ಚಟುವಟಿಕೆ ನೋಡಿ", "ನಂಬಿಕೆ ಸಾಧನಗಳು"]]
+    en: ["Buyer & trader workspace", "Discover produce listings, arrange transport, review farmer net-realisation estimates and raise a dispute when a transaction has an issue.", ["Browse produce", "Request transport", "Review activity"]],
+    kn: ["ಖರೀದಿದಾರ ಮತ್ತು ವ್ಯಾಪಾರಿ ಕಾರ್ಯಸ್ಥಳ", "ಬೆಳೆ ಪಟ್ಟಿಗಳನ್ನು ಹುಡುಕಿ, ಸಾರಿಗೆ ವ್ಯವಸ್ಥೆ ಮಾಡಿ, ರೈತರ ನಿವ್ವಳ ಆದಾಯದ ಅಂದಾಜು ನೋಡಿ ಮತ್ತು ಸಮಸ್ಯೆಯಿದ್ದರೆ ವಿವಾದ ದಾಖಲಿಸಿ.", ["ಬೆಳೆ ಹುಡುಕಿ", "ಸಾರಿಗೆ ವಿನಂತಿಸಿ", "ಚಟುವಟಿಕೆ ನೋಡಿ"]]
   },
   buyer: {
     en: ["Buyer workspace", "Discover listings, submit offers and coordinate transaction details with the listing owner.", ["Browse listings", "Review activity", "Trust tools"]],
@@ -32,8 +32,8 @@ const roleContent = {
     kn: ["ಸಂಸ್ಕಾರಕರ ಕಾರ್ಯಸ್ಥಳ", "ಉಪಉತ್ಪನ್ನ ವಿವರಗಳನ್ನು ಪರಿಶೀಲಿಸಿ ಮತ್ತು ಸ್ವೀಕೃತಿ ವಿನಂತಿ ಕಳುಹಿಸಿ. ಗುಣಮಟ್ಟ ದಾಖಲೆಗಳಿಗೆ ಸ್ವತಂತ್ರ ಪರಿಶೀಲನೆ ಅಗತ್ಯ.", ["ಫಾರ್ಮ್‌ಲೂಪ್ ಹುಡುಕಿ", "ಸ್ವೀಕೃತಿ ಸಲ್ಲಿಸಿ", "ಗುಣಮಟ್ಟ ದಾಖಲೆ"]]
   },
   municipality: {
-    en: ["Municipality & local-body workspace", "Review farm-waste guidance and use the published contact directory. Only platform administrators can publish contacts after checking an official source.", ["Waste guidance", "Municipal contacts", "Account history"]],
-    kn: ["ಪುರಸಭೆ ಮತ್ತು ಸ್ಥಳೀಯ ಸಂಸ್ಥೆ ಕಾರ್ಯಸ್ಥಳ", "ಕೃಷಿ ತ್ಯಾಜ್ಯ ಮಾರ್ಗದರ್ಶನ ಪರಿಶೀಲಿಸಿ ಮತ್ತು ಪ್ರಕಟಿತ ಸಂಪರ್ಕ ಡೈರೆಕ್ಟರಿ ಬಳಸಿ. ಅಧಿಕೃತ ಮೂಲ ಪರಿಶೀಲಿಸಿದ ನಂತರ ವೇದಿಕೆ ನಿರ್ವಾಹಕರು ಮಾತ್ರ ಸಂಪರ್ಕಗಳನ್ನು ಪ್ರಕಟಿಸಬಹುದು.", ["ತ್ಯಾಜ್ಯ ಮಾರ್ಗದರ್ಶನ", "ಪುರಸಭೆ ಸಂಪರ್ಕ", "ಖಾತೆ ಇತಿಹಾಸ"]]
+    en: ["Municipality & local-body workspace", "Review and respond to local waste-service enquiries in your district. Only platform administrators can publish contacts after checking an official source.", ["Service enquiries", "Municipal contacts", "Account history"]],
+    kn: ["ಪುರಸಭೆ ಮತ್ತು ಸ್ಥಳೀಯ ಸಂಸ್ಥೆ ಕಾರ್ಯಸ್ಥಳ", "ನಿಮ್ಮ ಜಿಲ್ಲೆಯ ಸ್ಥಳೀಯ ತ್ಯಾಜ್ಯ ಸೇವಾ ವಿಚಾರಣೆಗಳನ್ನು ಪರಿಶೀಲಿಸಿ ಮತ್ತು ಪ್ರತಿಕ್ರಿಯಿಸಿ. ಅಧಿಕೃತ ಮೂಲ ಪರಿಶೀಲಿಸಿದ ನಂತರ ವೇದಿಕೆ ನಿರ್ವಾಹಕರು ಮಾತ್ರ ಸಂಪರ್ಕಗಳನ್ನು ಪ್ರಕಟಿಸಬಹುದು.", ["ಸೇವಾ ವಿಚಾರಣೆಗಳು", "ಪುರಸಭೆ ಸಂಪರ್ಕ", "ಖಾತೆ ಇತಿಹಾಸ"]]
   },
   transporter: {
     en: ["Transporter workspace", "Use active listings to identify pickup and delivery opportunities. Confirm route, load, vehicle suitability, price and responsibility directly before accepting a job.", ["Browse opportunities", "Review activity", "Trust tools"]],
@@ -58,11 +58,11 @@ export function RoleDashboard({ role, stats = [] }: { role: string; stats?: { la
   const selected = roleContent[role as keyof typeof roleContent] ?? roleContent.other;
   const [title, description, actions] = selected[language];
   const roleAudio = role === "buyer" ? "buyer_trader" : role === "provider" ? "machinery_owner" : role === "processor" ? "waste_processor" : role === "fpo" ? "fpo_cooperative" : role in roleContent ? role : "portal";
-  const hrefs = role === "transporter" ? ["/workspace?module=transport", "#operations", "#operations"] : role === "farmer" ? ["#create-listing", "#market-prices", "#waste-guide"]
+  const hrefs = role === "transporter" ? ["/workspace?module=transport", "#operations", "#operations"] : role === "buyer_trader" || role === "buyer" ? ["#marketplace", "/workspace?module=transport", "#operations"] : role === "farmer" ? ["#create-listing", "#market-prices", "#waste-guide"]
     : role === "machinery_owner" || role === "provider" ? ["#create-listing", "#operations", "#operations"]
     : role === "waste_processor" || role === "processor" ? ["#marketplace", "#operations", "#operations"]
-    : role === "municipality" ? ["#waste-guide", "#municipality-directory", "#operations"]
-    : role === "fpo" || role === "fpo_cooperative" ? ["#create-listing", "#marketplace", "#operations"]
+    : role === "municipality" ? ["#municipality-requests-title", "#municipality-directory", "#operations"]
+    : role === "fpo" || role === "fpo_cooperative" ? ["#fpo-workspace-title", "#marketplace", "#operations"]
     : ["#marketplace", "#operations", "#operations"];
   return <section className="role-dashboard" aria-label={title}>
     <div className="role-dashboard-intro"><span className="kicker">{language === "kn" ? "ನಿಮ್ಮ ಪಾತ್ರಕ್ಕೆ ಅನುಗುಣವಾಗಿ" : "YOUR ROLE WORKSPACE"}</span><h3>{title}</h3><p>{description}</p></div>

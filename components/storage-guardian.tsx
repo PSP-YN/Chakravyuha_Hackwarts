@@ -4,7 +4,8 @@ import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react
 import Link from "next/link";
 import type { Session } from "@supabase/supabase-js";
 import { getSupabase } from "@/lib/supabase/client";
-import { Localize } from "@/components/language-provider";
+import { friendlyErrorMessage } from "@/lib/error-message";
+import { AudioGuideButton, LanguageSwitch, Localize, useLanguage } from "@/components/language-provider";
 
 type Device = {
   id: string;
@@ -30,15 +31,29 @@ type Reading = {
   reasons: string[];
   battery_voltage: number | null;
   source: "device" | "simulator";
+  telemetry_context?: {
+    rain_intensity_pct?: number;
+    roof_leak_detected?: boolean;
+    water_ingress_detected?: boolean;
+    rodent_motion_events?: number;
+    insect_trap_pulses?: number;
+    pest_status?: string;
+    scenario?: string;
+    provenance?: string;
+  };
   recorded_at: string;
 };
 
-const fmt = (value: string | null) => value
-  ? new Date(value).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })
+const fmt = (value: string | null, locale: string) => value
+  ? new Date(value).toLocaleString(locale, { dateStyle: "medium", timeStyle: "short" })
   : "Never connected";
 
 export function StorageGuardian() {
   const db = getSupabase();
+  const { language } = useLanguage();
+  const locale = language === "kn" ? "kn-IN" : "en-IN";
+  const cropLabel = (value: string) => ({paddy:language==="kn"?"ಭತ್ತ":"Paddy / rice",ragi:language==="kn"?"ರಾಗಿ":"Ragi",maize:language==="kn"?"ಮೆಕ್ಕೆಜೋಳ":"Maize",wheat:language==="kn"?"ಗೋಧಿ":"Wheat",mixed:language==="kn"?"ಮಿಶ್ರ ಧಾನ್ಯ":"Mixed grain",other:language==="kn"?"ಇತರೆ":"Other"}[value]??value);
+  const storageLabel = (value: string) => ({bag:language==="kn"?"ಚೀಲ":"Bag / sack",bin:language==="kn"?"ಸಣ್ಣ ಸಂಗ್ರಹ ಪೆಟ್ಟಿಗೆ":"Small bin",silo:language==="kn"?"ಸೈಲೋ":"Silo",room:language==="kn"?"ಸಂಗ್ರಹ ಕೊಠಡಿ":"Storage room",other:language==="kn"?"ಇತರೆ":"Other"}[value]??value);
   const [session, setSession] = useState<Session | null>(null);
   const [authReady, setAuthReady] = useState(false);
   const [devices, setDevices] = useState<Device[]>([]);
@@ -60,37 +75,37 @@ export function StorageGuardian() {
   const [humidity, setHumidity] = useState(55);
   const [grainTemp, setGrainTemp] = useState(30);
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (silent = false) => {
     if (!db || !session) return;
-    setLoading(true);
+    if (!silent) setLoading(true);
     setError("");
     const { data: deviceRows, error: deviceError } = await db
       .from("storage_guardian_devices")
       .select("id,device_code,device_name,crop_type,storage_type,location,is_active,created_at,last_seen_at")
       .order("created_at", { ascending: false });
     if (deviceError) {
-      setError(deviceError.message);
-      setLoading(false);
+      setError(friendlyErrorMessage(deviceError, language, "Unable to load storage devices."));
+      if (!silent) setLoading(false);
       return;
     }
     const rows = (deviceRows ?? []) as Device[];
     setDevices(rows);
-    if (!selectedDevice && rows.length) setSelectedDevice(rows[0].id);
+    if (!selectedDevice && rows.length) setSelectedDevice(rows.find((row) => row.is_active)?.id ?? rows[0].id);
     if (!rows.length) {
       setReadings([]);
-      setLoading(false);
+      if (!silent) setLoading(false);
       return;
     }
     const { data: readingRows, error: readingError } = await db
       .from("storage_guardian_readings")
-      .select("id,device_id,ambient_temperature_c,relative_humidity_pct,grain_temperature_c,temperature_delta_c,condition_score,condition_level,reasons,battery_voltage,source,recorded_at")
+      .select("id,device_id,ambient_temperature_c,relative_humidity_pct,grain_temperature_c,temperature_delta_c,condition_score,condition_level,reasons,battery_voltage,source,telemetry_context,recorded_at")
       .in("device_id", rows.map((row) => row.id))
       .order("recorded_at", { ascending: false })
       .limit(60);
-    if (readingError) setError(readingError.message);
+    if (readingError) setError(friendlyErrorMessage(readingError, language, "Unable to load sensor history."));
     setReadings((readingRows ?? []) as Reading[]);
     setLoading(false);
-  }, [db, session, selectedDevice]);
+  }, [db, session, selectedDevice, language]);
 
   useEffect(() => {
     if (!db) {
@@ -118,6 +133,11 @@ export function StorageGuardian() {
   }, [db]);
 
   useEffect(() => { void refresh(); }, [refresh]);
+  useEffect(() => {
+    if (!session) return;
+    const timer = window.setInterval(() => { void refresh(true); }, 10000);
+    return () => window.clearInterval(timer);
+  }, [session, refresh]);
 
   const selected = devices.find((device) => device.id === selectedDevice) ?? devices[0] ?? null;
   const latest = useMemo(
@@ -144,11 +164,29 @@ export function StorageGuardian() {
       },
     });
     if (invokeError || data?.error) {
-      setError(data?.error ?? invokeError?.message ?? "Device registration failed.");
+      setError(friendlyErrorMessage(data?.error ?? invokeError ?? "Device registration failed.", language, "Device registration failed."));
     } else {
       setNewDeviceKey(String(data.device_key ?? ""));
       setSelectedDevice(String(data.device?.id ?? ""));
       setNotice("Device registered. Copy its key now; it will not be displayed again.");
+      await refresh();
+    }
+    setBusy(false);
+  }
+
+  async function revokeDevice(device: Device) {
+    if (!db) return;
+    const confirmed = window.confirm(language === "kn"
+      ? "ಈ ಸಾಧನವನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ ಅದರ API ಕೀಯನ್ನು ಶಾಶ್ವತವಾಗಿ ರದ್ದುಮಾಡಬೇಕೇ? ಹೊಸ ಸಾಧನವನ್ನು ನೋಂದಾಯಿಸುವವರೆಗೆ ಇದು ಡೇಟಾ ಕಳುಹಿಸುವುದಿಲ್ಲ."
+      : "Deactivate this device and permanently revoke its API key? It will stop sending data until you register a replacement.");
+    if (!confirmed) return;
+    setBusy(true); setError(""); setNotice("");
+    const { data, error: invokeError } = await db.functions.invoke("storage-guardian", { body: { action: "revoke", device_id: device.id } });
+    if (invokeError || data?.error) setError(friendlyErrorMessage(data?.error ?? invokeError ?? "Device revocation failed.", language, "Device revocation failed."));
+    else {
+      setNotice(language === "kn" ? "ಸಾಧನ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ ಮತ್ತು API ಕೀ ರದ್ದುಪಡಿಸಲಾಗಿದೆ." : "Device deactivated and API key revoked.");
+      if (selectedDevice === device.id) setSelectedDevice(devices.find((row) => row.id !== device.id && row.is_active)?.id ?? "");
+      setNewDeviceKey(""); setCopied(false);
       await refresh();
     }
     setBusy(false);
@@ -173,7 +211,7 @@ export function StorageGuardian() {
       },
     });
     if (invokeError || data?.error) {
-      setError(data?.error ?? invokeError?.message ?? "Simulation request failed.");
+      setError(friendlyErrorMessage(data?.error ?? invokeError ?? "Simulation request failed.", language, "Simulation request failed."));
     } else {
       setNotice("Simulated sensor reading saved. This is test data, not a physical sensor measurement.");
       await refresh();
@@ -192,7 +230,7 @@ export function StorageGuardian() {
       <main className="storage-page">
         <div className="storage-topline">
           <Link href="/workspace" className="storage-back">← Back to Krishi Connect 360</Link>
-          <span className="storage-live-pill"><i /> HARDWARE ADD-ON / PILOT</span>
+          <span className="storage-page-controls"><div className="storage-top-actions"><a href="https://wokwi.com/projects/481686932424365057" target="_blank" rel="noreferrer" className="storage-back">Launch actual ESP32 simulation in Wokwi ↗</a><span className="storage-live-pill"><i /> HARDWARE ADD-ON / PILOT</span></div><LanguageSwitch/><AudioGuideButton guide="storage_guardian" compact/></span>
         </div>
 
         <header className="storage-hero">
@@ -230,7 +268,7 @@ export function StorageGuardian() {
                 <span>LATEST CONDITION</span><strong className={`storage-level-text ${statusClass}`}>{latest?.condition_level ?? "NO DATA"}</strong><small>{latest ? `Condition index ${latest.condition_score}/100` : "Waiting for first reading"}</small>
               </div>
               <div className="storage-panel storage-stat">
-                <span>GRAIN-CORE TEMPERATURE</span><strong>{latest ? `${Number(latest.grain_temperature_c).toFixed(1)}°C` : "—"}</strong><small>{latest ? fmt(latest.recorded_at) : "No readings yet"}</small>
+                <span>GRAIN-CORE TEMPERATURE</span><strong>{latest ? `${Number(latest.grain_temperature_c).toFixed(1)}°C` : "—"}</strong><small>{latest ? fmt(latest.recorded_at,locale) : "No readings yet"}</small>
               </div>
               <div className="storage-panel storage-stat">
                 <span>AMBIENT RELATIVE HUMIDITY</span><strong>{latest ? `${Number(latest.relative_humidity_pct).toFixed(0)}%` : "—"}</strong><small>Air around the stored grain</small>
@@ -251,11 +289,14 @@ export function StorageGuardian() {
                       {devices.map((device) => {
                         const deviceLatest = readings.find((reading) => reading.device_id === device.id);
                         return (
-                          <button type="button" key={device.id} className={`storage-device-row ${selectedDevice === device.id ? "selected" : ""}`} onClick={() => setSelectedDevice(device.id)}>
-                            <span className="storage-device-icon">KG</span>
-                            <span className="storage-device-copy"><strong>{device.device_name}</strong><small>{device.device_code} · {device.crop_type.toUpperCase()} · {device.storage_type} · {device.location}</small><small>Last contact: {fmt(device.last_seen_at)}</small></span>
-                            <span className={`storage-level-chip ${deviceLatest?.condition_level.toLowerCase() ?? "empty"}`}>{deviceLatest?.condition_level ?? "NO DATA"}</span>
-                          </button>
+                          <div key={device.id} className={`storage-device-row ${selectedDevice === device.id ? "selected" : ""}`}>
+                            <button type="button" className="storage-device-select" onClick={() => setSelectedDevice(device.id)}>
+                              <span className="storage-device-icon">KG</span>
+                              <span className="storage-device-copy"><strong>{device.device_name}</strong><small>{device.device_code} · {cropLabel(device.crop_type)} · {storageLabel(device.storage_type)} · {device.location}</small><small>Last contact: {fmt(device.last_seen_at,locale)}</small></span>
+                              <span className={`storage-level-chip ${deviceLatest?.condition_level.toLowerCase() ?? "empty"}`}>{device.is_active ? (deviceLatest?.condition_level ?? "NO DATA") : (language === "kn" ? "ನಿಷ್ಕ್ರಿಯ" : "INACTIVE")}</span>
+                            </button>
+                            {device.is_active && <button type="button" className="button button-danger storage-revoke-button" onClick={() => void revokeDevice(device)} disabled={busy}>{language === "kn" ? "ಕೀ ರದ್ದು" : "Revoke key"}</button>}
+                          </div>
                         );
                       })}
                     </div>
@@ -264,7 +305,7 @@ export function StorageGuardian() {
 
                 <section className="storage-panel">
                   <div className="storage-section-heading">
-                    <div><span className="kicker">CONDITION HISTORY</span><h2>{selected?.device_name ?? "Select a device"}</h2></div>
+                    <div><span className="kicker">CONDITION HISTORY · AUTO-REFRESH 10S</span><h2>{selected?.device_name ?? "Select a device"}</h2></div>
                     {selected && <span className="storage-device-code">{selected.device_code}</span>}
                   </div>
                   {latest ? (
@@ -280,6 +321,17 @@ export function StorageGuardian() {
                         <div><small>Grain core</small><strong>{Number(latest.grain_temperature_c).toFixed(1)}°C</strong></div>
                         <div><small>Core − ambient</small><strong>{Number(latest.temperature_delta_c).toFixed(1)}°C</strong></div>
                       </div>
+                      {latest.telemetry_context && Object.keys(latest.telemetry_context).length > 0 && (
+                        <div className="storage-reading-grid storage-event-context">
+                          <div><small>Rain intensity</small><strong>{Number(latest.telemetry_context.rain_intensity_pct ?? 0)}%</strong></div>
+                          <div><small>Roof ingress assumption</small><strong>{latest.telemetry_context.roof_leak_detected ? "ACTIVE" : "OFF"}</strong></div>
+                          <div><small>Water contact input</small><strong>{latest.telemetry_context.water_ingress_detected === undefined ? (latest.source === "simulator" && latest.telemetry_context.roof_leak_detected ? "SIMULATED ACTIVE" : "NOT REPORTED") : (latest.telemetry_context.water_ingress_detected ? "ACTIVE" : "CLEAR")}</strong></div>
+                          <div><small>Rodent motion events</small><strong>{Number(latest.telemetry_context.rodent_motion_events ?? 0)}</strong></div>
+                          <div><small>Insect trap pulses</small><strong>{Number(latest.telemetry_context.insect_trap_pulses ?? 0)}</strong></div>
+                          <div><small>Pest channel</small><strong>{latest.telemetry_context.pest_status ?? "CLEAR"}</strong></div>
+                          <div><small>Scenario / provenance</small><strong>{latest.telemetry_context.scenario ?? latest.telemetry_context.provenance ?? "Device"}</strong></div>
+                        </div>
+                      )}
                     </>
                   ) : (
                     <div className="storage-empty"><strong>No readings for this device.</strong><p>Use the simulator below or connect the physical ESP32 node.</p></div>
@@ -288,7 +340,7 @@ export function StorageGuardian() {
                     <table className="storage-table">
                       <thead><tr><th>Recorded</th><th>Core</th><th>Ambient RH</th><th>Index</th><th>Source</th></tr></thead>
                       <tbody>
-                        {selectedReadings.map((reading) => <tr key={reading.id}><td>{fmt(reading.recorded_at)}</td><td>{Number(reading.grain_temperature_c).toFixed(1)}°C</td><td>{Number(reading.relative_humidity_pct).toFixed(0)}%</td><td><span className={`storage-level-chip ${reading.condition_level.toLowerCase()}`}>{reading.condition_level} · {reading.condition_score}</span></td><td>{reading.source === "simulator" ? "SIM" : "DEVICE"}</td></tr>)}
+                        {selectedReadings.map((reading) => <tr key={reading.id}><td>{fmt(reading.recorded_at,locale)}</td><td>{Number(reading.grain_temperature_c).toFixed(1)}°C</td><td>{Number(reading.relative_humidity_pct).toFixed(0)}%</td><td><span className={`storage-level-chip ${reading.condition_level.toLowerCase()}`}>{reading.condition_level} · {reading.condition_score}</span></td><td>{reading.source === "simulator" ? "SIM" : "DEVICE"}</td></tr>)}
                         {selectedReadings.length === 0 && <tr><td colSpan={5}>No readings recorded.</td></tr>}
                       </tbody>
                     </table>
@@ -323,7 +375,8 @@ export function StorageGuardian() {
                   <label className="storage-slider">Ambient temperature <strong>{ambientTemp}°C</strong><input type="range" min="-10" max="60" value={ambientTemp} onChange={(event) => setAmbientTemp(Number(event.target.value))} /></label>
                   <label className="storage-slider">Ambient relative humidity <strong>{humidity}%</strong><input type="range" min="20" max="100" value={humidity} onChange={(event) => setHumidity(Number(event.target.value))} /></label>
                   <label className="storage-slider">Grain-core temperature <strong>{grainTemp}°C</strong><input type="range" min="-10" max="70" value={grainTemp} onChange={(event) => setGrainTemp(Number(event.target.value))} /></label>
-                  <button className="button button-dark" type="button" onClick={() => void sendSimulation()} disabled={busy || !selected}>{busy ? "Sending…" : "Send simulated reading ↗"}</button>
+                  <button className="button button-dark" type="button" onClick={() => void sendSimulation()} disabled={busy || !selected || !selected.is_active}>{busy ? "Sending…" : "Send simulated reading ↗"}</button>
+                  <a className="button button-light" href="/krishi-guard-simulator">Open live rain & pest simulation ↗</a>
                   <small className="storage-sim-note">SIMULATED DATA · Not a physical sensor measurement</small>
                 </section>
               </aside>
@@ -337,7 +390,11 @@ export function StorageGuardian() {
             <div><strong>01 · ESP32</strong><p>Reads the sensors and sends one HTTPS telemetry request.</p></div>
             <div><strong>02 · DHT22</strong><p>Measures ambient temperature and relative humidity near the grain store.</p></div>
             <div><strong>03 · DS18B20</strong><p>Measures temperature inside a grain bag or storage core using a protected probe.</p></div>
-            <div><strong>04 · KRISHI CONNECT</strong><p>Stores readings, calculates the condition indicator and shows alerts in this workspace.</p></div>
+            <div><strong>04 · RAIN SENSOR</strong><p>Analogue wetness input estimates rain exposure at the sensor mounting point; it does not independently prove roof leakage.</p></div>
+            <div><strong>05 · RODENT PIR</strong><p>Detects movement in a monitored storage perimeter. It is not an insect detector or a species classifier.</p></div>
+            <div><strong>06 · INSECT BEAM</strong><p>An infrared break-beam counter records trap interruptions. It does not identify insect species.</p></div>
+            <div><strong>07 · WATER CONTACT</strong><p>A separate contact switch reports water at its probe location. It is not inferred from rain intensity or the modelled roof-leak path.</p></div>
+            <div><strong>08 · KRISHI CONNECT</strong><p>Stores source-labelled telemetry, calculates the grain-condition indicator and displays independent water-contact and pest events.</p></div>
           </div>
           <p className="storage-disclaimer">Storage condition indicators are advisory. They do not certify grain quality, diagnose fungal contamination, measure grain moisture or replace inspection and laboratory testing. Thresholds require local crop and storage validation.</p>
         </section>

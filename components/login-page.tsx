@@ -3,9 +3,11 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { getSupabase } from "@/lib/supabase/client";
+import { friendlyErrorMessage } from "@/lib/error-message";
 import { LanguageSwitch, useLanguage } from "@/components/language-provider";
 
 type ParticipantRole = "farmer" | "buyer_trader" | "machinery_owner" | "waste_processor" | "municipality" | "transporter" | "fpo_cooperative";
+const POLICY_VERSION = "2026-11-25";
 const roles: { value: ParticipantRole; en: string; kn: string }[] = [
   { value: "farmer", en: "Farmer", kn: "ರೈತ" },
   { value: "buyer_trader", en: "Buyer / Trader", kn: "ಖರೀದಿದಾರ / ವ್ಯಾಪಾರಿ" },
@@ -26,8 +28,8 @@ const copy = {
     sentSignup: "Registration link sent. Open the newest email to verify your address and activate your account.",
     failed: "We could not send the email link. Check the details and try again.", noConfig: "Account access is not configured in this deployment. Contact the pilot operator.",
     back: "Back to home", privacy: "Privacy notice", terms: "Terms of use", secure: "Supabase Auth · Passwordless email · English / ಕನ್ನಡ",
-    tip: "Email delivery requires a production SMTP provider configured in Supabase Auth.", fullName: "Full name", phone: "Mobile number", role: "I am registering as", district: "District", taluk: "Taluk", village: "Village / Town", organisation: "Organisation name (if applicable)",
-    login: "Already have an account? Sign in", signup: "New to Krishi Connect? Create an account", required: "Complete all required fields.",
+    tip: "Email delivery requires a production SMTP provider configured in Supabase Auth.", fullName: "Full name", phone: "Mobile number", role: "I am registering as", district: "District", taluk: "Taluk", village: "Village / Town", organisation: "Organisation name",
+    login: "Already have an account? Sign in", signup: "New to Krishi Connect? Create an account", required: "Complete all required fields and accept the Terms of Use and Privacy Notice.", consent: "I have read and accept the",
   },
   kn: {
     eyebrow: "ನಿಮ್ಮ ಕೃಷಿ ಆರ್ಥಿಕ ಜಾಲ", loginTitle: "ನಿಮ್ಮ ಕೃಷಿ ಜಾಲಕ್ಕೆ ಸೈನ್ ಇನ್ ಮಾಡಿ.", signupTitle: "ನಿಮ್ಮ ಭಾಗವಹಿಸುವವರ ಖಾತೆ ರಚಿಸಿ.",
@@ -38,8 +40,8 @@ const copy = {
     sentSignup: "ನೋಂದಣಿ ಲಿಂಕ್ ಕಳುಹಿಸಲಾಗಿದೆ. ಇಮೇಲ್ ಪರಿಶೀಲಿಸಿ ಖಾತೆ ಸಕ್ರಿಯಗೊಳಿಸಲು ಹೊಸ ಸಂದೇಶ ತೆರೆಯಿರಿ.",
     failed: "ಇಮೇಲ್ ಲಿಂಕ್ ಕಳುಹಿಸಲಾಗಲಿಲ್ಲ. ವಿವರಗಳನ್ನು ಪರಿಶೀಲಿಸಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.", noConfig: "ಈ ನಿಯೋಜನೆಯಲ್ಲಿ ಖಾತೆ ಪ್ರವೇಶ ಸಂರಚಿಸಲಾಗಿಲ್ಲ. ಪೈಲಟ್ ನಿರ್ವಾಹಕರನ್ನು ಸಂಪರ್ಕಿಸಿ.",
     back: "ಮುಖಪುಟಕ್ಕೆ ಹಿಂತಿರುಗಿ", privacy: "ಗೌಪ್ಯತಾ ಸೂಚನೆ", terms: "ಬಳಕೆಯ ನಿಯಮಗಳು", secure: "Supabase Auth · ಪಾಸ್‌ವರ್ಡ್ ರಹಿತ ಇಮೇಲ್ · English / ಕನ್ನಡ",
-    tip: "ಇಮೇಲ್ ವಿತರಣೆಗೆ Supabase Auth ನಲ್ಲಿ ಉತ್ಪಾದನಾ SMTP ಸೇವೆ ಸಂರಚಿಸಬೇಕು.", fullName: "ಪೂರ್ಣ ಹೆಸರು", phone: "ಮೊಬೈಲ್ ಸಂಖ್ಯೆ", role: "ನಾನು ನೋಂದಾಯಿಸಿಕೊಳ್ಳುವುದು", district: "ಜಿಲ್ಲೆ", taluk: "ತಾಲೂಕು", village: "ಗ್ರಾಮ / ಪಟ್ಟಣ", organisation: "ಸಂಸ್ಥೆಯ ಹೆಸರು (ಅನ್ವಯಿಸಿದರೆ)",
-    login: "ಈಗಾಗಲೇ ಖಾತೆ ಇದೆಯೇ? ಸೈನ್ ಇನ್ ಮಾಡಿ", signup: "Krishi Connect ಗೆ ಹೊಸಬರೇ? ಖಾತೆ ರಚಿಸಿ", required: "ಅಗತ್ಯವಿರುವ ಎಲ್ಲಾ ವಿವರಗಳನ್ನು ಭರ್ತಿ ಮಾಡಿ.",
+    tip: "ಇಮೇಲ್ ವಿತರಣೆಗೆ Supabase Auth ನಲ್ಲಿ ಉತ್ಪಾದನಾ SMTP ಸೇವೆ ಸಂರಚಿಸಬೇಕು.", fullName: "ಪೂರ್ಣ ಹೆಸರು", phone: "ಮೊಬೈಲ್ ಸಂಖ್ಯೆ", role: "ನಾನು ನೋಂದಾಯಿಸಿಕೊಳ್ಳುವುದು", district: "ಜಿಲ್ಲೆ", taluk: "ತಾಲೂಕು", village: "ಗ್ರಾಮ / ಪಟ್ಟಣ", organisation: "ಸಂಸ್ಥೆಯ ಹೆಸರು",
+    login: "ಈಗಾಗಲೇ ಖಾತೆ ಇದೆಯೇ? ಸೈನ್ ಇನ್ ಮಾಡಿ", signup: "Krishi Connect ಗೆ ಹೊಸಬರೇ? ಖಾತೆ ರಚಿಸಿ", required: "ಅಗತ್ಯವಿರುವ ಎಲ್ಲಾ ವಿವರಗಳನ್ನು ಭರ್ತಿ ಮಾಡಿ ಮತ್ತು ಬಳಕೆಯ ನಿಯಮಗಳು ಹಾಗೂ ಗೌಪ್ಯತಾ ಸೂಚನೆಯನ್ನು ಒಪ್ಪಿಕೊಳ್ಳಿ.", consent: "ನಾನು ಇದನ್ನು ಓದಿ ಒಪ್ಪುತ್ತೇನೆ:",
   }
 } as const;
 
@@ -52,10 +54,11 @@ export function LoginPage({ mode = "login" }: { mode?: "login" | "signup" }) {
   const [fullName,setFullName] = useState("");
   const [phone,setPhone] = useState("");
   const [role,setRole] = useState<ParticipantRole>("farmer");
-  const [district,setDistrict] = useState("Tumakuru");
+  const [district,setDistrict] = useState("");
   const [taluk,setTaluk] = useState("");
   const [village,setVillage] = useState("");
   const [organisation,setOrganisation] = useState("");
+  const [acceptedTerms,setAcceptedTerms] = useState(false);
   const [busy,setBusy] = useState(false);
   const [sent,setSent] = useState(false);
   const [error,setError] = useState("");
@@ -73,13 +76,13 @@ export function LoginPage({ mode = "login" }: { mode?: "login" | "signup" }) {
   async function submit(event:FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!db) return;
-    if (mode === "signup" && (!fullName.trim() || !phone.trim() || !district.trim() || !taluk.trim() || !village.trim() || ((role === "municipality" || role === "fpo_cooperative") && !organisation.trim()))) { setError(t.required); return; }
+    if (mode === "signup" && (!acceptedTerms || !fullName.trim() || !phone.trim() || !district.trim() || !taluk.trim() || !village.trim() || ((role === "municipality" || role === "fpo_cooperative") && !organisation.trim()))) { setError(t.required); return; }
     setBusy(true);setError("");setSent(false);
     try {
       const options = mode === "signup" ? {
         emailRedirectTo: `${window.location.origin}/workspace`,
         shouldCreateUser: true,
-        data: { full_name: fullName.trim(), phone: phone.trim(), participant_type: role, preferred_language: language, district: district.trim(), taluk: taluk.trim(), village: village.trim(), organization_name: organisation.trim() || null }
+        data: { full_name: fullName.trim(), phone: phone.trim(), participant_type: role, preferred_language: language, district: district.trim(), taluk: taluk.trim(), village: village.trim(), organization_name: organisation.trim() || null, accepted_terms: acceptedTerms, terms_version: POLICY_VERSION, privacy_notice_version: POLICY_VERSION }
       } : { emailRedirectTo: `${window.location.origin}/workspace`, shouldCreateUser: false };
       const {error} = await db.auth.signInWithOtp({ email:email.trim().toLowerCase(), options });
       if(error) throw error;
@@ -117,6 +120,7 @@ export function LoginPage({ mode = "login" }: { mode?: "login" | "signup" }) {
             <label>{t.village}<input value={village} onChange={e=>setVillage(e.target.value)} required maxLength={100}/></label>
             {(role === "municipality" || role === "fpo_cooperative") && <label>{t.organisation}<input value={organisation} onChange={e=>setOrganisation(e.target.value)} maxLength={160} required/></label>}
           </>}
+          {mode === "signup" && <label className="login-consent"><input type="checkbox" checked={acceptedTerms} onChange={e=>setAcceptedTerms(e.target.checked)} required/><span>{t.consent} <a href="/terms" target="_blank" rel="noopener noreferrer">{t.terms}</a> {language==="kn"?"ಮತ್ತು":"and"} <a href="/privacy" target="_blank" rel="noopener noreferrer">{t.privacy}</a>.</span></label>}
           <label htmlFor="login-email">{t.email}</label>
           <input id="login-email" type="email" autoComplete="email" inputMode="email" required maxLength={254} value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@example.com"/>
           <button className="landing-primary" disabled={!db||busy}>{busy?t.sending:(mode === "signup" ? t.register : t.send)}<span>↗</span></button>

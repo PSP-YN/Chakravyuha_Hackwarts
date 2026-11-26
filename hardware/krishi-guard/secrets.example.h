@@ -9,4 +9,3 @@
 
 // Keep 0 for offline simulation. Set to 1 only after registering a device
 // in Krishi Connect 360 and securely provisioning its one-time key.
-#define KRISHI_GUARD_ENABLE_TELEMETRY 0

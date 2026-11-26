@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Localize } from "@/components/language-provider";
+import { Localize, useLanguage } from "@/components/language-provider";
+import { friendlyErrorMessage } from "@/lib/error-message";
 
 type StateOption = string;
 type CommodityOption = { id: number; name: string };
@@ -45,6 +46,7 @@ const formatPrice = (value: number) => new Intl.NumberFormat("en-IN", {
 }).format(value);
 
 export function MarketPrices() {
+  const { language } = useLanguage();
   const [state, setState] = useState("Karnataka");
   const [filters, setFilters] = useState<FiltersResponse | null>(null);
   const [marketId, setMarketId] = useState("");
@@ -75,11 +77,11 @@ export function MarketPrices() {
         setMarketId(String(defaultMarket?.id ?? body.markets[0]?.id ?? ""));
       })
       .catch((reason: unknown) => {
-        if (reason instanceof Error && reason.name !== "AbortError") setError(reason.message);
+        if (reason instanceof Error && reason.name !== "AbortError") setError(friendlyErrorMessage(reason, language, "Unable to load market prices."));
       })
       .finally(() => setFiltersLoading(false));
     return () => controller.abort();
-  }, [state]);
+  }, [state, language]);
 
   useEffect(() => {
     if (!filters?.stateId || !marketId || !commodityId) return;
@@ -94,11 +96,11 @@ export function MarketPrices() {
         setPayload(body);
       })
       .catch((reason: unknown) => {
-        if (reason instanceof Error && reason.name !== "AbortError") setError(reason.message);
+        if (reason instanceof Error && reason.name !== "AbortError") setError(friendlyErrorMessage(reason, language, "Unable to load market prices."));
       })
       .finally(() => setLoading(false));
     return () => controller.abort();
-  }, [filters?.stateId, marketId, commodityId, reload]);
+  }, [filters?.stateId, marketId, commodityId, reload, language]);
 
   const rows = useMemo(() => {
     const needle = query.trim().toLowerCase();

@@ -1,0 +1,19 @@
+name: KRISHI GUARD - insect trap pulse
+version: 1
+author: KRISHI CONNECT 360
+steps:
+  - wait-serial: 'KRISHI GUARD READY'
+  - set-control:
+      part-id: insect
+      name: pressed
+      value: 1
+  - delay: 200ms
+  - set-control:
+      part-id: insect
+      name: pressed
+      value: 0
+  - wait-serial: 'PEST ALERT'
+  - expect-pin:
+      part-id: esp
+      name: 2
+      value: 1

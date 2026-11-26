@@ -40,6 +40,15 @@
       }
     },
     {
+      "type": "wokwi-resistor",
+      "id": "dhtpullup",
+      "top": -90,
+      "left": 205,
+      "attrs": {
+        "value": "10000"
+      }
+    },
+    {
       "type": "wokwi-led",
       "id": "status",
       "top": 250,
@@ -66,6 +75,45 @@
       "attrs": {
         "volume": "0.25"
       }
+    },
+    {
+      "type": "wokwi-potentiometer",
+      "id": "rainpot",
+      "top": -110,
+      "left": 500,
+      "attrs": {
+        "value": "1023"
+      }
+    },
+    {
+      "type": "wokwi-pir-motion-sensor",
+      "id": "pir",
+      "top": 100,
+      "left": 520,
+      "attrs": {
+        "delayTime": "5",
+        "inhibitTime": "1.2"
+      }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "insect",
+      "top": 260,
+      "left": 520,
+      "attrs": {
+        "color": "yellow",
+        "label": "Insect beam-break pulse"
+      }
+    },
+    {
+      "type": "wokwi-pushbutton",
+      "id": "leak",
+      "top": 390,
+      "left": 520,
+      "attrs": {
+        "color": "blue",
+        "label": "Water ingress probe"
+      }
     }
   ],
   "connections": [
@@ -83,6 +131,18 @@
     ],
     [
       "esp:15",
+      "dht:SDA",
+      "green",
+      []
+    ],
+    [
+      "esp:3V3",
+      "dhtpullup:1",
+      "red",
+      []
+    ],
+    [
+      "dhtpullup:2",
       "dht:SDA",
       "green",
       []
@@ -143,6 +203,66 @@
     ],
     [
       "buzzer:1",
+      "esp:GND.1",
+      "black",
+      []
+    ],
+    [
+      "esp:3V3",
+      "rainpot:VCC",
+      "red",
+      []
+    ],
+    [
+      "esp:GND.1",
+      "rainpot:GND",
+      "black",
+      []
+    ],
+    [
+      "esp:34",
+      "rainpot:SIG",
+      "orange",
+      []
+    ],
+    [
+      "esp:3V3",
+      "pir:VCC",
+      "red",
+      []
+    ],
+    [
+      "esp:GND.1",
+      "pir:GND",
+      "black",
+      []
+    ],
+    [
+      "esp:27",
+      "pir:OUT",
+      "green",
+      []
+    ],
+    [
+      "esp:26",
+      "insect:1.l",
+      "green",
+      []
+    ],
+    [
+      "insect:2.l",
+      "esp:GND.1",
+      "black",
+      []
+    ],
+    [
+      "esp:25",
+      "leak:1.l",
+      "green",
+      []
+    ],
+    [
+      "leak:2.l",
       "esp:GND.1",
       "black",
       []

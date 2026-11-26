@@ -5,7 +5,7 @@
 **Status:** Baseline source of truth
 
 ## Executive definition
-KRISHI CONNECT 360 is a Karnataka-first, mobile-first agricultural coordination platform connecting farmers, produce buyers, machinery/service providers, farmer collectives and agricultural by-product processors through shared listings, structured offers and an economic-outcome layer.
+KRISHI CONNECT 360 is a Karnataka-first, mobile-first agricultural coordination platform connecting farmers, buyers/traders, machinery owners, waste processors, transporters, municipalities and FPOs through shared listings, structured offers, bookings, enquiries and participant history. Storage Guardian is an optional ESP32 sensor add-on.
 
 It is a coordination and transparency product. It is not a guaranteed buyer, logistics operator, lender, insurer, government-verification service or replacement for e-NAM or public market infrastructure.
 
@@ -14,25 +14,34 @@ Fragmented supply, information asymmetry, machinery access friction and uncoordi
 
 1. Show expected net realisation, not just headline price.
 2. Structure machinery/service discovery around operation scope and total cost.
-3. Aggregate only compatible by-products with explicit quality, quantity and collection constraints.
-4. Measure completed outcomes, separating transaction value, proceeds, savings and net benefit.
+3. Coordinate by-product recovery and transport with explicit quality, quantity, route and collection constraints.
+4. Attribute FPO aggregate lots to active members and their contributed quantities.
+5. Provide district-scoped municipality enquiries and a source-linked contact directory.
+6. Measure completed outcomes, separating transaction value, proceeds, savings and net benefit.
 
 ## Modules
 | Module | Job | MVP |
 |---|---|---|
 | KrishiMarket 360 | Produce discovery and trade | Listings, offers, net-realisation comparison |
 | KrishiShare | Machinery and service coordination | Service listings and structured enquiries |
-| FarmLoop | By-product exchange | Material listings, quality and buyer offers |
+| FarmLoop | By-product exchange | Material listings, processor acceptance and quality records |
+| KrishiTransit | Transport coordination | Transport listings, accepted jobs, delivery confirmation and evidence |
+| FPO workspace | Collective operations | Member register and attributed aggregate lots |
+| Municipality coordination | Local waste-service enquiries | Official directory and district-scoped response workflow |
+| Storage Guardian | Optional hardware add-on | ESP32 sensor telemetry and advisory storage indicator |
 | Economic Impact Engine | Outcome visibility | Offer outcomes and participant-reported proceeds |
 
 The impact engine is a shared platform capability, not a fourth marketplace.
 
 ## Users and permissions
-- Farmer/supplier: creates own listings, receives offers and manages seller-side decisions.
-- Buyer/processor: discovers active listings and submits offers.
-- Machinery provider: publishes equipment/service availability and terms.
-- FPO/group coordinator: future pooled workflows and group reporting.
-- Platform operator: future restricted moderation role; never a client-controlled role flag.
+- Farmer: produce/by-product listings, machinery/transport requests, waste-service enquiries and transaction history.
+- Buyer/trader: produce offers and transport requests.
+- Machinery owner: machinery listings, bookings and evidence.
+- Waste processor: FarmLoop acceptance proposals and quality records.
+- Municipality/local-body contact: district-scoped waste-service enquiries and responses.
+- Transporter: transport listings and accepted-job lifecycle.
+- FPO/cooperative: member register and member-attributed aggregate lots.
+- Platform operator: restricted moderation and directory administration; never a client-controlled role flag.
 
 Supabase Auth proves control of an email/phone channel only. It does not prove farmer status, land ownership, FPO membership or government eligibility.
 
@@ -43,8 +52,8 @@ Supabase Auth proves control of an email/phone channel only. It does not prove f
 - Vercel hosting.
 - Browser uses publishable key only.
 - Money stored as integer paise; quantities always carry units.
-- AI is optional; core transactions and calculations work without an LLM.
-- Payments are outside MVP; accepted offer does not mean settled payment.
+- No AI/ML model is used in the current pilot; all financial and storage calculations are explicit rules.
+- Payments are outside the current pilot; accepted offer does not mean settled payment.
 - Reference prices are separate from buyer offers.
 
 ## Non-negotiable principles

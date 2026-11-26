@@ -2,9 +2,11 @@
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { getSupabase } from "@/lib/supabase/client";
+import { friendlyErrorMessage } from "@/lib/error-message";
 import { useLanguage } from "@/components/language-provider";
 import { money } from "@/lib/domain";
 import { RoleDashboard } from "@/components/role-dashboard";
+import { FpoWorkspace } from "@/components/fpo-workspace";
 
 type Row = Record<string, any>;
 const text = {
@@ -15,7 +17,7 @@ const text = {
     report:"Report a listing or participant", listing:"Listing", reason:"Reason", description:"Describe the issue (at least 10 characters)",
     submit:"Submit", misleading:"Misleading listing", fraud:"Suspected fraud", harassment:"Harassment", unsafe:"Unsafe practice", spam:"Spam", otherReason:"Other",
     dispute:"Open a transaction dispute", offer:"Accepted or completed offer", issue:"Issue type", qualityMismatch:"Quality mismatch", quantityMismatch:"Quantity mismatch", late:"Late or missing delivery", machinery:"Machinery service issue", payment:"Payment disagreement", safety:"Safety",
-    bookings:"Machinery bookings", noBookings:"No bookings yet. Accepted machinery offers appear here.", cancel:"Cancel booking", cancelReason:"Cancellation reason", reschedule:"Reschedule", start:"Start job", complete:"Mark job complete", startAt:"New service start",
+    bookings:"Machinery bookings", noBookings:"No bookings yet. Accepted machinery offers appear here.", transportJobs:"KrishiTransit jobs", noTransportJobs:"Accepted transport requests become trackable jobs here.", pickupReady:"Ready for pickup", pickedUp:"Picked up", inTransit:"In transit", deliveredPending:"Delivered — awaiting receiver confirmation", transportComplete:"Confirm receipt", transportEvidence:"Transport / delivery evidence", transportNote:"Status or delivery note", transportRoute:"Pickup → destination", transportVehicle:"Vehicle / capacity", loading:"Loading", unloading:"Unloading", toAgree:"To be agreed", requesterResponsibility:"Requester", transporterResponsibility:"Transporter", sharedResponsibility:"Shared", uploadTransportEvidence:"Upload transport evidence", cancelTransport:"Cancel transport job", cancel:"Cancel booking", cancelReason:"Cancellation reason", reschedule:"Reschedule", start:"Start job", complete:"Mark job complete", startAt:"New service start",
     evidence:"Job evidence", evidenceType:"Evidence type", before:"Before photo", after:"After photo", workNote:"Work note", delivery:"Delivery note", otherEvidence:"Other", file:"Choose photo or PDF", upload:"Upload evidence",
     farmloop:"FarmLoop processor requests", request:"Send processor acceptance request", materialSpec:"Material specification / acceptance conditions", price:"Proposed price ₹ per unit", quantity:"Proposed quantity", noByproducts:"No active by-product listings available.",
     quality:"Material quality check", method:"Test method / sampling protocol", lab:"Laboratory / testing organisation", reportRef:"Report reference", tested:"Test date", moisture:"Measured moisture %", contamination:"Measured contamination %", reportFile:"Attach report (PDF or image)", submitCheck:"Submit quality record",
@@ -28,7 +30,7 @@ const text = {
     report:"ಪಟ್ಟಿ ಅಥವಾ ಭಾಗವಹಿಸುವವರ ಬಗ್ಗೆ ವರದಿ", listing:"ಪಟ್ಟಿ", reason:"ಕಾರಣ", description:"ಸಮಸ್ಯೆಯನ್ನು ವಿವರಿಸಿ (ಕನಿಷ್ಠ 10 ಅಕ್ಷರಗಳು)",
     submit:"ಸಲ್ಲಿಸಿ", misleading:"ತಪ್ಪು ಮಾಹಿತಿ ಇರುವ ಪಟ್ಟಿ", fraud:"ವಂಚನೆಯ ಅನುಮಾನ", harassment:"ಕಿರುಕುಳ", unsafe:"ಅಸುರಕ್ಷಿತ ಕ್ರಮ", spam:"ಸ್ಪ್ಯಾಮ್", otherReason:"ಇತರೆ",
     dispute:"ವಹಿವಾಟಿನ ವಿವಾದ ತೆರೆಯಿರಿ", offer:"ಒಪ್ಪಿಕೊಂಡ ಅಥವಾ ಪೂರ್ಣಗೊಂಡ ಕೊಡುಗೆ", issue:"ಸಮಸ್ಯೆಯ ಪ್ರಕಾರ", qualityMismatch:"ಗುಣಮಟ್ಟ ವ್ಯತ್ಯಾಸ", quantityMismatch:"ಪ್ರಮಾಣ ವ್ಯತ್ಯಾಸ", late:"ತಡವಾದ ಅಥವಾ ಕಾಣೆಯಾದ ವಿತರಣೆ", machinery:"ಯಂತ್ರೋಪಕರಣ ಸೇವೆ ಸಮಸ್ಯೆ", payment:"ಪಾವತಿ ಭಿನ್ನಾಭಿಪ್ರಾಯ", safety:"ಸುರಕ್ಷತೆ",
-    bookings:"ಯಂತ್ರೋಪಕರಣ ಬುಕಿಂಗ್‌ಗಳು", noBookings:"ಇನ್ನೂ ಬುಕಿಂಗ್‌ಗಳಿಲ್ಲ. ಒಪ್ಪಿಕೊಂಡ ಯಂತ್ರೋಪಕರಣ ಕೊಡುಗೆಗಳು ಇಲ್ಲಿ ಕಾಣಿಸುತ್ತವೆ.", cancel:"ಬುಕಿಂಗ್ ರದ್ದುಮಾಡಿ", cancelReason:"ರದ್ದತಿಯ ಕಾರಣ", reschedule:"ಮರುನಿಗದಿ", start:"ಕೆಲಸ ಪ್ರಾರಂಭಿಸಿ", complete:"ಕೆಲಸ ಪೂರ್ಣಗೊಳಿಸಿ", startAt:"ಹೊಸ ಸೇವಾ ಆರಂಭ",
+    bookings:"ಯಂತ್ರೋಪಕರಣ ಬುಕಿಂಗ್‌ಗಳು", noBookings:"ಇನ್ನೂ ಬುಕಿಂಗ್‌ಗಳಿಲ್ಲ. ಒಪ್ಪಿಕೊಂಡ ಯಂತ್ರೋಪಕರಣ ಕೊಡುಗೆಗಳು ಇಲ್ಲಿ ಕಾಣಿಸುತ್ತವೆ.", transportJobs:"ಕೃಷಿಟ್ರಾನ್ಸಿಟ್ ಕೆಲಸಗಳು", noTransportJobs:"ಒಪ್ಪಿಕೊಂಡ ಸಾರಿಗೆ ವಿನಂತಿಗಳು ಇಲ್ಲಿ ಟ್ರ್ಯಾಕ್ ಮಾಡಬಹುದಾದ ಕೆಲಸಗಳಾಗುತ್ತವೆ.", pickupReady:"ಪಿಕಪ್‌ಗೆ ಸಿದ್ಧ", pickedUp:"ಸರಕು ಪಡೆದಿದೆ", inTransit:"ಸಾಗಣೆಯಲ್ಲಿದೆ", deliveredPending:"ವಿತರಿಸಲಾಗಿದೆ — ಸ್ವೀಕರಿಸುವವರ ದೃಢೀಕರಣ ಬಾಕಿ", transportComplete:"ಸ್ವೀಕೃತಿ ದೃಢಪಡಿಸಿ", transportEvidence:"ಸಾರಿಗೆ / ವಿತರಣೆ ಸಾಕ್ಷ್ಯ", transportNote:"ಸ್ಥಿತಿ ಅಥವಾ ವಿತರಣೆ ಟಿಪ್ಪಣಿ", transportRoute:"ಪಿಕಪ್ → ಗಮ್ಯಸ್ಥಾನ", transportVehicle:"ವಾಹನ / ಸಾಮರ್ಥ್ಯ", loading:"ಲೋಡಿಂಗ್", unloading:"ಅನ್‌ಲೋಡಿಂಗ್", toAgree:"ಒಪ್ಪಂದವಾಗಬೇಕು", requesterResponsibility:"ವಿನಂತಿದಾರರು", transporterResponsibility:"ಸಾರಿಗೆದಾರರು", sharedResponsibility:"ಹಂಚಿಕೆ", uploadTransportEvidence:"ಸಾರಿಗೆ ಸಾಕ್ಷ್ಯ ಅಪ್‌ಲೋಡ್", cancelTransport:"ಸಾರಿಗೆ ಕೆಲಸ ರದ್ದುಮಾಡಿ", cancel:"ಬುಕಿಂಗ್ ರದ್ದುಮಾಡಿ", cancelReason:"ರದ್ದತಿಯ ಕಾರಣ", reschedule:"ಮರುನಿಗದಿ", start:"ಕೆಲಸ ಪ್ರಾರಂಭಿಸಿ", complete:"ಕೆಲಸ ಪೂರ್ಣಗೊಳಿಸಿ", startAt:"ಹೊಸ ಸೇವಾ ಆರಂಭ",
     evidence:"ಕೆಲಸದ ಸಾಕ್ಷ್ಯ", evidenceType:"ಸಾಕ್ಷ್ಯದ ಪ್ರಕಾರ", before:"ಮೊದಲು ಫೋಟೋ", after:"ನಂತರ ಫೋಟೋ", workNote:"ಕೆಲಸದ ಟಿಪ್ಪಣಿ", delivery:"ವಿತರಣೆ ಟಿಪ್ಪಣಿ", otherEvidence:"ಇತರೆ", file:"ಫೋಟೋ ಅಥವಾ PDF ಆಯ್ಕೆಮಾಡಿ", upload:"ಸಾಕ್ಷ್ಯ ಅಪ್‌ಲೋಡ್",
     farmloop:"ಫಾರ್ಮ್‌ಲೂಪ್ ಸಂಸ್ಕಾರಕರ ವಿನಂತಿಗಳು", request:"ಸಂಸ್ಕಾರಕರ ಸ್ವೀಕೃತಿ ವಿನಂತಿ ಕಳುಹಿಸಿ", materialSpec:"ವಸ್ತು ವಿವರ / ಸ್ವೀಕೃತಿ ಷರತ್ತುಗಳು", price:"ಪ್ರಸ್ತಾಪಿತ ಬೆಲೆ ₹ ಪ್ರತಿ ಘಟಕ", quantity:"ಪ್ರಸ್ತಾಪಿತ ಪ್ರಮಾಣ", noByproducts:"ಸಕ್ರಿಯ ಉಪಉತ್ಪನ್ನ ಪಟ್ಟಿಗಳು ಲಭ್ಯವಿಲ್ಲ.",
     quality:"ವಸ್ತು ಗುಣಮಟ್ಟ ಪರಿಶೀಲನೆ", method:"ಪರೀಕ್ಷಾ ವಿಧಾನ / ಮಾದರಿ ಕ್ರಮ", lab:"ಪ್ರಯೋಗಾಲಯ / ಪರೀಕ್ಷಾ ಸಂಸ್ಥೆ", reportRef:"ವರದಿ ಉಲ್ಲೇಖ", tested:"ಪರೀಕ್ಷೆಯ ದಿನಾಂಕ", moisture:"ಅಳೆಯಲಾದ ತೇವಾಂಶ %", contamination:"ಅಳೆಯಲಾದ ಮಿಶ್ರಣ %", reportFile:"ವರದಿ ಸೇರಿಸಿ (PDF ಅಥವಾ ಚಿತ್ರ)", submitCheck:"ಗುಣಮಟ್ಟ ದಾಖಲೆ ಸಲ್ಲಿಸಿ",
@@ -51,8 +53,10 @@ export function OperationsCenter({ onProfileUpdated }: { onProfileUpdated?: () =
       job_started:language==="kn"?"ಕೆಲಸ ಪ್ರಾರಂಭವಾಗಿದೆ":"Job started",job_completed:language==="kn"?"ಕೆಲಸ ಪೂರ್ಣಗೊಂಡಿದೆ":"Job completed",booking_updated:language==="kn"?"ಬುಕಿಂಗ್ ನವೀಕರಿಸಲಾಗಿದೆ":"Booking updated",
       offer_received:language==="kn"?"ಹೊಸ ಕೊಡುಗೆ":"Offer received",offer_accepted:language==="kn"?"ಕೊಡುಗೆ ಒಪ್ಪಲಾಗಿದೆ":"Offer accepted",offer_rejected:language==="kn"?"ಕೊಡುಗೆ ತಿರಸ್ಕರಿಸಲಾಗಿದೆ":"Offer rejected",offer_withdrawn:language==="kn"?"ಕೊಡುಗೆ ಹಿಂಪಡೆಯಲಾಗಿದೆ":"Offer withdrawn",offer_completed:language==="kn"?"ಕೊಡುಗೆ ಪೂರ್ಣಗೊಂಡಿದೆ":"Offer completed",
       processor_request_received:language==="kn"?"ಸಂಸ್ಕಾರಕರ ವಿನಂತಿ ಬಂದಿದೆ":"Processor request received",processor_request_accepted:language==="kn"?"ಸಂಸ್ಕಾರಕರ ವಿನಂತಿ ಒಪ್ಪಲಾಗಿದೆ":"Processor request accepted",processor_request_rejected:language==="kn"?"ಸಂಸ್ಕಾರಕರ ವಿನಂತಿ ತಿರಸ್ಕರಿಸಲಾಗಿದೆ":"Processor request rejected",processor_request_withdrawn:language==="kn"?"ಸಂಸ್ಕಾರಕರ ವಿನಂತಿ ಹಿಂಪಡೆಯಲಾಗಿದೆ":"Processor request withdrawn",
-      booking_created:language==="kn"?"ಬುಕಿಂಗ್ ರಚಿಸಲಾಗಿದೆ":"Booking created",dispute_opened:language==="kn"?"ವಿವಾದ ತೆರೆಯಲಾಗಿದೆ":"Dispute opened",dispute_updated:language==="kn"?"ವಿವಾದ ನವೀಕರಿಸಲಾಗಿದೆ":"Dispute updated",report_submitted:language==="kn"?"ವರದಿ ಸಲ್ಲಿಸಲಾಗಿದೆ":"Report submitted",report_updated:language==="kn"?"ವರದಿ ನವೀಕರಿಸಲಾಗಿದೆ":"Report updated",
+      booking_created:language==="kn"?"ಬುಕಿಂಗ್ ರಚಿಸಲಾಗಿದೆ":"Booking created",pickup_ready:t.pickupReady,picked_up:t.pickedUp,in_transit:t.inTransit,delivered_pending_confirmation:t.deliveredPending,job_confirmed:language==="kn"?"ಸಾರಿಗೆ ಕೆಲಸ ದೃಢಪಟ್ಟಿದೆ":"Transport job confirmed",evidence_added:language==="kn"?"ಸಾಕ್ಷ್ಯ ಸೇರಿಸಲಾಗಿದೆ":"Evidence added",dispute_opened:language==="kn"?"ವಿವಾದ ತೆರೆಯಲಾಗಿದೆ":"Dispute opened",dispute_updated:language==="kn"?"ವಿವಾದ ನವೀಕರಿಸಲಾಗಿದೆ":"Dispute updated",report_submitted:language==="kn"?"ವರದಿ ಸಲ್ಲಿಸಲಾಗಿದೆ":"Report submitted",report_updated:language==="kn"?"ವರದಿ ನವೀಕರಿಸಲಾಗಿದೆ":"Report updated",
       quality_check_submitted:language==="kn"?"ಗುಣಮಟ್ಟ ದಾಖಲೆ ಸಲ್ಲಿಸಲಾಗಿದೆ":"Quality check submitted",quality_check_updated:language==="kn"?"ಗುಣಮಟ್ಟ ದಾಖಲೆ ನವೀಕರಿಸಲಾಗಿದೆ":"Quality check updated",listing_moderated:language==="kn"?"ಪಟ್ಟಿ ಪರಿಶೀಲಿಸಲಾಗಿದೆ":"Listing moderated",
+      municipality_request_submitted:language==="kn"?"ಪುರಸಭೆ ವಿಚಾರಣೆ ಸಲ್ಲಿಸಲಾಗಿದೆ":"Municipal enquiry submitted",municipality_request_updated:language==="kn"?"ಪುರಸಭೆಯ ಪ್ರತಿಕ್ರಿಯೆ ನವೀಕರಿಸಲಾಗಿದೆ":"Municipal response updated",
+      transport_job_created:language==="kn"?"ಸಾರಿಗೆ ಕೆಲಸ ರಚಿಸಲಾಗಿದೆ":"Transport job created",transport_job_updated:language==="kn"?"ಸಾರಿಗೆ ಕೆಲಸ ನವೀಕರಿಸಲಾಗಿದೆ":"Transport job updated",transport_job_started:language==="kn"?"ಸಾರಿಗೆ ಪಿಕಪ್ ಪ್ರಾರಂಭವಾಗಿದೆ":"Transport pickup started",transport_job_completed:language==="kn"?"ಸಾರಿಗೆ ವಿತರಣೆ ಪೂರ್ಣಗೊಂಡಿದೆ":"Transport delivery completed",transport_job_cancelled:language==="kn"?"ಸಾರಿಗೆ ಕೆಲಸ ರದ್ದಾಗಿದೆ":"Transport job cancelled",transport_evidence_added:language==="kn"?"ಸಾರಿಗೆ ಸಾಕ್ಷ್ಯ ಸೇರಿಸಲಾಗಿದೆ":"Transport evidence added",
       farmer:t.farmer,buyer:t.buyer,buyer_trader:t.buyer,provider:t.provider,machinery_owner:t.provider,processor:t.processor,waste_processor:t.processor,fpo:t.fpo,fpo_cooperative:t.fpo,municipality:t.municipality,transporter:t.transporter
     };
     return labels[value] ?? value.replaceAll("_"," ");
@@ -63,6 +67,9 @@ export function OperationsCenter({ onProfileUpdated }: { onProfileUpdated?: () =
   const [listings,setListings] = useState<Row[]>([]);
   const [offers,setOffers] = useState<Row[]>([]);
   const [bookings,setBookings] = useState<Row[]>([]);
+  const [transportJobs,setTransportJobs] = useState<Row[]>([]);
+  const [transportJobEvents,setTransportJobEvents] = useState<Row[]>([]);
+  const [municipalityEnquiries,setMunicipalityEnquiries] = useState<Row[]>([]);
   const [reports,setReports] = useState<Row[]>([]);
   const [disputes,setDisputes] = useState<Row[]>([]);
   const [acceptances,setAcceptances] = useState<Row[]>([]);
@@ -89,24 +96,27 @@ export function OperationsCenter({ onProfileUpdated }: { onProfileUpdated?: () =
       db.from("farmloop_processor_acceptances").select("*").order("created_at",{ascending:false}).limit(100),
       db.from("material_quality_checks").select("*").order("created_at",{ascending:false}).limit(100),
       db.from("user_profiles").select("*").eq("user_id",user.id).maybeSingle(),
-      db.from("participant_notifications").select("*").order("created_at",{ascending:false}).limit(30)
+      db.from("participant_notifications").select("*").order("created_at",{ascending:false}).limit(30),
+      db.from("transport_jobs").select("*").order("scheduled_pickup",{ascending:true}).limit(100),
+      db.from("municipality_service_enquiries").select("id,status,created_at").order("created_at",{ascending:false}).limit(100)
     ]);
     const failures=results.filter(r=>r.error);
-    if(failures.length) setError(failures[0].error?.message ?? t.failed);
+    if(failures.length) setError(friendlyErrorMessage(failures[0].error?.message ?? t.failed, language, t.failed));
     setListings(results[0].data??[]);setOffers(results[1].data??[]);setBookings(results[2].data??[]);
     setReports(results[3].data??[]);setDisputes(results[4].data??[]);setAcceptances(results[5].data??[]);setQuality(results[6].data??[]);
-    setProfile(results[7].data??null);setNotifications(results[8].data??[]);
-    const [eventRows,evidenceRows,participantRows,moderationRows,auditRows] = await Promise.all([
+    setProfile(results[7].data??null);setNotifications(results[8].data??[]);setTransportJobs(results[9].data??[]);setMunicipalityEnquiries(results[10].data??[]);
+    const [eventRows,evidenceRows,participantRows,moderationRows,auditRows,transportEventRows] = await Promise.all([
       db.from("machinery_booking_events").select("*").order("created_at",{ascending:false}).limit(200),
       db.from("machinery_booking_evidence").select("*").order("created_at",{ascending:false}).limit(200),
       admin ? db.from("user_profiles").select("*").order("created_at",{ascending:false}).limit(200) : Promise.resolve({data:[],error:null}),
       admin ? db.from("listing_moderation_actions").select("*").order("created_at",{ascending:false}).limit(200) : Promise.resolve({data:[],error:null}),
-      db.from("platform_audit_events").select("id,table_name,record_id,action,changed_fields,occurred_at,actor_id").order("occurred_at",{ascending:false}).limit(100)
+      db.from("platform_audit_events").select("id,table_name,record_id,action,changed_fields,occurred_at,actor_id").order("occurred_at",{ascending:false}).limit(100),
+      db.from("transport_job_events").select("*").order("created_at",{ascending:false}).limit(200)
     ]);
-    if(eventRows.error||evidenceRows.error||participantRows.error||moderationRows.error||auditRows.error) setError((eventRows.error||evidenceRows.error||participantRows.error||moderationRows.error||auditRows.error)?.message??t.failed);
-    setBookingEvents(eventRows.data??[]);setBookingEvidence(evidenceRows.data??[]);setParticipants(participantRows.data??[]);setModerationActions(moderationRows.data??[]);setAuditEvents(auditRows.data??[]);
+    if(eventRows.error||evidenceRows.error||participantRows.error||moderationRows.error||auditRows.error||transportEventRows.error) setError((eventRows.error||evidenceRows.error||participantRows.error||moderationRows.error||auditRows.error||transportEventRows.error)?.message??t.failed);
+    setBookingEvents(eventRows.data??[]);setBookingEvidence(evidenceRows.data??[]);setParticipants(participantRows.data??[]);setModerationActions(moderationRows.data??[]);setAuditEvents(auditRows.data??[]);setTransportJobEvents(transportEventRows.data??[]);
     setBusy(false);
-  },[db,user,t.failed,admin]);
+  },[db,user,t.failed,admin,language]);
 
   useEffect(()=>{
     if(!db)return;
@@ -129,7 +139,7 @@ export function OperationsCenter({ onProfileUpdated }: { onProfileUpdated?: () =
     if(!db||!user||!profile||profile.verification_status==="pending"||profile.verification_status==="verified")return;
     setBusy(true);
     const {error}=await db.from("user_profiles").update({verification_status:"pending"}).eq("user_id",user.id);
-    if(error)setError(error.message);else{setNotice(t.saved);await refresh();}
+    if(error)setError(friendlyErrorMessage(error, language, t.failed));else{setNotice(t.saved);await refresh();}
     setBusy(false);
   }
 
@@ -137,7 +147,7 @@ export function OperationsCenter({ onProfileUpdated }: { onProfileUpdated?: () =
     if(!db||!user)return;
     const readAt=new Date().toISOString();
     const {error}=await db.from("participant_notifications").update({read_at:readAt}).eq("id",id).is("read_at",null);
-    if(error){setError(error.message);return;}
+    if(error){setError(friendlyErrorMessage(error, language, t.failed));return;}
     setNotifications(rows=>rows.map(row=>row.id===id?{...row,read_at:readAt}:row));
   }
 
@@ -155,7 +165,7 @@ export function OperationsCenter({ onProfileUpdated }: { onProfileUpdated?: () =
     if(displayName.length<2||phone.length<7||district.length<2||taluk.length<2||village.length<2||(requiresOrganisation&&organisationName.length<2)){setError(language==="kn"?"ಹೆಸರು, ಮೊಬೈಲ್ ಮತ್ತು ಸ್ಥಳದ ವಿವರಗಳನ್ನು ಸರಿಯಾಗಿ ಭರ್ತಿ ಮಾಡಿ.":"Enter a valid name, mobile number and complete location.");setBusy(false);return;}
     const payload={display_name:displayName,phone,district,taluk,village,organization_name:organisationName||null,preferred_language:preferredLanguage,profile_completed:true};
     const {error}=await db.from("user_profiles").update(payload).eq("user_id",user.id);
-    if(error)setError(error.message);else{setNotice(t.saved);setLanguage(payload.preferred_language as "en"|"kn");await refresh();onProfileUpdated?.();}
+    if(error)setError(friendlyErrorMessage(error, language, t.failed));else{setNotice(t.saved);setLanguage(payload.preferred_language as "en"|"kn");await refresh();onProfileUpdated?.();}
     setBusy(false);
   }
 
@@ -164,7 +174,7 @@ export function OperationsCenter({ onProfileUpdated }: { onProfileUpdated?: () =
     if(!String(f.get("listing_id")||"")&&!String(f.get("reported_user_id")||"")){setError(language==="kn"?"ಪಟ್ಟಿ ಅಥವಾ ಭಾಗವಹಿಸುವವರನ್ನು ಆಯ್ಕೆಮಾಡಿ.":"Select a listing or participant to report.");return;}
     setBusy(true);
     const {error}=await db.from("participant_reports").insert({reporter_id:user.id,listing_id:String(f.get("listing_id")||"")||null,reported_user_id:String(f.get("reported_user_id")||"")||null,reason:String(f.get("reason")),description:String(f.get("description")??"").trim()});
-    if(error)setError(error.message);else{setNotice(t.saved);form.reset();await refresh();}
+    if(error)setError(friendlyErrorMessage(error, language, t.failed));else{setNotice(t.saved);form.reset();await refresh();}
     setBusy(false);
   }
 
@@ -172,7 +182,7 @@ export function OperationsCenter({ onProfileUpdated }: { onProfileUpdated?: () =
     e.preventDefault();if(!db||!user)return;const form=e.currentTarget;const f=new FormData(form);
     setBusy(true);
     const {error}=await db.from("market_disputes").insert({offer_id:String(f.get("offer_id")),opened_by:user.id,issue_type:String(f.get("issue_type")),description:String(f.get("description")??"").trim()});
-    if(error)setError(error.message);else{setNotice(t.saved);form.reset();await refresh();}
+    if(error)setError(friendlyErrorMessage(error, language, t.failed));else{setNotice(t.saved);form.reset();await refresh();}
     setBusy(false);
   }
 
@@ -181,7 +191,7 @@ export function OperationsCenter({ onProfileUpdated }: { onProfileUpdated?: () =
     if(!listing){setError(t.failed);return;}
     setBusy(true);
     const {error}=await db.from("farmloop_processor_acceptances").insert({listing_id:listing.id,listing_owner_id:listing.owner_id,processor_id:user.id,proposed_quantity:Number(f.get("quantity")),proposed_price_paise:Math.round(Number(f.get("price"))*100),material_specification:String(f.get("specification")??"").trim()});
-    if(error)setError(error.message);else{setNotice(t.saved);form.reset();await refresh();}
+    if(error)setError(friendlyErrorMessage(error, language, t.failed));else{setNotice(t.saved);form.reset();await refresh();}
     setBusy(false);
   }
 
@@ -201,14 +211,14 @@ export function OperationsCenter({ onProfileUpdated }: { onProfileUpdated?: () =
       const {error}=await db.from("material_quality_checks").insert({listing_id:listingId,submitted_by:user.id,moisture_pct:f.get("moisture")?Number(f.get("moisture")):null,contamination_pct:f.get("contamination")?Number(f.get("contamination")):null,test_method:String(f.get("method")??"").trim(),laboratory_name:String(f.get("lab")??"").trim()||null,report_reference:String(f.get("report_reference")??"").trim()||null,report_object_path:objectPath,tested_at:String(f.get("tested_at")??"")||null});
       if(error)throw error;
       setNotice(t.saved);form.reset();await refresh();
-    }catch(err){setError(err instanceof Error?err.message:t.failed);}
+    }catch(err){setError(friendlyErrorMessage(err, language, t.failed));}
     setBusy(false);
   }
 
   async function updateBooking(id:string,patch:Row){
     if(!db)return;setBusy(true);
     const {error}=await db.from("machinery_bookings").update(patch).eq("id",id);
-    if(error)setError(error.message);else{setNotice(t.saved);await refresh();}
+    if(error)setError(friendlyErrorMessage(error, language, t.failed));else{setNotice(t.saved);await refresh();}
     setBusy(false);
   }
 
@@ -226,20 +236,45 @@ export function OperationsCenter({ onProfileUpdated }: { onProfileUpdated?: () =
       const {error}=await db.from("machinery_booking_evidence").insert({booking_id:bookingId,uploaded_by:user.id,evidence_type:String(f.get("evidence_type")),object_path:path,note:String(f.get("note")??"").trim()||null});
       if(error)throw error;
       setNotice(t.saved);form.reset();await refresh();
-    }catch(err){setError(err instanceof Error?err.message:t.failed);}
+    }catch(err){setError(friendlyErrorMessage(err, language, t.failed));}
     setBusy(false);
   }
 
+  async function updateTransportJob(id:string,status:string,note:string,cancellationReason?:string){
+    if(!db)return;setBusy(true);setError("");
+    const {error}=await db.from("transport_jobs").update({status,status_note:note.trim()||null,cancellation_reason:cancellationReason??null}).eq("id",id);
+    if(error)setError(friendlyErrorMessage(error, language, t.failed));else{setNotice(t.saved);await refresh();}
+    setBusy(false);
+  }
+
+  async function uploadTransportEvidence(e:FormEvent<HTMLFormElement>,jobId:string){
+    e.preventDefault();if(!db||!user)return;const form=e.currentTarget,f=new FormData(form),file=f.get("file") as File;
+    if(!file||!file.size){setError(t.failed);return;}
+    if(file.size>10*1024*1024){setError(t.evidenceLimit);return;}
+    if(!["image/jpeg","image/png","image/webp","application/pdf"].includes(file.type)){setError(language==="kn"?"PDF ಅಥವಾ JPG, PNG, WebP ಚಿತ್ರ ಮಾತ್ರ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ.":"Upload a PDF or JPG, PNG, WebP image only.");return;}
+    setBusy(true);setError("");
+    try{const ext=file.name.split(".").pop()?.toLowerCase()||"jpg",path=jobId+"/"+user.id+"/"+crypto.randomUUID()+"."+ext;
+      const upload=await db.storage.from("transport-evidence").upload(path,file,{contentType:file.type,upsert:false});if(upload.error)throw upload.error;
+      const {error}=await db.from("transport_job_events").insert({job_id:jobId,actor_id:user.id,event_type:"evidence_added",note:String(f.get("note")??"").trim()||null,object_path:path});if(error)throw error;
+      setNotice(t.saved);form.reset();await refresh();
+    }catch(err){setError(friendlyErrorMessage(err, language, t.failed))}
+    setBusy(false);
+  }
+
+  async function openTransportEvidence(path:string){
+    if(!db)return;const {data,error}=await db.storage.from("transport-evidence").createSignedUrl(path,60);if(error)setError(friendlyErrorMessage(error, language, t.failed));else if(data?.signedUrl)window.open(data.signedUrl,"_blank","noopener,noreferrer");
+  }
+
   async function updateAcceptance(id:string,status:"accepted"|"rejected"|"withdrawn") {
-    if(!db)return;setBusy(true);const {error}=await db.from("farmloop_processor_acceptances").update({status}).eq("id",id);if(error)setError(error.message);else{setNotice(t.saved);await refresh();}setBusy(false);
+    if(!db)return;setBusy(true);const {error}=await db.from("farmloop_processor_acceptances").update({status}).eq("id",id);if(error)setError(friendlyErrorMessage(error, language, t.failed));else{setNotice(t.saved);await refresh();}setBusy(false);
   }
 
   async function openEvidence(path:string){
-    if(!db)return;const {data,error}=await db.storage.from("booking-evidence").createSignedUrl(path,60);if(error)setError(error.message);else if(data?.signedUrl)window.open(data.signedUrl,"_blank","noopener,noreferrer");
+    if(!db)return;const {data,error}=await db.storage.from("booking-evidence").createSignedUrl(path,60);if(error)setError(friendlyErrorMessage(error, language, t.failed));else if(data?.signedUrl)window.open(data.signedUrl,"_blank","noopener,noreferrer");
   }
 
   async function openQualityReport(path:string){
-    if(!db)return;const {data,error}=await db.storage.from("quality-reports").createSignedUrl(path,60);if(error)setError(error.message);else if(data?.signedUrl)window.open(data.signedUrl,"_blank","noopener,noreferrer");
+    if(!db)return;const {data,error}=await db.storage.from("quality-reports").createSignedUrl(path,60);if(error)setError(friendlyErrorMessage(error, language, t.failed));else if(data?.signedUrl)window.open(data.signedUrl,"_blank","noopener,noreferrer");
   }
 
   async function adminModerateListing(id:string,status:string,reason:string){
@@ -247,21 +282,21 @@ export function OperationsCenter({ onProfileUpdated }: { onProfileUpdated?: () =
     if(reason.trim().length<10){setError(language==="kn"?"ಕನಿಷ್ಠ 10 ಅಕ್ಷರಗಳ ಕಾರಣ ನೀಡಿ.":"Provide a moderation reason of at least 10 characters.");return;}
     setBusy(true);
     const {error}=await db.rpc("admin_moderate_listing",{p_listing_id:id,p_status:status,p_reason:reason.trim()});
-    if(error)setError(error.message);else{setNotice(t.saved);await refresh();}
+    if(error)setError(friendlyErrorMessage(error, language, t.failed));else{setNotice(t.saved);await refresh();}
     setBusy(false);
   }
 
   async function adminProfileUpdate(id:string,patch:Row){
     if(!db||!admin)return;setBusy(true);
     const {error}=await db.from("user_profiles").update(patch).eq("user_id",id);
-    if(error)setError(error.message);else{setNotice(t.saved);await refresh();}
+    if(error)setError(friendlyErrorMessage(error, language, t.failed));else{setNotice(t.saved);await refresh();}
     setBusy(false);
   }
 
   async function adminUpdate(table:string,id:string,patch:Row){
     if(!db||!admin)return;setBusy(true);
     const {error}=await db.from(table).update(patch).eq("id",id);
-    if(error)setError(error.message);else{setNotice(t.saved);await refresh();}
+    if(error)setError(friendlyErrorMessage(error, language, t.failed));else{setNotice(t.saved);await refresh();}
     setBusy(false);
   }
 
@@ -294,11 +329,11 @@ export function OperationsCenter({ onProfileUpdated }: { onProfileUpdated?: () =
   ] : role === "transporter" ? [
     { label:{en:"Your transport listings",kn:"ನಿಮ್ಮ ಸಾರಿಗೆ ಪಟ್ಟಿಗಳು"}, value:ownListings.filter(row=>row.category==="transport").length },
     { label:{en:"Transport requests",kn:"ಸಾರಿಗೆ ವಿನಂತಿಗಳು"}, value:ownOffers.filter(row=>listings.find(item=>item.id===row.listing_id)?.category==="transport").length },
-    { label:{en:"Pending requests",kn:"ಬಾಕಿ ವಿನಂತಿಗಳು"}, value:incomingOffers.filter(row=>listings.find(item=>item.id===row.listing_id)?.category==="transport").length },
+    { label:{en:"Active transport jobs",kn:"ಸಕ್ರಿಯ ಸಾರಿಗೆ ಕೆಲಸಗಳು"}, value:transportJobs.filter(row=>row.transporter_id===user.id&&!['completed','cancelled'].includes(row.status)).length },
   ] : role === "municipality" ? [
-    { label:{en:"Active local listings",kn:"ಸಕ್ರಿಯ ಸ್ಥಳೀಯ ಪಟ್ಟಿಗಳು"}, value:listings.filter(row=>row.status==="active").length },
-    { label:{en:"Reports you submitted",kn:"ನೀವು ಸಲ್ಲಿಸಿದ ವರದಿಗಳು"}, value:reports.length },
-    { label:{en:"Open disputes visible",kn:"ಕಾಣುವ ತೆರೆದ ವಿವಾದಗಳು"}, value:disputes.filter(row=>["open","in_review"].includes(row.status)).length },
+    { label:{en:"New local enquiries",kn:"ಹೊಸ ಸ್ಥಳೀಯ ವಿಚಾರಣೆಗಳು"}, value:municipalityEnquiries.filter(row=>row.status==="submitted").length },
+    { label:{en:"Enquiries in progress",kn:"ಪ್ರಗತಿಯಲ್ಲಿರುವ ವಿಚಾರಣೆಗಳು"}, value:municipalityEnquiries.filter(row=>["acknowledged","information_provided","referred"].includes(row.status)).length },
+    { label:{en:"Closed enquiries",kn:"ಮುಚ್ಚಿದ ವಿಚಾರಣೆಗಳು"}, value:municipalityEnquiries.filter(row=>row.status==="closed").length },
   ] : [
     { label:{en:"Your organisation listings",kn:"ನಿಮ್ಮ ಸಂಸ್ಥೆಯ ಪಟ್ಟಿಗಳು"}, value:ownListings.length },
     { label:{en:"Offers involving your lots",kn:"ನಿಮ್ಮ ಪಟ್ಟಿಗಳಿಗೆ ಸಂಬಂಧಿಸಿದ ಕೊಡುಗೆಗಳು"}, value:ownOffers.length },
@@ -311,13 +346,15 @@ export function OperationsCenter({ onProfileUpdated }: { onProfileUpdated?: () =
     {error&&<div className="inline-alert error" role="alert">{error}<button onClick={()=>setError("")}>×</button></div>}
     {notice&&<div className="inline-alert success" role="status">{notice}<button onClick={()=>setNotice("")}>×</button></div>}
 
+    {profile?.participant_type === "fpo_cooperative" && <FpoWorkspace />}
+
     <div className="operations-grid">
       <article className="operations-card">
         <h3>{t.profile}</h3>
         <form key={profile?.user_id??"profile-loading"} onSubmit={saveProfile} className="operations-form">
           <label>{t.name}<input name="display_name" maxLength={80} minLength={2} required defaultValue={profile?.display_name??""} placeholder={t.displayNameHint}/></label>
           <label>{t.role}<input value={enumLabel(profile?.participant_type??"farmer")} readOnly aria-readonly="true"/></label>
-          <div className="operations-two"><label>{t.phone}<input name="phone" type="tel" minLength={7} maxLength={20} required defaultValue={profile?.phone??""}/></label><label>{t.language}<select name="preferred_language" defaultValue={profile?.preferred_language??language}><option value="en">English</option><option value="kn">ಕನ್ನಡ</option></select></label></div>
+          <div className="operations-two"><label>{t.phone}<input name="phone" type="tel" minLength={7} maxLength={20} required defaultValue={profile?.phone??""}/></label><label>{t.language}<select name="preferred_language" defaultValue={profile?.preferred_language??language}><option value="en">{language==="kn"?"ಇಂಗ್ಲಿಷ್":"English"}</option><option value="kn">ಕನ್ನಡ</option></select></label></div>
           <div className="operations-two"><label>{t.district}<input name="district" required maxLength={80} defaultValue={profile?.district??""}/></label><label>{t.taluk}<input name="taluk" required maxLength={80} defaultValue={profile?.taluk??""}/></label></div>
           <label>{t.village}<input name="village" required maxLength={100} defaultValue={profile?.village??""}/></label>
           <label>{t.organisation}<input name="organization_name" maxLength={160} required={["municipality","fpo_cooperative"].includes(profile?.participant_type??"")} defaultValue={profile?.organization_name??""}/></label>
@@ -391,7 +428,7 @@ export function OperationsCenter({ onProfileUpdated }: { onProfileUpdated?: () =
     <div className="operations-section">
       <h3>{t.bookings}</h3>
       {bookings.length===0?<p className="operations-empty">{t.noBookings}</p>:bookings.map(b=><article className="operations-row" key={b.id}>
-        <div><b>{listings.find(l=>l.id===b.listing_id)?.title??(language==="kn"?"ಯಂತ್ರೋಪಕರಣ ಸೇವೆ":"Machinery service")}</b><p>{new Date(b.scheduled_start).toLocaleString(language==="kn"?"kn-IN":"en-IN")} · {b.duration_hours} {language==="kn"?"ಗಂಟೆ":"hrs"} · {t[b.status as keyof typeof t]??b.status}</p><small>Booking {b.id.slice(0,8)}</small></div>
+        <div><b>{listings.find(l=>l.id===b.listing_id)?.title??(language==="kn"?"ಯಂತ್ರೋಪಕರಣ ಸೇವೆ":"Machinery service")}</b><p>{new Date(b.scheduled_start).toLocaleString(language==="kn"?"kn-IN":"en-IN")} · {b.duration_hours} {language==="kn"?"ಗಂಟೆ":"hrs"} · {t[b.status as keyof typeof t]??b.status}</p><small>{language==="kn"?"ಬುಕಿಂಗ್":"Booking"} {b.id.slice(0,8)}</small></div>
         <div className="operations-actions">
           {b.provider_id===user.id&&["confirmed","rescheduled"].includes(b.status)&&<><form onSubmit={e=>{e.preventDefault();const f=new FormData(e.currentTarget);void updateBooking(b.id,{status:"rescheduled",scheduled_start:new Date(String(f.get("start"))).toISOString()});}}><label>{t.startAt}<input type="datetime-local" name="start" required min={new Date(Date.now()+60000-new Date().getTimezoneOffset()*60000).toISOString().slice(0,16)}/></label><button className="button button-quiet" disabled={busy}>{t.reschedule}</button></form><button className="button button-quiet" onClick={()=>void updateBooking(b.id,{status:"in_progress"})} disabled={busy}>{t.start}</button></>}
           {b.provider_id===user.id&&b.status==="in_progress"&&<button className="button button-primary" onClick={()=>void updateBooking(b.id,{status:"completed"})} disabled={busy}>{t.complete}</button>}
@@ -401,6 +438,23 @@ export function OperationsCenter({ onProfileUpdated }: { onProfileUpdated?: () =
         </div>
       </article>)}
     </div>
+
+    {(transportJobs.length>0 || profile?.participant_type==="transporter")&&<div className="operations-section">
+      <h3>{t.transportJobs}</h3>
+      {transportJobs.length===0?<p className="operations-empty">{t.noTransportJobs}</p>:transportJobs.map(job=><article className="operations-row transport-job-row" key={job.id}>
+        <div className="transport-job-summary"><b>{job.pickup_location} → {job.destination}</b><p>{job.vehicle_type} · {job.capacity_tonnes} t · {new Date(job.scheduled_pickup).toLocaleString(language==="kn"?"kn-IN":"en-IN")}</p><small>{t.status}: {enumLabel(job.status)} · {t.loading}: {enumLabel(job.loading_responsibility)} · {t.unloading}: {enumLabel(job.unloading_responsibility)}</small></div>
+        <div className="transport-job-actions">
+          {job.transporter_id===user.id&&job.status==="confirmed"&&<button className="button button-primary" onClick={()=>void updateTransportJob(job.id,"pickup_ready","")} disabled={busy}>{t.pickupReady}</button>}
+          {job.transporter_id===user.id&&job.status==="pickup_ready"&&<button className="button button-primary" onClick={()=>void updateTransportJob(job.id,"picked_up","")} disabled={busy}>{t.pickedUp}</button>}
+          {job.transporter_id===user.id&&job.status==="picked_up"&&<button className="button button-primary" onClick={()=>void updateTransportJob(job.id,"in_transit","")} disabled={busy}>{t.inTransit}</button>}
+          {job.transporter_id===user.id&&job.status==="in_transit"&&<button className="button button-primary" onClick={()=>void updateTransportJob(job.id,"delivered_pending_confirmation","")} disabled={busy}>{t.deliveredPending}</button>}
+          {job.requester_id===user.id&&job.status==="delivered_pending_confirmation"&&<button className="button button-primary" onClick={()=>void updateTransportJob(job.id,"completed","")} disabled={busy}>{t.transportComplete}</button>}
+          {job.status==="confirmed"||job.status==="pickup_ready"?<form onSubmit={e=>{e.preventDefault();const f=new FormData(e.currentTarget);void updateTransportJob(job.id,"cancelled","",String(f.get("reason")??""));}}><label>{t.cancelReason}<input name="reason" required minLength={5} maxLength={500}/></label><button className="button button-danger" disabled={busy}>{t.cancelTransport}</button></form>:null}
+          <form className="evidence-form" onSubmit={e=>void uploadTransportEvidence(e,job.id)}><label>{t.transportEvidence}<input name="file" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" required/></label><input name="note" maxLength={500} placeholder={t.transportNote}/><button className="button button-quiet" disabled={busy}>{t.uploadTransportEvidence}</button></form>
+          <div className="booking-history">{transportJobEvents.filter(x=>x.job_id===job.id).map(event=><div key={event.id}><small>{enumLabel(event.event_type)} · {new Date(event.created_at).toLocaleString(language==="kn"?"kn-IN":"en-IN")}{event.note?` · ${event.note}`:""}</small>{event.object_path&&<button className="button button-quiet" onClick={()=>void openTransportEvidence(event.object_path)}>{t.openReport} ↗</button>}</div>)}</div>
+        </div>
+      </article>)}
+    </div>}
 
     <div className="operations-section">
       <h3>{language === "kn" ? "ಖಾತೆ ಮತ್ತು ಡೇಟಾ ಚಟುವಟಿಕೆ ಇತಿಹಾಸ" : "Account and data activity history"}</h3>

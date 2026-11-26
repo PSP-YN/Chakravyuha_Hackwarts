@@ -15,12 +15,17 @@
 - [x] Category-specific machinery fields: operation, HP range, implement, operator, fuel, minimum hours and availability dates.
 - [x] Machinery service requests with start time/duration and database-enforced accepted-booking overlap prevention.
 - [x] By-product material type, moisture, contamination, collection radius and availability deadline.
-- [x] Database constraints for required category details and offer capacity.
+- [x] KrishiTransit accepted-job lifecycle, delivery confirmation, evidence and notifications.
+- [x] FPO member register and member-attributed aggregate produce lots.
+- [x] District-scoped municipality enquiries, official response and shared timeline.
+- [x] Storage Guardian ESP32 firmware, sensor model, telemetry API, simulator and key revocation.
+- [x] Role-specific database listing/offer constraints, terms consent and English/Kannada UI/audio.
 - [ ] Two-account RLS and complete browser journey against real user accounts.
-- [ ] Kannada copy review, field validation with local farmers, low-connectivity testing and moderation/dispute handling.
+- [ ] Production SMTP delivery, backup/restore drill, retention policy and incident response.
+- [ ] Kannada copy review, field validation with local farmers, low-connectivity testing and physical hardware acceptance.
 
-## Phase 3 — Integrations (not in this prototype)
-- AGMARKNET/data.gov.in adapters with provenance, FPO workspace, transport quotes, notifications and authorised public-system integrations.
+## Phase 3 — External integrations (future)
+- More robust AGMARKNET/data.gov.in ingestion and provenance; authorised public-system integrations; verified local-body service catalogues; route/vehicle data; sensor calibration and optional device fleet management.
 
 ## Phase 4 — Commercial readiness (not in this prototype)
 - Pricing tests, KYC/legal/refund/dispute design, partner SLAs, security review, backup/restore drill and measured geographic expansion.

@@ -10,7 +10,7 @@ export function assessStorageCondition(input: {
   relativeHumidityPct: number;
   grainTemperatureC: number;
   previousGrainTemperatureC?: number | null;
-}) : StorageCondition {
+}): StorageCondition {
   const delta = input.grainTemperatureC - input.ambientTemperatureC;
   const trend = input.previousGrainTemperatureC == null
     ? null
@@ -43,19 +43,26 @@ export function assessStorageCondition(input: {
 
   if (trend !== null && trend >= 2) {
     score += 25;
-    reasons.push("Grain core temperature rose by at least 2 C in the recent comparison window");
+    reasons.push(
+      "Grain core temperature rose by at least 2 C in the recent comparison window",
+    );
   } else if (trend !== null && trend >= 1) {
     score += 10;
     reasons.push("Grain core temperature is trending upward");
   }
 
   score = Math.min(100, score);
-  const level = score >= 75 ? "URGENT"
-    : score >= 50 ? "ACTION"
-    : score >= 25 ? "WATCH"
+  const level = score >= 75
+    ? "URGENT"
+    : score >= 50
+    ? "ACTION"
+    : score >= 25
+    ? "WATCH"
     : "NORMAL";
 
-  if (reasons.length === 0) reasons.push("No configured storage-condition trigger is currently active");
+  if (reasons.length === 0) {
+    reasons.push("No configured storage-condition trigger is currently active");
+  }
 
   return {
     score,

@@ -4,3 +4,31 @@ export type Offer = { id:string; listing_id:string; buyer_id:string; owner_id:st
 export const toPaise = (value:string) => { const n=Number(value); if(!Number.isFinite(n)||n<0||!Number.isSafeInteger(Math.round(n*100))) throw new Error("Enter a valid amount."); return Math.round(n*100); };
 export const money = (paise:number) => new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",minimumFractionDigits:0,maximumFractionDigits:2}).format(paise/100);
 export const netPaise = (o:Offer) => o.offered_price_paise*o.accepted_quantity-o.transport_cost_paise-o.handling_cost_paise-o.commission_cost_paise-o.other_cost_paise;
+
+
+export type TransportJobStatus = "confirmed" | "pickup_ready" | "picked_up" | "in_transit" | "delivered_pending_confirmation" | "completed" | "cancelled";
+export function canTransitionTransportJob(from: TransportJobStatus, to: TransportJobStatus, actor: "requester" | "transporter"): boolean {
+  if (from === "confirmed" && to === "pickup_ready") return actor === "transporter";
+  if (from === "pickup_ready" && to === "picked_up") return actor === "transporter";
+  if (from === "picked_up" && to === "in_transit") return actor === "transporter";
+  if (from === "in_transit" && to === "delivered_pending_confirmation") return actor === "transporter";
+  if (from === "delivered_pending_confirmation" && to === "completed") return actor === "requester";
+  if ((from === "confirmed" || from === "pickup_ready") && to === "cancelled") return true;
+  return false;
+}
+
+export function validateFpoAllocations(total: number, allocations: { memberId: string; quantity: number }[], activeMemberIds: Set<string>): boolean {
+  if (!Number.isFinite(total) || total <= 0 || allocations.length === 0) return false;
+  const ids = allocations.map((item) => item.memberId);
+  if (ids.some((id) => !id || !activeMemberIds.has(id)) || new Set(ids).size !== ids.length) return false;
+  if (allocations.some((item) => !Number.isFinite(item.quantity) || item.quantity <= 0)) return false;
+  const sum = allocations.reduce((value, item) => value + item.quantity, 0);
+  return Math.abs(sum - total) < 0.0005;
+}
+
+
+export function canMakeOffer(role: string, category: Category): boolean {
+  if (role === "farmer" || role === "fpo_cooperative" || role === "fpo") return ["produce", "machinery", "transport"].includes(category);
+  if (role === "buyer_trader" || role === "buyer" || role === "machinery_owner" || role === "provider") return ["produce", "transport"].includes(category);
+  return false;
+}

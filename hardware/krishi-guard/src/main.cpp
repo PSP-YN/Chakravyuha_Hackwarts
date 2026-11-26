@@ -5,21 +5,43 @@
 #include <DHTesp.h>
 #include <OneWire.h>
 #include <DallasTemperature.h>
-#if __has_include("../secrets.h")
-#include "../secrets.h"
+#if defined(KRISHI_GUARD_PHYSICAL_BUILD)
+  #if __has_include("../secrets.h")
+    #include "../secrets.h"
+  #else
+    #error "Physical firmware requires hardware/krishi-guard/secrets.h. Copy secrets.example.h and provision a real registered device key."
+  #endif
 #else
-#include "../secrets.example.h"
+  #include "../secrets.example.h"
 #endif
 #include "../certs.h"
+
+#ifndef KRISHI_GUARD_ENABLE_TELEMETRY
+#define KRISHI_GUARD_ENABLE_TELEMETRY 0
+#endif
+
+#if defined(KRISHI_GUARD_PHYSICAL_BUILD) && !KRISHI_GUARD_ENABLE_TELEMETRY
+  #error "Physical builds must enable authenticated device telemetry."
+#endif
+#if defined(KRISHI_GUARD_PHYSICAL_BUILD)
+  #ifndef KRISHI_GUARD_DEVICE_KEY
+    #error "Physical builds require a registered device key."
+  #endif
+  static_assert(sizeof(KRISHI_GUARD_DEVICE_KEY) == 65,
+    "KRISHI_GUARD_DEVICE_KEY must be the 64-character one-time device key.");
+#endif
+#if defined(KRISHI_GUARD_WOKWI) && KRISHI_GUARD_ENABLE_TELEMETRY
+  #error "Public Wokwi simulations must not contain production device credentials."
+#endif
 
 #define DHT_PIN 15
 #define DS18B20_PIN 4
 #define STATUS_LED 2
 #define BUZZER_PIN 18
-
-#ifndef KRISHI_GUARD_ENABLE_TELEMETRY
-#define KRISHI_GUARD_ENABLE_TELEMETRY 0
-#endif
+#define RAIN_SENSOR_PIN 34
+#define RODENT_PIR_PIN 27
+#define INSECT_BEAM_PIN 26
+#define WATER_INGRESS_PIN 25
 
 DHTesp dht;
 OneWire oneWire(DS18B20_PIN);
@@ -27,10 +49,6 @@ DallasTemperature grainProbe(&oneWire);
 
 constexpr unsigned long SAMPLE_INTERVAL_MS = 2500;
 constexpr unsigned long SEND_INTERVAL_MS = 30000;
-constexpr float WATCH_HUMIDITY_PCT = 75.0;
-constexpr float URGENT_HUMIDITY_PCT = 80.0;
-constexpr float WATCH_DELTA_C = 4.0;
-constexpr float URGENT_DELTA_C = 6.0;
 
 unsigned long lastSample = 0;
 unsigned long lastSend = 0;
@@ -38,7 +56,28 @@ unsigned long lastWiFiAttempt = 0;
 float ambientTemperatureC = NAN;
 float relativeHumidityPct = NAN;
 float grainTemperatureC = NAN;
+float previousGrainTemperatureC = NAN;
 bool sensorFault = false;
+int rainIntensityPct = 0;
+bool rodentMotionDetected = false;
+bool waterIngressDetected = false;
+volatile uint32_t insectTrapPulses = 0;
+volatile uint32_t lastInsectEdgeUs = 0;
+constexpr uint32_t INSECT_DEBOUNCE_US = 50000;
+portMUX_TYPE insectMux = portMUX_INITIALIZER_UNLOCKED;
+uint32_t lastAlertedInsectPulses = 0;
+uint32_t rodentMotionEvents = 0;
+uint32_t lastAlertedRodentEvents = 0;
+bool previousRodentMotion = false;
+
+void IRAM_ATTR onInsectBeamBreak() {
+  const uint32_t nowUs = micros();
+  if (nowUs - lastInsectEdgeUs < INSECT_DEBOUNCE_US) return;
+  lastInsectEdgeUs = nowUs;
+  portENTER_CRITICAL_ISR(&insectMux);
+  insectTrapPulses = insectTrapPulses + 1;
+  portEXIT_CRITICAL_ISR(&insectMux);
+}
 
 void beginWiFi() {
   WiFi.mode(WIFI_STA);
@@ -84,16 +123,39 @@ bool readSensors() {
   return true;
 }
 
-void updateLocalAlarm() {
+int assessConditionScore() {
   const float delta = grainTemperatureC - ambientTemperatureC;
-  const bool urgent = relativeHumidityPct >= URGENT_HUMIDITY_PCT &&
-                      delta >= URGENT_DELTA_C;
-  const bool watch = relativeHumidityPct >= WATCH_HUMIDITY_PCT ||
-                     delta >= WATCH_DELTA_C;
+  const float trend = isnan(previousGrainTemperatureC)
+      ? NAN
+      : grainTemperatureC - previousGrainTemperatureC;
+  int score = 0;
 
-  digitalWrite(STATUS_LED, urgent ? HIGH : LOW);
+  if (relativeHumidityPct >= 80.0) score += 40;
+  else if (relativeHumidityPct >= 75.0) score += 25;
+  else if (relativeHumidityPct >= 65.0) score += 10;
+
+  if (delta >= 6.0) score += 35;
+  else if (delta >= 4.0) score += 20;
+  else if (delta >= 2.0) score += 10;
+
+  if (!isnan(trend)) {
+    if (trend >= 2.0) score += 25;
+    else if (trend >= 1.0) score += 10;
+  }
+  return min(score, 100);
+}
+
+void updateLocalAlarm(int score, bool pestAlert, bool waterIngressAlert, bool sensorFaultAlert = false) {
+  const bool urgent = score >= 75;
+  const bool action = score >= 50;
+  const bool watch = score >= 25;
+  digitalWrite(STATUS_LED, (watch || pestAlert || waterIngressAlert || sensorFaultAlert) ? HIGH : LOW);
   if (urgent) tone(BUZZER_PIN, 1800, 350);
+  else if (action) tone(BUZZER_PIN, 1300, 220);
   else if (watch) tone(BUZZER_PIN, 900, 100);
+  else if (waterIngressAlert) tone(BUZZER_PIN, 1500, 250);
+  else if (sensorFaultAlert) tone(BUZZER_PIN, 1200, 150);
+  else if (pestAlert) tone(BUZZER_PIN, 1100, 180);
   else noTone(BUZZER_PIN);
 }
 
@@ -120,12 +182,27 @@ bool sendTelemetry() {
   http.addHeader("apikey", SUPABASE_PUBLISHABLE_KEY);
   http.addHeader("x-device-key", KRISHI_GUARD_DEVICE_KEY);
 
+  uint32_t pulseSnapshot;
+  portENTER_CRITICAL(&insectMux);
+  pulseSnapshot = insectTrapPulses;
+  portEXIT_CRITICAL(&insectMux);
+  const char *pestStatus = (rodentMotionEvents >= 3 || pulseSnapshot >= 3)
+      ? "ACTION" : (pulseSnapshot > 0 || rodentMotionEvents > 0) ? "WATCH" : "CLEAR";
   String payload = "{";
   payload += "\"action\":\"telemetry\",";
   payload += "\"ambient_temperature_c\":" + String(ambientTemperatureC, 2) + ",";
   payload += "\"relative_humidity_pct\":" + String(relativeHumidityPct, 2) + ",";
-  payload += "\"grain_temperature_c\":" + String(grainTemperatureC, 2);
-  payload += "}";
+  payload += "\"grain_temperature_c\":" + String(grainTemperatureC, 2) + ",";
+  payload += "\"environmental_context\":{";
+  payload += "\"rain_intensity_pct\":" + String(rainIntensityPct) + ",";
+  // A contact at the sensor location confirms water presence, not a roof leak.
+  payload += "\"water_ingress_detected\":" + String(waterIngressDetected ? "true" : "false") + ",";
+  payload += "\"rodent_motion_events\":" + String(rodentMotionEvents) + ",";
+  payload += "\"insect_trap_pulses\":" + String(pulseSnapshot) + ",";
+  payload += "\"pest_status\":\"";
+  payload += pestStatus;
+  payload += "\",";
+  payload += "\"scenario\":\"physical sensor node\"}}";
 
   const int code = http.POST(payload);
   const String response = http.getString();
@@ -140,6 +217,11 @@ void setup() {
   Serial.begin(115200);
   pinMode(STATUS_LED, OUTPUT);
   pinMode(BUZZER_PIN, OUTPUT);
+  pinMode(RAIN_SENSOR_PIN, INPUT);
+  pinMode(RODENT_PIR_PIN, INPUT);
+  pinMode(INSECT_BEAM_PIN, INPUT_PULLUP);
+  pinMode(WATER_INGRESS_PIN, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(INSECT_BEAM_PIN), onInsectBeamBreak, FALLING);
   digitalWrite(STATUS_LED, LOW);
   noTone(BUZZER_PIN);
 
@@ -160,18 +242,53 @@ void loop() {
   }
   lastSample = now;
 
+  // Read independent environmental and pest channels even when a climate sensor fails.
+  // A failed DHT22/DS18B20 must never suppress a water-contact or pest alarm.
+  rainIntensityPct = constrain(map(analogRead(RAIN_SENSOR_PIN), 4095, 0, 0, 100), 0, 100);
+  rodentMotionDetected = digitalRead(RODENT_PIR_PIN) == HIGH;
+  waterIngressDetected = digitalRead(WATER_INGRESS_PIN) == LOW;
+  if (rodentMotionDetected && !previousRodentMotion) rodentMotionEvents++;
+  previousRodentMotion = rodentMotionDetected;
+  uint32_t pulseSnapshot;
+  portENTER_CRITICAL(&insectMux);
+  pulseSnapshot = insectTrapPulses;
+  portEXIT_CRITICAL(&insectMux);
+  const bool newInsectPulse = pulseSnapshot > lastAlertedInsectPulses;
+  const bool newRodentEvent = rodentMotionEvents > lastAlertedRodentEvents;
+  const bool pestAlert = rodentMotionDetected || newInsectPulse || newRodentEvent;
+  lastAlertedInsectPulses = pulseSnapshot;
+  lastAlertedRodentEvents = rodentMotionEvents;
+
   if (!readSensors()) {
-    Serial.println("SENSOR FAULT - check DHT22 / DS18B20 wiring");
-    digitalWrite(STATUS_LED, HIGH);
-    tone(BUZZER_PIN, 1200, 150);
+    // Break the trend chain across a sensor fault; never compare against stale data.
+    // Preserve independent water-ingress and pest alarms while climate data is unavailable.
+    previousGrainTemperatureC = NAN;
+    updateLocalAlarm(0, pestAlert, waterIngressDetected, true);
+    Serial.printf("SENSOR FAULT - check DHT22 / DS18B20 wiring | RAIN %d%% | WATER_INGRESS %s | RODENT %s | INSECT_PULSES %lu | PEST %s\n",
+                  rainIntensityPct,
+                  waterIngressDetected ? "ACTIVE" : "CLEAR",
+                  rodentMotionDetected ? "MOTION" : "CLEAR",
+                  (unsigned long)pulseSnapshot,
+                  pestAlert ? "ALERT" : "CLEAR");
     return;
   }
 
-  updateLocalAlarm();
   const float delta = grainTemperatureC - ambientTemperatureC;
-  Serial.printf("AIR %.1f C | RH %.1f %% | GRAIN %.1f C | DELTA %.1f C\n",
-                ambientTemperatureC, relativeHumidityPct,
-                grainTemperatureC, delta);
+  const int conditionScore = assessConditionScore();
+  updateLocalAlarm(conditionScore, pestAlert, waterIngressDetected);
+  const float trend = isnan(previousGrainTemperatureC)
+      ? 0.0
+      : grainTemperatureC - previousGrainTemperatureC;
+  const char *conditionLevel = conditionScore >= 75 ? "URGENT"
+      : conditionScore >= 50 ? "ACTION"
+      : conditionScore >= 25 ? "WATCH" : "NORMAL";
+  Serial.printf("AIR %.1f C | RH %.1f %% | GRAIN %.1f C | DELTA %.1f C | TREND %.1f C | SCORE %d | %s | RAIN %d%% | WATER_INGRESS %s | RODENT %s | INSECT_PULSES %lu | PEST %s\n",
+                ambientTemperatureC, relativeHumidityPct, grainTemperatureC, delta, trend,
+                conditionScore, conditionLevel, rainIntensityPct,
+                waterIngressDetected ? "ACTIVE" : "CLEAR",
+                rodentMotionDetected ? "MOTION" : "CLEAR",
+                (unsigned long)pulseSnapshot, pestAlert ? "ALERT" : "CLEAR");
+  previousGrainTemperatureC = grainTemperatureC;
 
   if (now - lastSend >= SEND_INTERVAL_MS) {
     lastSend = now;

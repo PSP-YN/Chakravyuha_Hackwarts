@@ -21,6 +21,11 @@ const copy = {
     loopText: "Connect crop residues and by-products with processors using clear quantity and material specifications.",
     transport: "Move farm goods",
     transportText: "Publish vehicle capacity, pickup and destination, service radius and availability for agricultural transport.",
+    storage: "Monitor stored grain conditions",
+    storageText: "Optional ESP32 hardware reads ambient humidity and grain-core temperature. Alerts are advisory—not a quality certificate or moisture measurement.",
+    storageCta: "Explore Storage Guardian",
+    participants: "A workspace for every participant",
+    participantText: "Choose a role at sign-up. Farmers, buyers, machinery owners, waste processors, municipalities, transporters and FPOs each get a focused workspace.",
     transparent: "Clear information. Real participants. No invented promises.",
     transparentText: "Listings and offers are published by participants. AGMARKNET prices are reference data—not guaranteed buyer offers. Estimates are not settlement receipts.",
     steps: "How Krishi Connect works",
@@ -49,6 +54,11 @@ const copy = {
     loopText: "ಸ್ಪಷ್ಟ ಪ್ರಮಾಣ ಮತ್ತು ವಸ್ತು ವಿವರಗಳೊಂದಿಗೆ ಬೆಳೆ ಅವಶೇಷಗಳು ಮತ್ತು ಉಪಉತ್ಪನ್ನಗಳನ್ನು ಸಂಸ್ಕಾರಕರೊಂದಿಗೆ ಸಂಪರ್ಕಿಸಿ.",
     transport: "ಕೃಷಿ ಸರಕು ಸಾಗಣೆ",
     transportText: "ವಾಹನ ಸಾಮರ್ಥ್ಯ, ಪಿಕಪ್, ಗಮ್ಯಸ್ಥಾನ, ಸೇವಾ ವ್ಯಾಪ್ತಿ ಮತ್ತು ಕೃಷಿ ಸಾರಿಗೆ ಲಭ್ಯತೆಯನ್ನು ಪ್ರಕಟಿಸಿ.",
+    storage: "ಸಂಗ್ರಹಿತ ಧಾನ್ಯದ ಸ್ಥಿತಿ ಗಮನಿಸಿ",
+    storageText: "ಐಚ್ಛಿಕ ESP32 ಹಾರ್ಡ್‌ವೇರ್ ಪರಿಸರದ ಆರ್ದ್ರತೆ ಮತ್ತು ಧಾನ್ಯದ ಒಳಭಾಗದ ತಾಪಮಾನವನ್ನು ಅಳೆಯುತ್ತದೆ. ಎಚ್ಚರಿಕೆಗಳು ಸಲಹೆಗಾಗಿ ಮಾತ್ರ—ಗುಣಮಟ್ಟ ಪ್ರಮಾಣಪತ್ರ ಅಥವಾ ತೇವಾಂಶ ಮಾಪನವಲ್ಲ.",
+    storageCta: "ಸ್ಟೋರೇಜ್ ಗಾರ್ಡ್ ನೋಡಿ",
+    participants: "ಪ್ರತಿ ಭಾಗವಹಿಸುವವರಿಗೂ ಪ್ರತ್ಯೇಕ ಕಾರ್ಯಸ್ಥಳ",
+    participantText: "ನೋಂದಣಿಯ ವೇಳೆ ಪಾತ್ರ ಆಯ್ಕೆಮಾಡಿ. ರೈತರು, ಖರೀದಿದಾರರು, ಯಂತ್ರೋಪಕರಣ ಮಾಲೀಕರು, ತ್ಯಾಜ್ಯ ಸಂಸ್ಕಾರಕರು, ಪುರಸಭೆಗಳು, ಸಾರಿಗೆದಾರರು ಮತ್ತು FPOಗಳಿಗೆ ಪ್ರತ್ಯೇಕ ಕಾರ್ಯಸ್ಥಳಗಳಿವೆ.",
     transparent: "ಸ್ಪಷ್ಟ ಮಾಹಿತಿ. ನೈಜ ಭಾಗವಹಿಸುವವರು. ಕಲ್ಪಿತ ಭರವಸೆಗಳಿಲ್ಲ.",
     transparentText: "ಪಟ್ಟಿಗಳು ಮತ್ತು ಕೊಡುಗೆಗಳನ್ನು ಭಾಗವಹಿಸುವವರೇ ಪ್ರಕಟಿಸುತ್ತಾರೆ. AGMARKNET ಬೆಲೆಗಳು ಉಲ್ಲೇಖ ಮಾಹಿತಿ ಮಾತ್ರ—ಖಚಿತ ಖರೀದಿ ಕೊಡುಗೆಗಳಲ್ಲ. ಅಂದಾಜುಗಳು ಪಾವತಿ ರಸೀದಿಗಳಲ್ಲ.",
     steps: "ಕೃಷಿ ಕನೆಕ್ಟ್ ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ",
@@ -84,7 +94,7 @@ export function LandingPage() {
           <span><b>KRISHI CONNECT 360</b><small>{language==="kn"?"ಕೃಷಿ ಆರ್ಥಿಕ ಜಾಲ":"FARM ECONOMY NETWORK"}</small></span>
         </a>
         <nav>
-          <a href="#markets">{language === "en" ? "Markets" : "ಮಾರುಕಟ್ಟೆಗಳು"}</a>
+          <a href="#markets">{language === "en" ? "Services" : "ಸೇವೆಗಳು"}</a>
           <a href="#how">{language === "en" ? "How it works" : "ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ"}</a>
           <LanguageSwitch />
           <a className="landing-login" href="/login">{language === "en" ? "Sign in" : "ಸೈನ್ ಇನ್"}</a>
@@ -118,6 +128,16 @@ export function LandingPage() {
           <article className="landing-market market-byproduct"><span>{language==="kn"?"03 / ವೃತ್ತಾಕಾರದ ಮೌಲ್ಯ":"03 / CIRCULAR VALUE"}</span><div className="landing-market-icon">⟳</div><h3>FarmLoop</h3><p>{t.loopText}</p><a href="/workspace?module=byproduct">{t.loop} ↗</a></article>
           <article className="landing-market market-machinery"><span>{language==="kn"?"04 / ಸರಕು ಸಾಗಣೆ":"04 / MOVE GOODS"}</span><div className="landing-market-icon">⇄</div><h3>KrishiTransit</h3><p>{t.transportText}</p><a href="/workspace?module=transport">{t.transport} ↗</a></article>
         </div>
+      </section>
+
+      <section className="landing-storage">
+        <div className="landing-storage-mark">KG</div>
+        <div><span>{language==="kn"?"ಐಚ್ಛಿಕ ಹಾರ್ಡ್‌ವೇರ್ ಸೇರ್ಪಡೆ":"OPTIONAL HARDWARE ADD-ON"}</span><h2>{t.storage}</h2><p>{t.storageText}</p><a href="/workspace/storage-guardian">{t.storageCta} ↗</a><small>{language==="kn"?"ವರ್ಚುವಲ್ ESP32 ಪ್ರಯೋಗಾಲಯವೂ ಲಭ್ಯ":"A virtual ESP32 simulator is also available"} · <a href="/krishi-guard-simulator">{language==="kn"?"ಸಿಮ್ಯುಲೇಟರ್ ತೆರೆಯಿರಿ":"Open simulator"}</a></small></div>
+      </section>
+
+      <section className="landing-participants">
+        <div><span>{language==="kn"?"ಏಳು ಭಾಗವಹಿಸುವವರ ಪಾತ್ರಗಳು":"SEVEN PARTICIPANT ROLES"}</span><h2>{t.participants}</h2><p>{t.participantText}</p></div>
+        <div className="landing-role-grid">{(language==="kn"?["ರೈತ","ಖರೀದಿದಾರ / ವ್ಯಾಪಾರಿ","ಯಂತ್ರೋಪಕರಣ ಮಾಲೀಕ","ತ್ಯಾಜ್ಯ ಸಂಸ್ಕಾರಕ","ಪುರಸಭೆ / ಸ್ಥಳೀಯ ಸಂಸ್ಥೆ","ಸಾರಿಗೆದಾರ","FPO / ಸಹಕಾರಿ"]:["Farmer","Buyer / trader","Machinery owner","Waste processor","Municipality / local body","Transporter","FPO / cooperative"]).map((role,i)=><span key={role}><b>{String(i+1).padStart(2,"0")}</b>{role}</span>)}</div>
       </section>
 
       <section className="landing-transparency">

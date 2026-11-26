@@ -1,52 +1,73 @@
 # QA and Release Strategy
 
-## Automated checks implemented
-- `npm test`: paise conversion, invalid money inputs, INR formatting and net-realisation arithmetic.
-- `npm run typecheck`: strict TypeScript check.
-- `npm audit --audit-level=high`: dependency vulnerability gate.
+## Automated checks
+
+- `npm run typecheck`: strict TypeScript validation.
+- `npm test`: eight domain tests covering paise arithmetic, net realisation, FPO allocation rules, transport state transitions, storage condition scoring and role-appropriate offers.
 - `npm run build`: optimized Next.js production build.
+- `npm audit --audit-level=high`: dependency vulnerability gate.
+- `git diff --check`: whitespace and patch integrity.
 
-## Live checks performed
-- Supabase public listing Data API read returned HTTP 200; current production database contains zero participant listings (no demo records were seeded).
-- Anonymous offer insert returned HTTP 401 / permission denied (expected; anon has no INSERT grant).
-- New machinery and by-product columns are present in the live database.
-- Supabase security advisor returned no findings after the pilot migrations.
-- Previous Chrome viewport checks at 360, 390, 580, 768, 1024, 1440 and 1920 px showed no horizontal overflow. A new production browser smoke test confirmed the page title, all three modules, refresh control, active-listing empty state, and Supabase listing API HTTP 200. Responsive checks at 360, 390, 580, 768, 1024 and 1440 px showed no horizontal overflow. The auth form becomes available after local session restoration. Firefox is not installed in the current laptop environment, so no fresh Firefox run was performed.
+## Integration validation performed during the build phase
 
-## Integration tests still required with two real accounts
-- User A publishes produce listing → User B sees it → User B submits offer → User A accepts → User B cannot access unrelated offer or update listing → User A marks completed.
-- Repeat with machinery booking request and overlapping accepted time windows.
-- Repeat with by-product quality requirements.
-- Verify buyer withdrawal, seller reject, listing pause/reactivation/closure, and accepted quantity caps.
-- Verify magic-link delivery, redirect URL allowlist and session persistence.
+- PostgreSQL 17 temporary test database: FPO aggregate-lot RPC, member attribution snapshots, direct FPO produce-listing denial, transport offer role checks, accepted-offer-to-job creation, transporter/requester state transitions, transport event/notification creation, municipality district-scoped enquiry/response/timeline/notification and signup policy-consent trigger.
+- Chrome and Firefox local-browser smoke tests: landing, login, signup, workspace, storage route, virtual hardware simulator, privacy, terms, favicon, robots and sitemap routes; seven signup roles; Kannada legal/workspace text; Storage Guardian and simulator Kannada audio playback; 390px mobile layouts without horizontal overflow; self-hosted fonts; no console or failed-network errors after serializing Supabase auth initialization.
+- Self-hosted font assets are used to avoid runtime dependence on Google Fonts requests.
+- Deno checks pass for the Storage Guardian Edge Function (type check, lint and format). A local Deno server returned the expected CORS preflight, method rejection, malformed-JSON rejection, missing user/device authentication rejection and oversized-body rejection. This is not a successful Supabase-backed device-registration test.
+- ESP32 PlatformIO targets are built separately for Wokwi simulation and physical certificate-validated firmware. The physical target compiles with telemetry enabled and a compile-time guard; Wokwi telemetry remains disabled. This is a compile check, not proof of a connected physical device.
 
-## Security matrix
-| Test | Expected |
+## Not yet verified
+
+- Real magic-link delivery and redirect completion with a new email account.
+- Two-account buyer/seller commercial transaction and all RLS denial cases against the live Supabase project after the new migrations are applied.
+- Real farmer/transporter accepted job and private evidence upload/download against the live project.
+- Real FPO member aggregate lot and municipality district account workflow against the live project.
+- Storage Guardian physical ESP32/DHT22/DS18B20 sensor readings, live Wi-Fi telemetry and device-key revocation on hardware.
+- Backup restore drill, approved retention schedule, incident-response exercise and fluent-speaker Kannada review.
+
+## Security acceptance matrix
+
+| Test | Expected result |
 |---|---|
-| Anonymous SELECT active listing | Allowed |
-| Anonymous INSERT offer | Denied by table grants |
-| User A reads User B paused listing | Denied |
-| User A updates User B listing | Denied |
-| Buyer A reads unrelated offer | Denied |
-| Buyer submits spoofed owner_id | Denied by RLS and listing ownership check |
-| Buyer changes offer status other than pending -> withdrawn | Denied by trigger |
-| Buyer inserts an offer already marked accepted/completed | Denied by pending-only INSERT policy and trigger |
-| Seller reassigns offer owner | Denied by column-level UPDATE grant |
-| Negative price/cost/quantity | Constraint failure |
-| Accepted offers exceed listing quantity | Denied by trigger under listing-row lock |
-| Overlapping accepted machinery bookings | Denied by trigger under listing-row lock |
-| Accept offer against paused/closed listing | Denied by trigger |
+| Anonymous active listing read | Allowed |
+| Anonymous offer insert | Denied |
+| User reads another participant's paused listing | Denied |
+| User updates another participant's listing | Denied |
+| Buyer reads unrelated offer | Denied |
+| Buyer spoofs listing owner | Denied |
+| Buyer role bids on machinery listing | Denied by role trigger |
+| Transporter bids on another transport listing | Denied by role trigger |
+| Buyer/trader requests transport listing | Allowed when profile is complete |
+| FPO directly inserts an unattributed produce lot | Denied |
+| FPO aggregate contribution does not equal listing quantity | Denied by RPC |
+| FPO contribution exceeds lot total | Denied by trigger |
+| Transporter skips pickup states | Denied |
+| Transporter confirms delivery as receiver | Denied |
+| Requester advances transport before delivery | Denied |
+| Unverified municipality account reads/responds to enquiry | Denied |
+| Verified municipality user from another district reads enquiry | Denied |
+| Participant submits enquiry to a different district contact | Denied |
+| Requester changes enquiry details after submission | Denied |
+| Missing/stale terms consent at signup | Auth user creation denied |
+| Participant edits own role or consent record | Denied |
+| Invalid device key / revoked device | Telemetry denied |
+| Device exceeds telemetry rate | HTTP 429 |
 
-## Financial test
-Offer ₹2,400/quintal × 8 quintals = ₹19,200 gross. Farmer costs ₹1,250. Expected net = ₹17,950; expected net per quintal = ₹2,243.75. Label as estimate, not settled proceeds.
+## Financial example
+
+Offer ₹2,400/quintal × 8 quintals = ₹19,200 gross. Farmer-borne costs ₹1,250. Expected net = ₹17,950; expected net per quintal = ₹2,243.75. This is an estimate, not settled proceeds.
 
 ## Release gates
-Typecheck and build pass; migration applies to clean project; RLS tests pass; core browser journey passes; mobile and keyboard access reviewed; env correctly scoped; production smoke test complete; no critical/high security issue.
 
-## Known limitations
-- Auth email delivery, production redirect allowlist and two-user RLS workflows are not yet verified with real user accounts.
-- Vercel GitHub integration is connected and production deployment is READY at https://krishi-connect-360.vercel.app. Latest UI/auth polish is deployed at commit 070bb66.
-- Machinery scheduling is a requested time window with overlap protection after seller acceptance; it is not a live calendar or automatic booking confirmation.
-- By-product compatibility is represented by typed listing attributes and participant search; no laboratory verification or automated processor certification exists.
-- No Kannada-reviewed copy, dispute resolution, moderation, external price feed, logistics integration, payments or AI.
-- Accepted offer is not payment settlement. Completion is participant-reported.
+- Typecheck, tests, build and dependency audit pass.
+- All pending migrations apply to a clean test database and are reviewed against production schema.
+- Supabase RLS and role restrictions are verified with two real accounts.
+- Magic-link delivery, redirects and profile onboarding pass.
+- Chrome, Firefox, mobile and keyboard/accessibility checks pass.
+- Hardware simulation and physical firmware build pass; real hardware test is documented separately.
+- Backup/restore, privacy/retention, support and incident procedures are approved.
+- No critical/high security finding remains.
+
+## Current release classification
+
+Build work is being completed on `feature/complete-platform`. New feature migrations and code are not yet applied to the production Supabase project or deployed to the production Vercel alias. Do not call the new build production-ready until the not-yet-verified items above are completed.

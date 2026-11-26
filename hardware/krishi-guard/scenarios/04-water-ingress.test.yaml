@@ -1,0 +1,15 @@
+name: KRISHI GUARD - water ingress contact
+version: 1
+author: KRISHI CONNECT 360
+steps:
+  - wait-serial: 'KRISHI GUARD READY'
+  - set-control:
+      part-id: leak
+      name: pressed
+      value: 1
+  - delay: 3000ms
+  - wait-serial: 'WATER_INGRESS ACTIVE'
+  - expect-pin:
+      part-id: esp
+      name: 2
+      value: 1

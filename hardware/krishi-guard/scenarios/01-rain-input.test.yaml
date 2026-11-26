@@ -1,0 +1,11 @@
+name: KRISHI GUARD - rain input
+version: 1
+author: KRISHI CONNECT 360
+steps:
+  - wait-serial: 'KRISHI GUARD READY'
+  - set-control:
+      part-id: rainpot
+      name: position
+      value: 0.0
+  - delay: 3000ms
+  - wait-serial: 'RAIN 100%'

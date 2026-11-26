@@ -1,99 +1,101 @@
-# KRISHI GUARD — low-cost grain-storage condition monitor
+# KRISHI GUARD — ESP32 storage-monitor node
 
-KRISHI GUARD is a hardware add-on for KRISHI CONNECT 360. One ESP32 node reads
-ambient temperature/relative humidity and grain-core temperature, raises a
-local advisory alarm, and can send one authenticated HTTPS telemetry request
-to the existing Supabase Edge Function.
+KRISHI GUARD is the hardware add-on for KRISHI CONNECT 360. It monitors the air around stored grain, grain-core temperature, rain-plate wetness, perimeter movement and insect-trap beam interruptions. Local LED/buzzer alarms work without Wi-Fi. When provisioned with a registered device key, the physical firmware sends authenticated readings to the Storage Guardian Edge Function.
 
-## Prototype BOM
+**This is a prototype monitoring aid.** Its condition index is a transparent heuristic, not a spoilage probability, grain-moisture measurement, pest species classifier or food-safety certification. Thresholds require field calibration and validation.
 
-| Part | Qty | Purpose |
-|---|---:|---|
-| ESP32 DevKit v1 | 1 | Wi-Fi controller |
-| DHT22 | 1 | Storage-headspace temperature and RH |
-| DS18B20 waterproof probe | 1 | Grain-core temperature |
-| 4.7 kΩ resistor | 1 | DS18B20 data pull-up |
-| LED + 220 Ω resistor | 1 | Urgent local indicator |
-| Active/passive buzzer | 1 | Audible advisory |
-| USB 5 V supply | 1 | Prototype power |
-| Breadboard and jumper wires | 1 set | Assembly |
+## 1. Bill of materials
 
-Indicative local prototype target: ₹600–₹1,000, excluding enclosure and shipping.
-Prices vary by supplier. Start with USB power; add a protected battery only after
-the sensor node and API path are validated.
+| Qty | Component | Requirement / purpose |
+|---:|---|---|
+| 1 | ESP32 DevKit V1 / ESP32-WROOM-32 development board | 3.3 V GPIO, ADC1 input on GPIO34, USB programming |
+| 1 | DHT22 / AM2302 module | Storage-air temperature and relative humidity; use a 10 kΩ data pull-up for a bare sensor |
+| 1 | DS18B20 waterproof probe | Grain-core temperature; use a 4.7 kΩ data pull-up |
+| 1 | Rain sensor plate + interface board (YL-83 class) | Analogue wetness output; power/interface so AO never exceeds 3.3 V |
+| 1 | HC-SR501 PIR or equivalent 3.3 V logic-output PIR | Movement in a defined storage perimeter; not rodent identification |
+| 1 | IR break-beam pair / trap counter module | Open-collector or 3.3 V-safe digital output for insect-trap interruption pulses |
+| 1 | Normally-open water-leak contact / float switch | Separate contact input to GPIO25; this is not inferred from rain intensity |
+| 1 | LED + 220 Ω resistor | Local status / alert indicator |
+| 1 | Passive buzzer module | Audible local alert on GPIO18; verify module current and drive requirements |
+| 1 | 4.7 kΩ resistor | DS18B20 DATA to 3V3 pull-up |
+| 1 | 10 kΩ resistor | DHT22 DATA to 3V3 pull-up when using a bare sensor |
+| — | Breadboard / perfboard, jumper wires, USB supply, enclosure, cable glands | Assembly and protected installation |
 
-## Wiring
+Use a regulated supply suitable for the ESP32 and sensor modules. Do not expose the breadboard prototype to rain or grain dust. For deployment, use a protected enclosure, strain relief, insulated terminals and an appropriate power supply.
 
-| ESP32 | Component |
-|---|---|
-| 3V3 | DHT22 VCC, DS18B20 VDD |
-| GND | DHT22 GND, DS18B20 GND, LED cathode, buzzer GND |
-| GPIO 15 | DHT22 DATA |
-| GPIO 4 | DS18B20 DQ |
-| 3V3 to DS18B20 DQ | 4.7 kΩ pull-up |
-| GPIO 2 through 220 Ω | LED anode |
-| GPIO 18 | Buzzer signal |
+## 2. Pin map
 
-Check the exact buzzer module pinout. Do not drive a high-current buzzer directly
-from a GPIO; use a transistor driver if its current exceeds the ESP32 pin rating.
-Keep the sensor electronics outside direct contact with grain and protect the
-probe cable from abrasion and moisture ingress.
+| ESP32 GPIO | Signal | Direction | Wiring |
+|---:|---|---|---|
+| 15 | DHT22 DATA | Digital bidirectional | DHT DATA; 10 kΩ pull-up to 3V3 for bare sensor |
+| 4 | DS18B20 DATA | 1-Wire | Probe DATA; 4.7 kΩ pull-up to 3V3 |
+| 34 | Rain plate AO | ADC input only | Analogue output, calibrated dry-to-wet; never apply 5 V |
+| 27 | PIR OUT | Digital input | 3.3 V logic HIGH on movement |
+| 26 | IR beam-break OUT | Digital input / falling-edge interrupt | Open-collector output; `INPUT_PULLUP`; LOW pulse on interruption |
+| 25 | Water-ingress contact | Digital input | Normally-open contact between GPIO25 and GND; `INPUT_PULLUP` |
+| 2 | Status LED | Digital output | GPIO2 → 220 Ω → LED anode; cathode → GND (or board LED) |
+| 18 | Buzzer signal | PWM/tone output | Buzzer input; GND common |
+| 3V3 / GND | Sensor power | Power | Common ground across every module; check each module's supply range |
 
-## Build
+GPIO34 is input-only and has no internal pull-up. GPIO15 and GPIO2 are ESP32 strapping pins; keep the attached modules from forcing unsafe boot levels. Confirm the exact DevKit pin labels before wiring.
 
-Install PlatformIO Core, then from this directory:
+## 3. Circuit and event semantics
+
+- `diagram.json` is the PlatformIO/Wokwi CLI circuit.
+- `wokwi-web/diagram.json` and `wokwi-web/sketch.ino` are the standalone browser-simulation circuit and sketch.
+- Rain plate / potentiometer reports wetness at the plate. It does **not** establish roof leakage.
+- GPIO25 is a separate water-contact input. The browser digital twin's roof-ingress scenario is a model assumption and must not be described as a rain sensor measurement.
+- PIR reports movement in its field of view. It cannot reliably classify an animal as a rodent.
+- The insect channel counts beam interruptions. It does not identify insects or prove that every interruption is an insect.
+- Insect pulse ISR includes a 50 ms debounce interval. The condition score and pest-event channel remain separate.
+
+## 4. Firmware build
+
+From the repository root:
 
 ```bash
-pio run -e esp32dev
-pio run -e wokwi
+pio run -d hardware/krishi-guard -e wokwi
 ```
 
-The Wokwi project reads `.pio/build/wokwi/firmware.bin` and the matching ELF.
-Open this directory in VS Code with the Wokwi extension, or use Wokwi CLI after
-configuring a Wokwi CI token.
+The Wokwi build uses `secrets.example.h`, has telemetry disabled, and contains no production device key. Physical firmware is deliberately gated on a real device registration and credentials:
 
-## Simulation
+1. Register a Storage Guardian device in the signed-in KRISHI CONNECT 360 app.
+2. Copy the one-time device key securely; it is shown only at registration.
+3. Copy `secrets.example.h` to `secrets.h` and fill in the Wi-Fi credentials, Supabase publishable key, endpoint and registered 64-character device key.
+4. Build with `pio run -d hardware/krishi-guard -e esp32dev`.
+5. Keep `secrets.h` private; it is git-ignored. Never add it to a public Wokwi project or repository.
 
-1. Build `pio run -e wokwi`.
-2. Open the project in Wokwi.
-3. Start the simulator and inspect the serial monitor.
-4. Change DHT22 humidity/temperature and DS18B20 temperature in the part controls.
-5. Verify local LED/buzzer behaviour for normal, watch, urgent and sensor-fault cases.
+A physical build without a real `secrets.h` is expected to fail. Do not replace this gate with placeholder credentials. Physical telemetry uses the configured root CA; the TLS verification bypass is restricted to the Wokwi build.
 
-The Wokwi firmware defaults to telemetry disabled. To test a cloud connection,
-register a throwaway test device in the Krishi Guard page, copy its one-time key
-into an untracked `secrets.h`, set telemetry to 1, and keep the Wokwi project
-private. Never publish a production device key.
+## 5. Wokwi checks
 
-## Connect to Krishi Connect 360
+```bash
+pio run -d hardware/krishi-guard -e wokwi
+wokwi-cli lint hardware/krishi-guard
+wokwi-cli hardware/krishi-guard --scenario hardware/krishi-guard/scenarios/01-rain-input.test.yaml
+wokwi-cli hardware/krishi-guard --scenario hardware/krishi-guard/scenarios/02-insect-beam.test.yaml
+wokwi-cli hardware/krishi-guard --scenario hardware/krishi-guard/scenarios/03-insect-recovery.test.yaml
+wokwi-cli hardware/krishi-guard --scenario hardware/krishi-guard/scenarios/04-water-ingress.test.yaml
+```
 
-1. Sign in to the application.
-2. Open Workspace → Storage Guardian.
-3. Register a device and copy the one-time device key.
-4. Copy `secrets.example.h` to `secrets.h`; fill Wi-Fi, publishable key and device key.
-5. Set `KRISHI_GUARD_ENABLE_TELEMETRY` to 1.
-6. Build `pio run -e esp32dev`, flash the ESP32 and monitor the serial output.
-7. Confirm that a new reading appears with source DEVICE in the application.
+Wokwi CLI scenario execution requires `WOKWI_CLI_TOKEN` from the Wokwi CI dashboard. Diagram lint and local PlatformIO compilation do not require that token. Trigger PIR motion manually in Wokwi and inspect serial output / LED / buzzer.
 
-The firmware posts to the existing `storage-guardian` Edge Function. The browser
-never receives the device secret. The Edge Function stores only the SHA-256 hash.
+## 6. Application integration
 
-## Condition interpretation
+The physical firmware posts `action: telemetry` with ambient temperature, relative humidity, grain temperature and environmental context. The Edge Function authenticates the one-time device key, checks the registered device, validates ranges and rate limits, calculates the condition index server-side, and stores `source = device` with `DEVICE_SENSOR` provenance. Browser digital-twin readings use the authenticated `simulate` action and are stored as `source = simulator` with `BROWSER_SCENARIO_SIMULATION` provenance.
 
-The app's condition score is a transparent prototype heuristic using headspace
-relative humidity, grain-to-air temperature difference and recent core-temperature
-trend. It is NOT a spoilage probability, direct grain-moisture measurement, mould
-diagnosis or grain-quality certification. Validate crop-specific thresholds against
-reference instruments and field data before operational use.
+The migration `20261125212157_storage_guardian_environmental_events.sql` adds the JSONB context column. Apply migrations only after checking the linked Supabase project's migration history and reviewing the pending changes. A local Supabase stack is not assumed to be running.
 
-## Security
+## 7. Bench acceptance checklist
 
-- Physical firmware validates TLS using the included Google Trust Services root CA.
-- The Wokwi build uses insecure TLS only when simulation telemetry is explicitly enabled.
-- Keep `secrets.h` out of Git and out of public simulator projects.
-- Use a unique device key for each node; revoke it if exposed.
-- The device uses the Supabase publishable key plus its own one-time device key.
-- Never embed the Supabase service-role key in firmware.
+- Verify DHT22 and DS18B20 readings against a known reference before interpreting the index.
+- Move the rain sensor from dry to wet and confirm GPIO34 percentage moves in the expected direction after calibration.
+- Trigger PIR movement and confirm one rising-edge event per motion activation.
+- Interrupt the IR beam repeatedly and confirm pulses increment without contact bounce duplicates.
+- Close the water contact and confirm a separate ingress alert.
+- Disconnect each sensor in turn; confirm a sensor fault is raised and trend calculation restarts after recovery.
+- Disconnect Wi-Fi; confirm local sampling and LED/buzzer alerts continue.
+- Provision a registered key, reconnect Wi-Fi and verify a device-sourced row appears in the Storage Guardian dashboard.
+- Confirm browser simulations remain visibly labelled as simulated and never appear as physical device measurements.
 
-The pinned root CA must be reviewed periodically and updated if the endpoint's
-certificate chain changes. Google recommends maintaining an up-to-date trust store.
+Do not claim field readiness until the physical bench tests, real-device registration, authenticated telemetry, enclosure/power safety and field calibration have passed.

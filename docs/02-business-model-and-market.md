@@ -15,10 +15,13 @@ Do not claim uniqueness without a dated direct feature audit.
 **Farmer:** compare offers by expected net proceeds; discover nearby services; find buyers for usable by-products; retain transaction history.  
 **Buyer/processor:** discover structured supply; filter material/quality/quantity/location; submit traceable offers.  
 **Provider:** publish serviceable capacity and terms; receive qualified enquiries.  
-**FPO:** future collective listings, group requests and member outcome reporting.
+**FPO:** member-attributed aggregate lots, member status and collective offer follow-up.
+**Transporter:** structured vehicle, capacity, route and pickup requests with delivery evidence.
+**Municipality:** district-scoped waste-service enquiries and official contact visibility.
+**Storage Guardian:** optional storage-condition monitoring; advisory only, not a certified grain-quality service.
 
 ## Revenue hypotheses
-Potential paths: disclosed facilitation fee on completed value; provider subscription; FPO workspace; buyer sourcing tools; later logistics coordination fee. Keep essential farmer workflows free during pilot. Do not pay-to-rank listings.
+Potential paths after pilot validation: disclosed facilitation fee on completed value; provider subscription; FPO workspace; buyer sourcing tools; logistics coordination fee; optional hardware bundle/service. No payment collection or monetisation is active in the current pilot. Keep essential farmer workflows free during early validation. Do not pay-to-rank listings.
 
 ### Illustrative monthly gross revenue (scenario only)
 | Activity | Arithmetic | Revenue |
